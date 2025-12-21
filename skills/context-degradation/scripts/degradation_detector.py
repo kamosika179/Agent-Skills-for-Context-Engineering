@@ -2,6 +2,15 @@
 Context Degradation Detection
 
 This module provides utilities for detecting and measuring context degradation patterns.
+
+PRODUCTION NOTES:
+- The attention estimation functions in this module simulate U-shaped attention curves
+  for demonstration purposes. Production systems should extract actual attention weights
+  from model internals when available.
+- Token estimation uses simplified heuristics (~4 chars/token). Production systems
+  should use model-specific tokenizers for accurate counts.
+- The poisoning and hallucination detection uses pattern matching as a proxy.
+  Production systems may benefit from fine-tuned classifiers or model-based detection.
 """
 
 import numpy as np
@@ -40,7 +49,18 @@ def _estimate_attention(position: int, total: int, is_beginning: bool, is_end: b
     """
     Estimate attention weight for position.
     
-    Simulates U-shaped attention curve.
+    Simulates U-shaped attention curve based on research findings.
+    
+    IMPORTANT: This is a simulation for demonstration purposes.
+    Production systems should:
+    1. Extract actual attention weights from model forward passes
+    2. Use model-specific attention analysis tools
+    3. Consider using interpretability libraries (e.g., TransformerLens)
+    
+    The simulated curve reflects research findings:
+    - Beginning tokens receive high attention (primacy effect)
+    - End tokens receive high attention (recency effect)
+    - Middle tokens receive degraded attention (lost-in-middle)
     """
     if is_beginning:
         return 0.8 + np.random.random() * 0.2

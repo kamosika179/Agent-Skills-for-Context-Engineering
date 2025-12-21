@@ -87,6 +87,43 @@ Clash commonly arises from multi-source retrieval where different sources have c
 **Resolution Approaches**
 Resolution approaches include explicit conflict marking that identifies contradictions and requests clarification, priority rules that establish which source takes precedence, and version filtering that excludes outdated information from context.
 
+### Empirical Benchmarks and Thresholds
+
+Research provides concrete data on degradation patterns that inform design decisions.
+
+**RULER Benchmark Findings**
+The RULER benchmark delivers sobering findings: only 50% of models claiming 32K+ context maintain satisfactory performance at 32K tokens. GPT-4 showed the least degradation (15.4 points from 4K to 128K), while most models dropped 30+ points. Near-perfect scores on simple needle-in-haystack tests do not translate to real long-context understanding.
+
+**Model-Specific Degradation Thresholds**
+| Model | Degradation Onset | Severe Degradation | Notes |
+|-------|-------------------|-------------------|-------|
+| GPT-4 | ~32K tokens | ~128K tokens | Lowest overall degradation |
+| Gemini 2.5 Pro | ~750 words | ~5K words | Random word generation on repetition tasks |
+| Claude | Varies | Varies | Lower hallucination but higher abstention |
+| Qwen3-8B | ~5K words | ~10K words | Incoherent text generation observed |
+
+**Model-Specific Behavior Patterns**
+Different models exhibit distinct failure modes under context pressure:
+
+- **Claude**: Lowest hallucination rates but high abstention under ambiguity. When uncertain, Claude tends to refuse or ask for clarification rather than fabricate.
+- **GPT**: Highest hallucination rates with confident-but-incorrect responses. More likely to generate plausible-sounding but factually wrong outputs.
+- **Gemini**: Began generating random words not present in input after certain thresholds on synthetic tasks.
+
+These patterns inform model selection for different use cases. High-stakes tasks may prefer Claude's conservative abstention; exploratory tasks may tolerate GPT's confident generation.
+
+### Counterintuitive Findings
+
+Research reveals several counterintuitive patterns that challenge assumptions about context management.
+
+**Shuffled Haystacks Outperform Coherent Ones**
+Studies found that shuffled (incoherent) haystacks produce better performance than logically coherent ones. This suggests that coherent context may create false associations that confuse retrieval, while incoherent context forces models to rely on exact matching.
+
+**Single Distractors Have Outsized Impact**
+Even a single irrelevant document reduces performance significantly. The effect is not proportional to the amount of noise but follows a step function where the presence of any distractor triggers degradation.
+
+**Needle-Question Similarity Correlation**
+Lower similarity between needle and question pairs shows faster degradation with context length. Tasks requiring inference across dissimilar content are particularly vulnerable.
+
 ### When Larger Contexts Hurt
 
 Larger context windows do not uniformly improve performance. In many cases, larger contexts create new problems that outweigh benefits.
@@ -162,18 +199,21 @@ turn_30: 90000 tokens (significant degradation)
 
 ## Integration
 
-This skill builds on [context-fundamentals](skills/context-fundamentals/SKILL.md) and should be studied after understanding basic context concepts. It connects to:
+This skill builds on context-fundamentals and should be studied after understanding basic context concepts. It connects to:
 
-- [context-optimization](skills/context-optimization/SKILL.md) - Techniques for mitigating degradation
-- [multi-agent-patterns](skills/multi-agent-patterns/SKILL.md) - Using isolation to prevent degradation
-- [evaluation](skills/evaluation/SKILL.md) - Measuring and detecting degradation in production
+- context-optimization - Techniques for mitigating degradation
+- multi-agent-patterns - Using isolation to prevent degradation
+- evaluation - Measuring and detecting degradation in production
 
 ## References
 
-Internal skills:
-- [context-fundamentals](skills/context-fundamentals/SKILL.md) - Context basics
-- [context-optimization](skills/context-optimization/SKILL.md) - Mitigation techniques
-- [evaluation](skills/evaluation/SKILL.md) - Detection and measurement
+Internal reference:
+- [Degradation Patterns Reference](./references/patterns.md) - Detailed technical reference
+
+Related skills in this collection:
+- context-fundamentals - Context basics
+- context-optimization - Mitigation techniques
+- evaluation - Detection and measurement
 
 External resources:
 - Research on attention mechanisms and context window limitations

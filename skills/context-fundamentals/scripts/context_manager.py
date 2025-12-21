@@ -2,9 +2,14 @@
 Context Management Utilities
 
 This module provides utilities for managing context in agent systems.
+
+Note: This module uses simplified estimation functions for demonstration.
+Production systems should use actual tokenizers (tiktoken for OpenAI,
+model-specific tokenizers for other providers) for accurate token counts.
 """
 
 from typing import Dict, List
+import hashlib
 
 
 def estimate_token_count(text: str) -> int:
@@ -12,7 +17,17 @@ def estimate_token_count(text: str) -> int:
     Estimate token count for text.
     
     Uses approximation: ~4 characters per token for English.
-    For production, use actual tokenizer.
+    
+    WARNING: This is a rough estimate for demonstration purposes.
+    Production systems should use actual tokenizers:
+    - OpenAI: tiktoken library
+    - Anthropic: Model-specific tokenizers
+    - Other: Provider-specific tokenization
+    
+    Actual tokenization varies by:
+    - Model architecture
+    - Content type (code vs prose)
+    - Language (non-English typically has higher token/char ratio)
     """
     return len(text) // 4
 
@@ -246,9 +261,11 @@ def validate_context_structure(context: Dict) -> Dict:
             recommendations.append(f"Add {section} section with relevant information")
     
     # Check for duplicate information
+    # Using hashlib instead of hash() for cross-process consistency
     seen_content = set()
     for section, content in context.items():
-        content_hash = hash(content[:1000])  # First 1000 chars
+        content_str = str(content)[:1000]  # First 1000 chars
+        content_hash = hashlib.md5(content_str.encode()).hexdigest()
         if content_hash in seen_content:
             issues.append(f"Potential duplicate content in {section}")
         seen_content.add(content_hash)

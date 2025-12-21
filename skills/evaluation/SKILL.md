@@ -24,6 +24,20 @@ Agent evaluation requires outcome-focused approaches that account for non-determ
 
 The key insight is that agents may find alternative paths to goals—the evaluation should judge whether they achieve right outcomes while following reasonable processes.
 
+**Performance Drivers: The 95% Finding**
+Research on the BrowseComp evaluation (which tests browsing agents' ability to locate hard-to-find information) found that three factors explain 95% of performance variance:
+
+| Factor | Variance Explained | Implication |
+|--------|-------------------|-------------|
+| Token usage | 80% | More tokens = better performance |
+| Number of tool calls | ~10% | More exploration helps |
+| Model choice | ~5% | Better models multiply efficiency |
+
+This finding has significant implications for evaluation design:
+- **Token budgets matter**: Evaluate agents with realistic token budgets, not unlimited resources
+- **Model upgrades beat token increases**: Upgrading to Claude Sonnet 4 provides larger gains than doubling token budget on Claude Sonnet 3.7
+- **Multi-agent validation**: The finding validates architectures that distribute work across agents with separate context windows
+
 ## Detailed Topics
 
 ### Evaluation Challenges
@@ -185,12 +199,17 @@ test_set = [
 
 This skill connects to all other skills as a cross-cutting concern:
 
-- [context-fundamentals](skills/context-fundamentals/SKILL.md) - Evaluating context usage
-- [context-degradation](skills/context-degradation/SKILL.md) - Detecting degradation
-- [context-optimization](skills/context-optimization/SKILL.md) - Measuring optimization effectiveness
-- [multi-agent-patterns](skills/multi-agent-patterns/SKILL.md) - Evaluating coordination
-- [tool-design](skills/tool-design/SKILL.md) - Evaluating tool effectiveness
-- [memory-systems](skills/memory-systems/SKILL.md) - Evaluating memory quality
+- context-fundamentals - Evaluating context usage
+- context-degradation - Detecting degradation
+- context-optimization - Measuring optimization effectiveness
+- multi-agent-patterns - Evaluating coordination
+- tool-design - Evaluating tool effectiveness
+- memory-systems - Evaluating memory quality
+
+## References
+
+Internal reference:
+- [Metrics Reference](./references/metrics.md) - Detailed evaluation metrics and implementation
 
 ## References
 

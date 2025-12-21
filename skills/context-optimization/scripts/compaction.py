@@ -2,6 +2,22 @@
 Context Optimization Utilities
 
 This module provides utilities for context compaction, observation masking, and budget management.
+
+PRODUCTION NOTES:
+- Token estimation uses simplified heuristics (~4 chars/token for English).
+  Production systems should use model-specific tokenizers:
+  - OpenAI: tiktoken library
+  - Anthropic: anthropic tokenizer
+  - Local models: HuggingFace tokenizers
+  
+- Summarization functions use simple heuristics for demonstration.
+  Production systems should use:
+  - LLM-based summarization for high-quality compression
+  - Domain-specific summarization models
+  - Schema-based summarization for structured outputs
+  
+- Cache metrics are illustrative. Production systems should integrate
+  with actual inference infrastructure metrics.
 """
 
 from typing import List, Dict
@@ -14,7 +30,16 @@ def estimate_token_count(text: str) -> int:
     Estimate token count for text.
     
     Uses approximation: ~4 characters per token for English.
-    For production, use actual tokenizer.
+    
+    WARNING: This is a rough estimate. Actual tokenization varies by:
+    - Model (GPT-4, Claude, etc. have different tokenizers)
+    - Content type (code typically has higher token density)
+    - Language (non-English may have 2-3x higher token/char ratio)
+    
+    Production usage:
+        import tiktoken
+        enc = tiktoken.encoding_for_model("gpt-4")
+        token_count = len(enc.encode(text))
     """
     return len(text) // 4
 

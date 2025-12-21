@@ -32,6 +32,19 @@ Single agents face inherent ceilings in reasoning capability, context management
 
 Multi-agent architectures address these limitations by partitioning work across multiple context windows. Each agent operates in a clean context focused on its subtask. Results aggregate at a coordination layer without any single context bearing the full burden.
 
+**The Token Economics Reality**
+Multi-agent systems consume significantly more tokens than single-agent approaches. Production data shows:
+
+| Architecture | Token Multiplier | Use Case |
+|--------------|------------------|----------|
+| Single agent chat | 1× baseline | Simple queries |
+| Single agent with tools | ~4× baseline | Tool-using tasks |
+| Multi-agent system | ~15× baseline | Complex research/coordination |
+
+Research on the BrowseComp evaluation found that three factors explain 95% of performance variance: token usage (80% of variance), number of tool calls, and model choice. This validates the multi-agent approach of distributing work across agents with separate context windows to add capacity for parallel reasoning.
+
+Critically, upgrading to better models often provides larger performance gains than doubling token budgets. Claude Sonnet 4 showed larger gains than doubling tokens on Claude Sonnet 3.7. This suggests model selection and multi-agent architecture are complementary strategies.
+
 **The Parallelization Argument**
 Many tasks contain parallelizable subtasks that a single agent must execute sequentially. A research task might require searching multiple independent sources, analyzing different documents, or comparing competing approaches. A single agent processes these sequentially, accumulating context with each step.
 
@@ -56,6 +69,28 @@ When to use: Complex tasks with clear decomposition, tasks requiring coordinatio
 Advantages: Strict control over workflow, easier to implement human-in-the-loop interventions, ensures adherence to predefined plans.
 
 Disadvantages: Supervisor context becomes bottleneck, supervisor failures cascade to all workers, "telephone game" problem where supervisors paraphrase sub-agent responses incorrectly.
+
+**The Telephone Game Problem and Solution**
+LangGraph benchmarks found supervisor architectures initially performed 50% worse than optimized versions due to the "telephone game" problem where supervisors paraphrase sub-agent responses incorrectly, losing fidelity.
+
+The fix: implement a `forward_message` tool allowing sub-agents to pass responses directly to users:
+
+```python
+def forward_message(message: str, to_user: bool = True):
+    """
+    Forward sub-agent response directly to user without supervisor synthesis.
+    
+    Use when:
+    - Sub-agent response is final and complete
+    - Supervisor synthesis would lose important details
+    - Response format must be preserved exactly
+    """
+    if to_user:
+        return {"type": "direct_response", "content": message}
+    return {"type": "supervisor_input", "content": message}
+```
+
+With this pattern, swarm architectures slightly outperform supervisors because sub-agents respond directly to users, eliminating translation errors.
 
 Implementation note: Implement direct pass-through mechanisms allowing sub-agents to pass responses directly to users rather than through supervisor synthesis when appropriate.
 
@@ -188,18 +223,21 @@ def handle_customer_request(request):
 
 ## Integration
 
-This skill builds on [context-fundamentals](skills/context-fundamentals/SKILL.md) and [context-degradation](skills/context-degradation/SKILL.md). It connects to:
+This skill builds on context-fundamentals and context-degradation. It connects to:
 
-- [memory-systems](skills/memory-systems/SKILL.md) - Shared state management across agents
-- [tool-design](skills/tool-design/SKILL.md) - Tool specialization per agent
-- [context-optimization](skills/context-optimization/SKILL.md) - Context partitioning strategies
+- memory-systems - Shared state management across agents
+- tool-design - Tool specialization per agent
+- context-optimization - Context partitioning strategies
 
 ## References
 
-Internal skills:
-- [context-fundamentals](skills/context-fundamentals/SKILL.md) - Context basics
-- [memory-systems](skills/memory-systems/SKILL.md) - Cross-agent memory
-- [context-optimization](skills/context-optimization/SKILL.md) - Partitioning strategies
+Internal reference:
+- [Frameworks Reference](./references/frameworks.md) - Detailed framework implementation patterns
+
+Related skills in this collection:
+- context-fundamentals - Context basics
+- memory-systems - Cross-agent memory
+- context-optimization - Partitioning strategies
 
 External resources:
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - Multi-agent patterns and state management

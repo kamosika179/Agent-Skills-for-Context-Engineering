@@ -44,6 +44,21 @@ Knowledge graphs preserve relationships between entities. Instead of isolated do
 
 Temporal knowledge graphs add validity periods to facts. Each fact has a "valid from" and optionally "valid until" timestamp. This enables time-travel queries that reconstruct knowledge at specific points in time.
 
+**Benchmark Performance Comparison**
+The Deep Memory Retrieval (DMR) benchmark provides concrete performance data across memory architectures:
+
+| Memory System | DMR Accuracy | Retrieval Latency | Notes |
+|---------------|--------------|-------------------|-------|
+| Zep (Temporal KG) | 94.8% | 2.58s | Best accuracy, fast retrieval |
+| MemGPT | 93.4% | Variable | Good general performance |
+| GraphRAG | ~75-85% | Variable | 20-35% gains over baseline RAG |
+| Vector RAG | ~60-70% | Fast | Loses relationship structure |
+| Recursive Summarization | 35.3% | Low | Severe information loss |
+
+Zep demonstrated 90% reduction in retrieval latency compared to full-context baselines (2.58s vs 28.9s for GPT-4o). This efficiency comes from retrieving only relevant subgraphs rather than entire context history.
+
+GraphRAG achieves approximately 20-35% accuracy gains over baseline RAG in complex reasoning tasks and reduces hallucination by up to 30% through community-based summarization.
+
 ### Memory Layer Architecture
 
 **Layer 1: Working Memory**
@@ -176,17 +191,20 @@ def query_address_at_time(user_id, query_time):
 
 ## Integration
 
-This skill builds on [context-fundamentals](skills/context-fundamentals/SKILL.md). It connects to:
+This skill builds on context-fundamentals. It connects to:
 
-- [multi-agent-patterns](skills/multi-agent-patterns/SKILL.md) - Shared memory across agents
-- [context-optimization](skills/context-optimization/SKILL.md) - Memory-based context loading
-- [evaluation](skills/evaluation/SKILL.md) - Evaluating memory quality
+- multi-agent-patterns - Shared memory across agents
+- context-optimization - Memory-based context loading
+- evaluation - Evaluating memory quality
 
 ## References
 
-Internal skills:
-- [context-fundamentals](skills/context-fundamentals/SKILL.md) - Context basics
-- [multi-agent-patterns](skills/multi-agent-patterns/SKILL.md) - Cross-agent memory
+Internal reference:
+- [Implementation Reference](./references/implementation.md) - Detailed implementation patterns
+
+Related skills in this collection:
+- context-fundamentals - Context basics
+- multi-agent-patterns - Cross-agent memory
 
 External resources:
 - Graph database documentation (Neo4j, etc.)

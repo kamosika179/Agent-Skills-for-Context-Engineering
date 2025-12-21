@@ -97,6 +97,61 @@ Research shows tool description overlap causes model confusion. More tools do no
 
 Implement mechanisms to help agents select the right tool: tool grouping, example-based selection, and hierarchy with umbrella tools that route to specialized sub-tools.
 
+### MCP Tool Naming Requirements
+
+When using MCP (Model Context Protocol) tools, always use fully qualified tool names to avoid "tool not found" errors.
+
+Format: `ServerName:tool_name`
+
+```python
+# Correct: Fully qualified names
+"Use the BigQuery:bigquery_schema tool to retrieve table schemas."
+"Use the GitHub:create_issue tool to create issues."
+
+# Incorrect: Unqualified names
+"Use the bigquery_schema tool..."  # May fail with multiple servers
+```
+
+Without the server prefix, agents may fail to locate tools, especially when multiple MCP servers are available. Establish naming conventions that include server context in all tool references.
+
+### Using Agents to Optimize Tools
+
+Claude can optimize its own tools. When given a tool and observed failure modes, it diagnoses issues and suggests improvements. Production testing shows this approach achieves 40% reduction in task completion time by helping future agents avoid mistakes.
+
+**The Tool-Testing Agent Pattern**:
+
+```python
+def optimize_tool_description(tool_spec, failure_examples):
+    """
+    Use an agent to analyze tool failures and improve descriptions.
+    
+    Process:
+    1. Agent attempts to use tool across diverse tasks
+    2. Collect failure modes and friction points
+    3. Agent analyzes failures and proposes improvements
+    4. Test improved descriptions against same tasks
+    """
+    prompt = f"""
+    Analyze this tool specification and the observed failures.
+    
+    Tool: {tool_spec}
+    
+    Failures observed:
+    {failure_examples}
+    
+    Identify:
+    1. Why agents are failing with this tool
+    2. What information is missing from the description
+    3. What ambiguities cause incorrect usage
+    
+    Propose an improved tool description that addresses these issues.
+    """
+    
+    return get_agent_response(prompt)
+```
+
+This creates a feedback loop: agents using tools generate failure data, which agents then use to improve tool descriptions, which reduces future failures.
+
 ### Testing Tool Design
 
 Evaluate tool designs against criteria: unambiguity, completeness, recoverability, efficiency, and consistency. Test tools by presenting representative agent requests and evaluating the resulting tool calls.
@@ -186,15 +241,18 @@ def search(query):
 ## Integration
 
 This skill connects to:
-- [context-fundamentals](skills/context-fundamentals/SKILL.md) - How tools interact with context
-- [multi-agent-patterns](skills/multi-agent-patterns/SKILL.md) - Specialized tools per agent
-- [evaluation](skills/evaluation/SKILL.md) - Evaluating tool effectiveness
+- context-fundamentals - How tools interact with context
+- multi-agent-patterns - Specialized tools per agent
+- evaluation - Evaluating tool effectiveness
 
 ## References
 
-Internal skills:
-- [context-fundamentals](skills/context-fundamentals/SKILL.md) - Tool context interactions
-- [evaluation](skills/evaluation/SKILL.md) - Tool testing patterns
+Internal reference:
+- [Best Practices Reference](./references/best_practices.md) - Detailed tool design guidelines
+
+Related skills in this collection:
+- context-fundamentals - Tool context interactions
+- evaluation - Tool testing patterns
 
 External resources:
 - MCP (Model Context Protocol) documentation
