@@ -60,9 +60,9 @@ Scripts and examples demonstrate concepts using Python pseudocode that works acr
 
 Install skills by referencing this repository or by copying skill folders into your configured skills directory. When working on context engineering tasks, activate relevant skills to load their instructions.
 
-### For Cursor
+### For Cursor & Codex & Open Code
 
-Copy skill content into `.cursorrules` or create project-specific rules files. The skills provide the context and guidelines that Cursor's agent needs for effective context engineering.
+Copy skill content into `.rules` or create project-specific SKills folders. The skills provide the context and guidelines that agent needs for effective context engineering and agent design.
 
 ### For Custom Implementations
 
@@ -100,15 +100,10 @@ npm install
 cp env.example .env  # Add OPENAI_API_KEY
 npm test  # Run 19 passing tests
 ```
+
 ## Star History
 
-<a href="https://www.star-history.com/#muratcankoylan/Agent-Skills-for-Context-Engineering&davila7/claude-code-templates&type=timeline&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=muratcankoylan/Agent-Skills-for-Context-Engineering,davila7/claude-code-templates&type=timeline&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=muratcankoylan/Agent-Skills-for-Context-Engineering,davila7/claude-code-templates&type=timeline&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=muratcankoylan/Agent-Skills-for-Context-Engineering,davila7/claude-code-templates&type=timeline&legend=top-left" />
- </picture>
-</a>
+[![Star History Chart](https://api.star-history.com/svg?repos=muratcankoylan/Agent-Skills-for-Context-Engineering&type=timeline&legend=top-left)](https://www.star-history.com/#muratcankoylan/Agent-Skills-for-Context-Engineering&type=timeline&legend=top-left)
 
 ## Structure
 
@@ -132,6 +127,8 @@ This repository follows the Agent Skills open development model. Contributions a
 3. Include working examples where appropriate
 4. Document trade-offs and potential issues
 5. Keep SKILL.md under 500 lines for optimal performance
+
+Feel free to reach out to [Muratcan Koylan](https://x.com/koylanai) for collaboration and any requests.
 
 ## License
 
