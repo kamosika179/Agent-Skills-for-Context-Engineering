@@ -1,6 +1,7 @@
 ---
 name: context-compression
-description: Design and evaluate context compression strategies for long-running agent sessions. Use when agents exhaust memory, need to summarize conversation history, or when optimizing tokens-per-task rather than tokens-per-request.
+description: This skill should be used when the user asks to "compress context", "summarize conversation history", "implement compaction", "reduce token usage", or mentions context compression, structured summarization, tokens-per-task optimization, or long-running agent sessions exceeding context limits.
+version: 1.1.0
 ---
 
 # Context Compression Strategies

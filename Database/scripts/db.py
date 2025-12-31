@@ -51,3 +51,4 @@ def execute_many(query: str, params_list: list) -> None:
     with get_cursor() as cur:
         cur.executemany(query, params_list)
 
+

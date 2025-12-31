@@ -1,6 +1,6 @@
 ---
 name: book-sft-pipeline
-description: End-to-end system for creating supervised fine-tuning datasets from books and training style-transfer models. Covers text extraction, intelligent segmentation, synthetic instruction generation, Tinker-compatible output, LoRA training, and validation.
+description: This skill should be used when the user asks to "fine-tune on books", "create SFT dataset", "train style model", "extract ePub text", or mentions style transfer, LoRA training, book segmentation, or author voice replication.
 version: 2.0.0
 ---
 

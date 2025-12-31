@@ -1,6 +1,7 @@
 ---
 name: multi-agent-patterns
-description: Design multi-agent architectures for complex tasks. Use when single-agent context limits are exceeded, when tasks decompose naturally into subtasks, or when specializing agents improves quality.
+description: This skill should be used when the user asks to "design multi-agent system", "implement supervisor pattern", "create swarm architecture", "coordinate multiple agents", or mentions multi-agent patterns, context isolation, agent handoffs, sub-agents, or parallel agent execution.
+version: 1.0.0
 ---
 
 # Multi-Agent Architecture Patterns

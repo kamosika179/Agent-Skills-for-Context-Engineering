@@ -27,3 +27,4 @@ DOCS_DIR = PROJECT_ROOT / "docs"
 MAX_TOKENS_PER_CHUNK = 8000  # Leave room for embedding model limits
 CHUNK_OVERLAP = 200
 
+

@@ -265,3 +265,4 @@ def process_new_document(content: str, path: str) -> Dict:
     interface = AgentKnowledgeInterface()
     return interface.analyze_document(content, path)
 
+

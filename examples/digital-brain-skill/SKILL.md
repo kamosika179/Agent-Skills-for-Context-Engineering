@@ -1,6 +1,6 @@
 ---
 name: digital-brain
-description: Personal knowledge management system for founders, creators, and builders. Manages personal brand, content creation, network relationships, goals, and provides voice/tone consistency for content generation.
+description: This skill should be used when the user asks to "write a post", "check my voice", "look up contact", "prepare for meeting", "weekly review", "track goals", or mentions personal brand, content creation, network management, or voice consistency.
 version: 1.0.0
 ---
 

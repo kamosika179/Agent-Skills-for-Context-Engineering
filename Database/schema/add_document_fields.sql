@@ -10,3 +10,4 @@ UPDATE documents
 SET source_url = 'No' 
 WHERE source_url IS NULL;
 
+
