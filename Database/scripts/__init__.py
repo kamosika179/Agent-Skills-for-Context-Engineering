@@ -1,3 +1,0 @@
-# Semantic Knowledge Registry Scripts
-
-
