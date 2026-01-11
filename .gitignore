@@ -57,3 +57,6 @@ Private/
 
 # Cursor IDE
 .cursor/
+
+# Local history
+.specstory/
