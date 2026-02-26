@@ -1,82 +1,82 @@
 ---
 name: context-engineering-collection
-description: A comprehensive collection of Agent Skills for context engineering, multi-agent architectures, and production agent systems. Use when building, optimizing, or debugging agent systems that require effective context management.
+description: コンテキストエンジニアリング、マルチエージェントアーキテクチャ、および本番エージェントシステムのためのエージェントスキルの包括的なコレクション。効果的なコンテキスト管理を必要とするエージェントシステムの構築、最適化、またはデバッグ時に使用してください。
 ---
 
-# Agent Skills for Context Engineering
+# コンテキストエンジニアリングのためのエージェントスキル
 
-This collection provides structured guidance for building production-grade AI agent systems through effective context engineering.
+このコレクションは、効果的なコンテキストエンジニアリングを通じて、本番グレードのAIエージェントシステムを構築するための体系的なガイダンスを提供します。
 
-## When to Activate
+## 有効化のタイミング
 
-Activate these skills when:
-- Building new agent systems from scratch
-- Optimizing existing agent performance
-- Debugging context-related failures
-- Designing multi-agent architectures
-- Creating or evaluating tools for agents
-- Implementing memory and persistence layers
+以下の場合にこれらのスキルを有効化してください：
+- エージェントシステムをゼロから構築する場合
+- 既存のエージェントのパフォーマンスを最適化する場合
+- コンテキスト関連の障害をデバッグする場合
+- マルチエージェントアーキテクチャを設計する場合
+- エージェント用のツールを作成または評価する場合
+- メモリおよび永続化レイヤーを実装する場合
 
-## Skill Map
+## スキルマップ
 
-### Foundational Context Engineering
+### 基礎的なコンテキストエンジニアリング
 
-**Understanding Context Fundamentals**
-Context is not just prompt text—it is the complete state available to the language model at inference time, including system instructions, tool definitions, retrieved documents, message history, and tool outputs. Effective context engineering means understanding what information truly matters for the task at hand and curating that information for maximum signal-to-noise ratio.
+**コンテキストの基礎を理解する**
+コンテキストは単なるプロンプトテキストではありません。それは推論時に言語モデルが利用できる完全な状態であり、システム指示、ツール定義、取得されたドキュメント、メッセージ履歴、およびツール出力を含みます。効果的なコンテキストエンジニアリングとは、目の前のタスクにとってどの情報が本当に重要かを理解し、信号対雑音比を最大化するためにその情報をキュレーションすることを意味します。
 
-**Recognizing Context Degradation**
-Language models exhibit predictable degradation patterns as context grows: the "lost-in-middle" phenomenon where information in the center of context receives less attention; U-shaped attention curves that prioritize beginning and end; context poisoning when errors compound; and context distraction when irrelevant information overwhelms relevant content.
+**コンテキストの劣化を認識する**
+言語モデルはコンテキストが大きくなるにつれて予測可能な劣化パターンを示します：コンテキストの中央にある情報への注意が低下する「迷子効果（lost-in-middle）」現象、先頭と末尾を優先するU字型のアテンション曲線、エラーが複合するコンテキストポイズニング、そして無関係な情報が関連コンテンツを圧倒するコンテキストディストラクションです。
 
-### Architectural Patterns
+### アーキテクチャパターン
 
-**Multi-Agent Coordination**
-Production multi-agent systems converge on three dominant patterns: supervisor/orchestrator architectures with centralized control, peer-to-peer swarm architectures for flexible handoffs, and hierarchical structures for complex task decomposition. The critical insight is that sub-agents exist primarily to isolate context rather than to simulate organizational roles.
+**マルチエージェント協調**
+本番環境のマルチエージェントシステムは、3つの主要なパターンに収束します：集中制御を備えたスーパーバイザー／オーケストレーターアーキテクチャ、柔軟なハンドオフのためのピアツーピアスウォームアーキテクチャ、そして複雑なタスク分解のための階層構造です。重要な洞察は、サブエージェントは組織的な役割をシミュレートするためではなく、主にコンテキストを分離するために存在するということです。
 
-**Memory System Design**
-Memory architectures range from simple scratchpads to sophisticated temporal knowledge graphs. Vector RAG provides semantic retrieval but loses relationship information. Knowledge graphs preserve structure but require more engineering investment. The file-system-as-memory pattern enables just-in-time context loading without stuffing context windows.
+**メモリシステム設計**
+メモリアーキテクチャは、シンプルなスクラッチパッドから高度な時間的ナレッジグラフまで多岐にわたります。ベクトルRAGはセマンティック検索を提供しますが、関係性の情報が失われます。ナレッジグラフは構造を保持しますが、より多くのエンジニアリング投資が必要です。ファイルシステムをメモリとして使用するパターンは、コンテキストウィンドウを詰め込むことなく、ジャストインタイムのコンテキスト読み込みを可能にします。
 
-**Filesystem-Based Context**
-The filesystem provides a single interface for storing, retrieving, and updating effectively unlimited context. Key patterns include scratch pads for tool output offloading, plan persistence for long-horizon tasks, sub-agent communication via shared files, and dynamic skill loading. Agents use `ls`, `glob`, `grep`, and `read_file` for targeted context discovery, often outperforming semantic search for structural queries.
+**ファイルシステムベースのコンテキスト**
+ファイルシステムは、事実上無制限のコンテキストを保存、取得、更新するための単一のインターフェースを提供します。主要なパターンには、ツール出力のオフロード用スクラッチパッド、長期的なタスクのための計画の永続化、共有ファイルを介したサブエージェント通信、および動的なスキル読み込みが含まれます。エージェントは `ls`、`glob`、`grep`、および `read_file` を使用してターゲットを絞ったコンテキスト探索を行い、構造的なクエリではセマンティック検索を上回ることがよくあります。
 
-**Hosted Agent Infrastructure**
-Background coding agents run in remote sandboxed environments rather than on local machines. Key patterns include pre-built environment images refreshed on regular cadence, warm sandbox pools for instant session starts, filesystem snapshots for session persistence, and multiplayer support for collaborative agent sessions. Critical optimizations include allowing file reads before git sync completes (blocking only writes), predictive sandbox warming when users start typing, and self-spawning agents for parallel task execution.
+**ホステッドエージェントインフラストラクチャ**
+バックグラウンドコーディングエージェントは、ローカルマシンではなくリモートのサンドボックス環境で実行されます。主要なパターンには、定期的なケイデンスで更新されるビルド済み環境イメージ、即時セッション開始のためのウォームサンドボックスプール、セッション永続化のためのファイルシステムスナップショット、および協調エージェントセッションのためのマルチプレイヤーサポートが含まれます。重要な最適化には、git同期が完了する前のファイル読み取りの許可（書き込みのみブロック）、ユーザーの入力開始時の予測的サンドボックスウォーミング、および並列タスク実行のための自己スポーンエージェントが含まれます。
 
-**Tool Design Principles**
-Tools are contracts between deterministic systems and non-deterministic agents. Effective tool design follows the consolidation principle (prefer single comprehensive tools over multiple narrow ones), returns contextual information in errors, supports response format options for token efficiency, and uses clear namespacing.
+**ツール設計原則**
+ツールは決定論的システムと非決定論的エージェント間の契約です。効果的なツール設計は統合原則に従い（複数の狭いツールよりも単一の包括的なツールを優先）、エラーにコンテキスト情報を返し、トークン効率のためのレスポンスフォーマットオプションをサポートし、明確な名前空間を使用します。
 
-### Operational Excellence
+### 運用の卓越性
 
-**Context Compression**
-When agent sessions exhaust memory, compression becomes mandatory. The correct optimization target is tokens-per-task, not tokens-per-request. Structured summarization with explicit sections for files, decisions, and next steps preserves more useful information than aggressive compression. Artifact trail integrity remains the weakest dimension across all compression methods.
+**コンテキスト圧縮**
+エージェントセッションがメモリを使い果たした場合、圧縮は必須となります。正しい最適化目標は、リクエストあたりのトークンではなく、タスクあたりのトークンです。ファイル、決定事項、次のステップの明示的なセクションを持つ構造化された要約は、積極的な圧縮よりも有用な情報を多く保持します。アーティファクトトレイルの整合性は、すべての圧縮方法において最も弱い次元です。
 
-**Context Optimization**
-Techniques include compaction (summarizing context near limits), observation masking (replacing verbose tool outputs with references), prefix caching (reusing KV blocks across requests), and strategic context partitioning (splitting work across sub-agents with isolated contexts).
+**コンテキスト最適化**
+テクニックには、コンパクション（制限に近いコンテキストの要約）、オブザベーションマスキング（冗長なツール出力を参照に置換）、プレフィックスキャッシング（リクエスト間でのKVブロックの再利用）、および戦略的コンテキストパーティショニング（分離されたコンテキストを持つサブエージェント間での作業分割）が含まれます。
 
-**Evaluation Frameworks**
-Production agent evaluation requires multi-dimensional rubrics covering factual accuracy, completeness, tool efficiency, and process quality. Effective patterns include LLM-as-judge for scalability, human evaluation for edge cases, and end-state evaluation for agents that mutate persistent state.
+**評価フレームワーク**
+本番エージェントの評価には、事実の正確性、完全性、ツールの効率性、およびプロセスの品質をカバーする多次元のルーブリックが必要です。効果的なパターンには、スケーラビリティのためのLLM-as-judge、エッジケースのための人間による評価、および永続的な状態を変更するエージェントのための最終状態評価が含まれます。
 
-### Development Methodology
+### 開発方法論
 
-**Project Development**
-Effective LLM project development begins with task-model fit analysis: validating through manual prototyping that a task is well-suited for LLM processing before building automation. Production pipelines follow staged, idempotent architectures (acquire, prepare, process, parse, render) with file system state management for debugging and caching. Structured output design with explicit format specifications enables reliable parsing. Start with minimal architecture and add complexity only when proven necessary.
+**プロジェクト開発**
+効果的なLLMプロジェクト開発は、タスクとモデルの適合性分析から始まります：自動化を構築する前に、手動のプロトタイピングを通じてタスクがLLM処理に適しているかを検証します。本番パイプラインは、デバッグとキャッシングのためのファイルシステム状態管理を備えた、段階的で冪等なアーキテクチャ（取得、準備、処理、解析、レンダリング）に従います。明示的なフォーマット仕様を持つ構造化出力設計により、信頼性の高い解析が可能になります。最小限のアーキテクチャから始め、必要性が証明された場合にのみ複雑さを追加してください。
 
-## Core Concepts
+## 中核概念
 
-The collection is organized around three core themes. First, context fundamentals establish what context is, how attention mechanisms work, and why context quality matters more than quantity. Second, architectural patterns cover the structures and coordination mechanisms that enable effective agent systems. Third, operational excellence addresses the ongoing work of optimizing and evaluating production systems.
+このコレクションは3つの中核テーマを軸に構成されています。第一に、コンテキストの基礎は、コンテキストとは何か、アテンションメカニズムがどのように機能するか、そしてなぜコンテキストの品質が量よりも重要であるかを確立します。第二に、アーキテクチャパターンは、効果的なエージェントシステムを可能にする構造と協調メカニズムをカバーします。第三に、運用の卓越性は、本番システムの最適化と評価の継続的な作業に対処します。
 
-## Practical Guidance
+## 実践的なガイダンス
 
-Each skill can be used independently or in combination. Start with fundamentals to establish context management mental models. Branch into architectural patterns based on your system requirements. Reference operational skills when optimizing production systems.
+各スキルは個別に、または組み合わせて使用できます。コンテキスト管理のメンタルモデルを確立するために、基礎から始めてください。システム要件に基づいてアーキテクチャパターンに分岐してください。本番システムの最適化時には運用スキルを参照してください。
 
-The skills are platform-agnostic and work with Claude Code, Cursor, or any agent framework that supports custom instructions or skill-like constructs.
+これらのスキルはプラットフォームに依存せず、Claude Code、Cursor、またはカスタム指示やスキルのような構成をサポートする任意のエージェントフレームワークで動作します。
 
-## Integration
+## 統合
 
-This collection integrates with itself—skills reference each other and build on shared concepts. The fundamentals skill provides context for all other skills. Architectural skills (multi-agent, memory, tools) can be combined for complex systems. Operational skills (optimization, evaluation) apply to any system built using the foundational and architectural skills.
+このコレクションはそれ自体と統合されています。スキルは互いに参照し合い、共有された概念に基づいて構築されています。基礎スキルはすべての他のスキルにコンテキストを提供します。アーキテクチャスキル（マルチエージェント、メモリ、ツール）は複雑なシステムのために組み合わせることができます。運用スキル（最適化、評価）は、基礎スキルおよびアーキテクチャスキルを使用して構築された任意のシステムに適用されます。
 
-## References
+## 参考資料
 
-Internal skills in this collection:
+このコレクション内のスキル：
 - [context-fundamentals](skills/context-fundamentals/SKILL.md)
 - [context-degradation](skills/context-degradation/SKILL.md)
 - [context-compression](skills/context-compression/SKILL.md)
@@ -89,16 +89,16 @@ Internal skills in this collection:
 - [evaluation](skills/evaluation/SKILL.md)
 - [project-development](skills/project-development/SKILL.md)
 
-External resources on context engineering:
-- Research on attention mechanisms and context window limitations
-- Production experience from leading AI labs on agent system design
-- Framework documentation for LangGraph, AutoGen, and CrewAI
+コンテキストエンジニアリングに関する外部リソース：
+- アテンションメカニズムとコンテキストウィンドウの制限に関する研究
+- エージェントシステム設計に関する主要AIラボからの本番運用経験
+- LangGraph、AutoGen、および CrewAI のフレームワークドキュメント
 
 ---
 
-## Skill Metadata
+## スキルメタデータ
 
-**Created**: 2025-12-20
-**Last Updated**: 2025-12-25
-**Author**: Agent Skills for Context Engineering Contributors
-**Version**: 1.2.0
+**作成日**: 2025-12-20
+**最終更新日**: 2025-12-25
+**著者**: Agent Skills for Context Engineering コントリビューター
+**バージョン**: 1.2.0
