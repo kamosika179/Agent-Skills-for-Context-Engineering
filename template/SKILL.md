@@ -1,98 +1,98 @@
 ---
 name: skill-template
-description: Template for creating new Agent Skills for context engineering. Use this template when adding new skills to the collection.
+description: コンテキストエンジニアリングのための新しいエージェントスキルを作成するテンプレート。コレクションに新しいスキルを追加する際にこのテンプレートを使用してください。
 ---
 
-# Skill Name
+# スキル名
 
-Provide a clear, concise description of what this skill covers and when to use it. This description appears in skill discovery and should help agents (and humans) determine when this skill is relevant.
+このスキルが何をカバーし、いつ使用するかについて、明確で簡潔な説明を記載してください。この説明はスキルの検索時に表示され、エージェント（および人間）がこのスキルが関連するかどうかを判断するのに役立ちます。
 
-**Important**: Keep the total SKILL.md body under 500 lines for optimal performance. Move detailed reference material to separate files in the `references/` directory.
+**重要**: 最適なパフォーマンスのため、SKILL.md の本文は合計500行以内に収めてください。詳細なリファレンス資料は `references/` ディレクトリ内の別ファイルに移動してください。
 
-## When to Activate
+## いつアクティベートするか
 
-Describe specific situations, tasks, or contexts where this skill should be activated. Include both direct triggers (specific keywords or task types) and indirect signals (broader patterns that indicate skill relevance).
+このスキルをアクティベートすべき具体的な状況、タスク、またはコンテキストを記述してください。直接的なトリガー（特定のキーワードやタスクの種類）と間接的なシグナル（スキルの関連性を示すより広いパターン）の両方を含めてください。
 
-Write in third person. The description is injected into the system prompt, and inconsistent point-of-view can cause discovery problems.
+三人称で記述してください。説明はシステムプロンプトに挿入されるため、視点が一貫しないと検索に問題が生じる可能性があります。
 
-- Good: "Processes Excel files and generates reports"
-- Avoid: "I can help you process Excel files"
+- 良い例: "Excelファイルを処理してレポートを生成する"
+- 避けるべき例: "Excelファイルの処理をお手伝いします"
 
-## Core Concepts
+## コアコンセプト
 
-Explain the fundamental concepts covered by this skill. These are the mental models, principles, or frameworks that the skill teaches.
+このスキルがカバーする基本的なコンセプトを説明してください。これらは、スキルが教えるメンタルモデル、原則、またはフレームワークです。
 
-Default assumption: Claude is already very smart. Only add context Claude does not already have. Challenge each piece of information:
-- "Does Claude really need this explanation?"
-- "Can I assume Claude knows this?"
-- "Does this paragraph justify its token cost?"
+デフォルトの前提: Claudeはすでに非常に賢いです。Claudeがまだ持っていないコンテキストのみを追加してください。各情報を精査してください:
+- 「Claudeは本当にこの説明が必要か？」
+- 「Claudeはこれを知っていると想定できるか？」
+- 「この段落はトークンコストに見合うか？」
 
-## Detailed Topics
+## 詳細トピック
 
-### Topic 1
+### トピック 1
 
-Provide detailed explanation of the first major topic. Include specific techniques, patterns, or approaches. Use examples to illustrate concepts.
+最初の主要トピックについて詳細に説明してください。具体的なテクニック、パターン、またはアプローチを含めてください。コンセプトを説明するために例を使用してください。
 
-### Topic 2
+### トピック 2
 
-Provide detailed explanation of the second major topic. Continue with additional topics as needed.
+2番目の主要トピックについて詳細に説明してください。必要に応じて追加のトピックを続けてください。
 
-For longer topics, consider moving content to `references/` and linking:
-- See [detailed reference](./references/topic-details.md) for complete implementation
+長いトピックの場合は、コンテンツを `references/` に移動してリンクすることを検討してください:
+- 完全な実装については[詳細リファレンス](./references/topic-details.md)を参照
 
-## Practical Guidance
+## 実践ガイダンス
 
-Provide actionable guidance for applying the skill. Include common patterns, anti-patterns to avoid, and decision frameworks for choosing between approaches.
+スキルを適用するための実行可能なガイダンスを提供してください。一般的なパターン、避けるべきアンチパターン、アプローチを選択するための意思決定フレームワークを含めてください。
 
-Match the level of specificity to the task's fragility:
-- **High freedom**: Multiple approaches are valid, decisions depend on context
-- **Medium freedom**: Preferred pattern exists, some variation acceptable
-- **Low freedom**: Operations are fragile, specific sequence must be followed
+タスクの脆弱性に合わせて具体性のレベルを調整してください:
+- **高い自由度**: 複数のアプローチが有効で、判断はコンテキストに依存する
+- **中程度の自由度**: 推奨パターンが存在し、ある程度のバリエーションは許容される
+- **低い自由度**: 操作が脆弱で、特定の手順に従う必要がある
 
-## Examples
+## 例
 
-Provide concrete examples that illustrate skill application. Examples should show before/after comparisons, demonstrate correct usage, or show how to handle edge cases.
+スキルの適用を示す具体的な例を提供してください。例はビフォー・アフターの比較を示したり、正しい使用法を実演したり、エッジケースの処理方法を示したりする必要があります。
 
-Use input/output pairs for clarity:
+わかりやすくするために入力/出力のペアを使用してください:
 
-**Example:**
+**例:**
 ```
-Input: [describe input]
-Output: [show expected output]
+Input: [入力を記述]
+Output: [期待される出力を表示]
 ```
 
-## Guidelines
+## ガイドライン
 
-List specific guidelines to follow when applying this skill. These should be actionable rules that can be checked or verified.
+このスキルを適用する際に従うべき具体的なガイドラインをリストしてください。これらは確認または検証可能な実行可能なルールである必要があります。
 
-1. Guideline one with specific, verifiable criteria
-2. Guideline two with clear success conditions
-3. Continue as needed
+1. 具体的で検証可能な基準を持つガイドライン1
+2. 明確な成功条件を持つガイドライン2
+3. 必要に応じて続けてください
 
-## Integration
+## インテグレーション
 
-Explain how this skill integrates with other skills in the collection. List related skills as plain text (not links) to avoid cross-directory reference issues:
+このスキルがコレクション内の他のスキルとどのように統合されるかを説明してください。ディレクトリ間の参照の問題を避けるため、関連スキルはプレーンテキスト（リンクではなく）でリストしてください:
 
-- skill-name-one - Brief description of relationship
-- skill-name-two - Brief description of relationship
+- skill-name-one - 関連性の簡単な説明
+- skill-name-two - 関連性の簡単な説明
 
-## References
+## リファレンス
 
-Internal reference (use relative path to skill's own reference files):
-- [Reference Name](./references/reference-file.md) - Description
+内部リファレンス（スキル自身のリファレンスファイルへの相対パスを使用）:
+- [リファレンス名](./references/reference-file.md) - 説明
 
-Related skills in this collection:
-- skill-name - Relationship description
+このコレクション内の関連スキル:
+- skill-name - 関連性の説明
 
-External resources:
-- Research papers, documentation, or guides
+外部リソース:
+- 研究論文、ドキュメント、またはガイド
 
 ---
 
-## Skill Metadata
+## スキルメタデータ
 
-**Created**: [Date]
-**Last Updated**: [Date]
-**Author**: [Author or Attribution]
-**Version**: [Version number]
+**作成日**: [日付]
+**最終更新日**: [日付]
+**著者**: [著者または帰属]
+**バージョン**: [バージョン番号]
 

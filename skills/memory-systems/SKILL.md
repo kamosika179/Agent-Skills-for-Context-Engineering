@@ -1,117 +1,118 @@
 ---
 name: memory-systems
 description: >
-  Guides implementation of agent memory systems, compares production frameworks
-  (Mem0, Zep/Graphiti, Letta, LangMem), and designs persistence architectures
-  for cross-session knowledge retention. Use when the user asks to "implement
-  agent memory", "persist state across sessions", "build knowledge graph for agents",
-  "track entities over time", "add long-term memory", "choose a memory framework",
-  or mentions temporal knowledge graphs, vector stores, entity memory, or memory
-  benchmarks (LoCoMo, LongMemEval).
+  エージェントメモリシステムの実装をガイドし、本番フレームワーク
+  （Mem0、Zep/Graphiti、Letta、LangMem）を比較し、クロスセッションの
+  知識保持のための永続化アーキテクチャを設計します。ユーザーが「エージェント
+  メモリを実装」「セッション間で状態を永続化」「エージェント用のナレッジグラフを
+  構築」「エンティティを経時的に追跡」「長期メモリを追加」「メモリフレームワークを
+  選択」と依頼した場合、またはテンポラルナレッジグラフ、ベクトルストア、
+  エンティティメモリ、メモリベンチマーク（LoCoMo、LongMemEval）に
+  言及した場合に使用してください。
 ---
 
-# Memory System Design
+# メモリシステム設計
 
-Memory provides the persistence layer that allows agents to maintain continuity across sessions and reason over accumulated knowledge. Simple agents rely entirely on context for memory, losing all state when sessions end. Sophisticated agents implement layered memory architectures that balance immediate context needs with long-term knowledge retention. The evolution from vector stores to knowledge graphs to temporal knowledge graphs represents increasing investment in structured memory for improved retrieval and reasoning.
+メモリは、エージェントがセッション間で継続性を維持し、蓄積された知識に基づいて推論できるようにする永続化レイヤーを提供します。単純なエージェントはメモリをコンテキストのみに依存し、セッション終了時にすべての状態を失います。高度なエージェントは、即時のコンテキストニーズと長期的な知識保持のバランスをとる階層型メモリアーキテクチャを実装します。ベクトルストアからナレッジグラフ、さらにテンポラルナレッジグラフへの進化は、検索と推論を改善するための構造化メモリへの投資の増加を表しています。
 
-## When to Activate
+## いつアクティブにするか
 
-Activate this skill when:
-- Building agents that must persist knowledge across sessions
-- Choosing between memory frameworks (Mem0, Zep/Graphiti, Letta, LangMem)
-- Needing to maintain entity consistency across conversations
-- Implementing reasoning over accumulated knowledge
-- Designing memory architectures that scale in production
-- Evaluating memory systems against benchmarks (LoCoMo, LongMemEval, DMR)
+以下の場合にこのスキルをアクティブにしてください：
+- セッション間で知識を永続化する必要があるエージェントを構築する場合
+- メモリフレームワーク（Mem0、Zep/Graphiti、Letta、LangMem）の選択
+- 会話間でエンティティの一貫性を維持する必要がある場合
+- 蓄積された知識に基づく推論の実装
+- 本番環境でスケールするメモリアーキテクチャの設計
+- ベンチマーク（LoCoMo、LongMemEval、DMR）に対するメモリシステムの評価
 
-## Core Concepts
+## 主要コンセプト
 
-Memory spans a spectrum from volatile context window to persistent storage. Key insight from benchmarks: **tool complexity matters less than reliable retrieval** — Letta's filesystem agents scored 74% on LoCoMo using basic file operations, beating Mem0's specialized tools at 68.5%. Start simple, add structure (graphs, temporal validity) only when retrieval quality demands it.
+メモリは、揮発性のコンテキストウィンドウから永続ストレージまでのスペクトラムにまたがります。ベンチマークからの重要な洞察：**ツールの複雑さよりも信頼性の高い検索が重要** — Lettaのファイルシステムエージェントは基本的なファイル操作を使用してLoCoMoで74%を記録し、Mem0の専門ツールの68.5%を上回りました。シンプルに始め、検索品質が要求する場合にのみ構造（グラフ、テンポラルバリディティ）を追加してください。
 
-## Detailed Topics
+## 詳細トピック
 
-### Production Framework Landscape
+### 本番フレームワークの全体像
 
-| Framework | Architecture | Best For | Trade-off |
+| フレームワーク | アーキテクチャ | 最適な用途 | トレードオフ |
 |-----------|-------------|----------|-----------|
-| **Mem0** | Vector store + graph memory, pluggable backends | Multi-tenant systems, broad integrations | Less specialized for multi-agent |
-| **Zep/Graphiti** | Temporal knowledge graph, bi-temporal model | Enterprise requiring relationship modeling + temporal reasoning | Advanced features cloud-locked |
-| **Letta** | Self-editing memory with tiered storage (in-context/core/archival) | Full agent introspection, stateful services | Complexity for simple use cases |
-| **LangMem** | Memory tools for LangGraph workflows | Teams already on LangGraph | Tightly coupled to LangGraph |
-| **File-system** | Plain files with naming conventions | Simple agents, prototyping | No semantic search, no relationships |
+| **Mem0** | ベクトルストア + グラフメモリ、プラガブルバックエンド | マルチテナントシステム、幅広い統合 | マルチエージェントへの特化度が低い |
+| **Zep/Graphiti** | テンポラルナレッジグラフ、バイテンポラルモデル | リレーションシップモデリング + テンポラル推論を必要とするエンタープライズ | 高度な機能がクラウドにロック |
+| **Letta** | 階層型ストレージ（インコンテキスト/コア/アーカイブ）を持つ自己編集メモリ | 完全なエージェントイントロスペクション、ステートフルサービス | 単純なユースケースには複雑 |
+| **LangMem** | LangGraphワークフロー用のメモリツール | 既にLangGraphを使用しているチーム | LangGraphに密結合 |
+| **ファイルシステム** | 命名規則を持つプレーンファイル | 単純なエージェント、プロトタイピング | セマンティック検索なし、リレーションシップなし |
 
-Zep's Graphiti engine builds a three-tier knowledge graph (episode, semantic entity, community subgraphs) with a bi-temporal model tracking both when events occurred and when they were ingested. Mem0 offers the fastest path to production with managed infrastructure. Letta provides the deepest agent control through its Agent Development Environment.
+Zep の Graphiti エンジンは、3層のナレッジグラフ（エピソード、セマンティックエンティティ、コミュニティサブグラフ）を構築し、イベントの発生時期と取り込み時期の両方を追跡するバイテンポラルモデルを持ちます。Mem0はマネージドインフラストラクチャにより本番環境への最速パスを提供します。Lettaはそのエージェント開発環境を通じて最も深いエージェント制御を提供します。
 
-**Benchmark Performance Comparison**
+**ベンチマークパフォーマンス比較**
 
-| System | DMR Accuracy | LoCoMo | Latency |
+| システム | DMR精度 | LoCoMo | レイテンシ |
 |--------|-------------|--------|---------|
-| Zep (Temporal KG) | 94.8% | — | 2.58s |
+| Zep (Temporal KG) | 94.8% | — | 2.58秒 |
 | Letta (filesystem) | — | 74.0% | — |
 | Mem0 | — | 68.5% | — |
-| MemGPT | 93.4% | — | Variable |
-| GraphRAG | ~75-85% | — | Variable |
-| Vector RAG baseline | ~60-70% | — | Fast |
+| MemGPT | 93.4% | — | 可変 |
+| GraphRAG | 約75-85% | — | 可変 |
+| Vector RAGベースライン | 約60-70% | — | 高速 |
 
-Zep achieves up to 18.5% accuracy improvement on LongMemEval while reducing latency by 90%. Key insight: Letta's filesystem-based agents achieved 74% on LoCoMo using basic file operations, outperforming specialized memory tools — tool complexity matters less than reliable retrieval.
+ZepはLongMemEvalで最大18.5%の精度向上を達成し、レイテンシを90%削減します。重要な洞察：Lettaのファイルシステムベースのエージェントは基本的なファイル操作を使用してLoCoMoで74%を達成し、専門メモリツールを上回りました — ツールの複雑さよりも信頼性の高い検索が重要です。
 
-### Memory Layers (Decision Points)
+### メモリレイヤー（判断ポイント）
 
-| Layer | Persistence | Implementation | When to Use |
+| レイヤー | 永続性 | 実装 | 使用場面 |
 |-------|------------|----------------|-------------|
-| **Working** | Context window only | Scratchpad in system prompt | Always — optimize with attention-favored positions |
-| **Short-term** | Session-scoped | File-system, in-memory cache | Intermediate tool results, conversation state |
-| **Long-term** | Cross-session | Key-value store → graph DB | User preferences, domain knowledge, entity registries |
-| **Entity** | Cross-session | Entity registry + properties | Maintaining identity ("John Doe" = same person across conversations) |
-| **Temporal KG** | Cross-session + history | Graph with validity intervals | Facts that change over time, time-travel queries, preventing context clash |
+| **ワーキング** | コンテキストウィンドウのみ | システムプロンプト内のスクラッチパッド | 常に — アテンション優先位置で最適化 |
+| **短期** | セッションスコープ | ファイルシステム、インメモリキャッシュ | 中間ツール結果、会話状態 |
+| **長期** | クロスセッション | キーバリューストア → グラフDB | ユーザー設定、ドメイン知識、エンティティレジストリ |
+| **エンティティ** | クロスセッション | エンティティレジストリ + プロパティ | アイデンティティの維持（「山田太郎」＝会話を跨いで同一人物） |
+| **テンポラルKG** | クロスセッション + 履歴 | バリディティインターバルを持つグラフ | 時間とともに変化する事実、タイムトラベルクエリ、コンテキスト衝突の防止 |
 
-### Retrieval Strategies
+### 検索戦略
 
-| Strategy | Use When | Limitation |
+| 戦略 | 使用場面 | 制限 |
 |----------|----------|------------|
-| **Semantic** (embedding similarity) | Direct factual queries | Degrades on multi-hop reasoning |
-| **Entity-based** (graph traversal) | "Tell me everything about X" | Requires graph structure |
-| **Temporal** (validity filter) | Facts change over time | Requires validity metadata |
-| **Hybrid** (semantic + keyword + graph) | Best overall accuracy | Most infrastructure |
+| **セマンティック**（埋め込み類似度） | 直接的な事実クエリ | マルチホップ推論で劣化 |
+| **エンティティベース**（グラフ探索） | 「Xについて全部教えて」 | グラフ構造が必要 |
+| **テンポラル**（バリディティフィルター） | 時間とともに変化する事実 | バリディティメタデータが必要 |
+| **ハイブリッド**（セマンティック + キーワード + グラフ） | 全体的に最高精度 | 最もインフラが必要 |
 
-Zep's hybrid approach achieves 90% latency reduction (2.58s vs 28.9s) by retrieving only relevant subgraphs.
+Zepのハイブリッドアプローチは、関連するサブグラフのみを取得することで90%のレイテンシ削減（2.58秒 vs 28.9秒）を達成します。
 
-### Memory Consolidation
+### メモリの統合
 
-Consolidate periodically to prevent unbounded growth. **Invalidate but don't discard** — preserving history matters for temporal queries. Trigger on memory count thresholds, degraded retrieval quality, or scheduled intervals. See [implementation reference](./references/implementation.md) for working consolidation code.
+無制限な増加を防ぐために定期的に統合します。**無効化するが破棄しない** — テンポラルクエリにおいて履歴の保持が重要です。メモリ数のしきい値、検索品質の劣化、またはスケジュールされた間隔でトリガーします。動作する統合コードについては[実装リファレンス](./references/implementation.md)を参照してください。
 
-## Practical Guidance
+## 実践的なガイダンス
 
-### Choosing a Memory Architecture
+### メモリアーキテクチャの選択
 
-**Start simple, add complexity only when retrieval fails.** Most agents don't need a temporal knowledge graph on day one.
+**シンプルに始め、検索が失敗した場合にのみ複雑さを追加する。** ほとんどのエージェントは初日からテンポラルナレッジグラフを必要としません。
 
-1. **Prototype**: File-system memory. Store facts as structured JSON with timestamps. Good enough to validate agent behavior.
-2. **Scale**: Move to Mem0 or vector store with metadata when you need semantic search and multi-tenant isolation.
-3. **Complex reasoning**: Add Zep/Graphiti when you need relationship traversal, temporal validity, or cross-session synthesis.
-4. **Full control**: Use Letta when you need agent self-management of memory with deep introspection.
+1. **プロトタイプ**：ファイルシステムメモリ。タイムスタンプ付きの構造化JSONとして事実を保存。エージェントの動作を検証するのに十分。
+2. **スケール**：セマンティック検索とマルチテナント分離が必要な場合にMem0またはメタデータ付きベクトルストアに移行。
+3. **複雑な推論**：リレーションシップの探索、テンポラルバリディティ、クロスセッション統合が必要な場合にZep/Graphitiを追加。
+4. **完全な制御**：深いイントロスペクションを伴うエージェントのメモリ自己管理が必要な場合にLettaを使用。
 
-### Integration with Context
+### コンテキストとの統合
 
-Memories must integrate with context systems to be useful. Use just-in-time memory loading to retrieve relevant memories when needed. Use strategic injection to place memories in attention-favored positions (beginning/end of context).
+メモリは有用であるためにコンテキストシステムと統合する必要があります。ジャストインタイムメモリローディングを使用して、必要な時に関連するメモリを取得します。戦略的インジェクションを使用して、アテンション優先位置（コンテキストの先頭/末尾）にメモリを配置します。
 
-### Error Recovery
+### エラーリカバリ
 
-- **Empty retrieval**: Fall back to broader search (remove entity filter, widen time range). If still empty, prompt user for clarification.
-- **Stale results**: Check `valid_until` timestamps. If most results are expired, trigger consolidation before retrying.
-- **Conflicting facts**: Prefer the fact with the most recent `valid_from`. Surface the conflict to the user if confidence is low.
-- **Storage failure**: Queue writes for retry. Never block the agent's response on a memory write.
+- **空の検索結果**：より広い検索にフォールバック（エンティティフィルターの削除、時間範囲の拡大）。それでも空の場合、ユーザーに明確化を促す。
+- **古い結果**：`valid_until` タイムスタンプを確認。ほとんどの結果が期限切れの場合、リトライ前に統合をトリガー。
+- **矛盾する事実**：最新の `valid_from` を持つ事実を優先。信頼度が低い場合、矛盾をユーザーに提示。
+- **ストレージ障害**：書き込みをリトライ用にキューに入れる。メモリ書き込みでエージェントの応答をブロックしない。
 
-### Anti-Patterns
+### アンチパターン
 
-- **Stuffing everything into context**: Long inputs are expensive and degrade performance. Use just-in-time retrieval.
-- **Ignoring temporal validity**: Facts go stale. Without validity tracking, outdated information poisons context.
-- **Over-engineering early**: A filesystem agent can outperform complex memory tooling. Add sophistication when simple approaches fail.
-- **No consolidation strategy**: Unbounded memory growth degrades retrieval quality over time.
+- **すべてをコンテキストに詰め込む**：長い入力は高コストでパフォーマンスを低下させる。ジャストインタイム検索を使用する。
+- **テンポラルバリディティを無視する**：事実は古くなる。バリディティ追跡なしでは、古い情報がコンテキストを汚染する。
+- **早期の過剰設計**：ファイルシステムエージェントが複雑なメモリツールを上回ることがある。シンプルなアプローチが失敗した場合に高度化を追加する。
+- **統合戦略がない**：無制限なメモリ増加は検索品質を経時的に劣化させる。
 
-## Examples
+## 例
 
-**Example 1: Mem0 Integration**
+**例1: Mem0 統合**
 ```python
 from mem0 import Memory
 
@@ -123,7 +124,7 @@ m.add("User switched to light mode", user_id="alice")
 results = m.search("What theme does the user prefer?", user_id="alice")
 ```
 
-**Example 2: Temporal Query**
+**例2: テンポラルクエリ**
 ```python
 # Track entity with validity periods
 graph.create_temporal_relationship(
@@ -141,46 +142,46 @@ results = graph.query_at_time(
 )
 ```
 
-## Guidelines
+## ガイドライン
 
-1. Start with file-system memory; add complexity only when retrieval quality demands it
-2. Track temporal validity for any fact that can change over time
-3. Use hybrid retrieval (semantic + keyword + graph) for best accuracy
-4. Consolidate memories periodically — invalidate but don't discard
-5. Design for retrieval failure: always have a fallback when memory lookup returns nothing
-6. Consider privacy implications of persistent memory (retention policies, deletion rights)
-7. Benchmark your memory system against LoCoMo or LongMemEval before and after changes
-8. Monitor memory growth and retrieval latency in production
+1. ファイルシステムメモリから始め、検索品質が要求する場合にのみ複雑さを追加する
+2. 時間とともに変化しうる事実にはテンポラルバリディティを追跡する
+3. 最高精度のためにハイブリッド検索（セマンティック + キーワード + グラフ）を使用する
+4. メモリを定期的に統合する — 無効化するが破棄しない
+5. 検索失敗に備えて設計する：メモリ検索が何も返さない場合のフォールバックを常に用意する
+6. 永続メモリのプライバシーへの影響を考慮する（保持ポリシー、削除権）
+7. 変更前後にLoCoMoまたはLongMemEvalに対してメモリシステムをベンチマークする
+8. 本番環境でのメモリ増加と検索レイテンシを監視する
 
-## Integration
+## 統合
 
-This skill builds on context-fundamentals. It connects to:
+このスキルは context-fundamentals の上に構築されています。以下と連携します：
 
-- multi-agent-patterns - Shared memory across agents
-- context-optimization - Memory-based context loading
-- evaluation - Evaluating memory quality
+- multi-agent-patterns - エージェント間の共有メモリ
+- context-optimization - メモリベースのコンテキストローディング
+- evaluation - メモリ品質の評価
 
-## References
+## 参考資料
 
-Internal reference:
-- [Implementation Reference](./references/implementation.md) - Detailed implementation patterns
+内部参考：
+- [Implementation Reference](./references/implementation.md) - 詳細な実装パターン
 
-Related skills in this collection:
-- context-fundamentals - Context basics
-- multi-agent-patterns - Cross-agent memory
+このコレクション内の関連スキル：
+- context-fundamentals - コンテキストの基礎
+- multi-agent-patterns - クロスエージェントメモリ
 
-External resources:
-- Zep temporal knowledge graph paper (arXiv:2501.13956)
-- Mem0 production architecture paper (arXiv:2504.19413)
-- LoCoMo benchmark (Snap Research)
-- MemBench evaluation framework (ACL 2025)
-- Graphiti open-source temporal KG engine (github.com/getzep/graphiti)
+外部リソース：
+- Zep テンポラルナレッジグラフ論文 (arXiv:2501.13956)
+- Mem0 本番アーキテクチャ論文 (arXiv:2504.19413)
+- LoCoMo ベンチマーク (Snap Research)
+- MemBench 評価フレームワーク (ACL 2025)
+- Graphiti オープンソーステンポラルKGエンジン (github.com/getzep/graphiti)
 
 ---
 
-## Skill Metadata
+## スキルメタデータ
 
-**Created**: 2025-12-20
-**Last Updated**: 2026-02-12
-**Author**: Agent Skills for Context Engineering Contributors
-**Version**: 2.0.0
+**作成日**: 2025-12-20
+**最終更新日**: 2026-02-12
+**著者**: Agent Skills for Context Engineering Contributors
+**バージョン**: 2.0.0

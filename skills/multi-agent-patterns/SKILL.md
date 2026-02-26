@@ -1,79 +1,79 @@
 ---
 name: multi-agent-patterns
-description: This skill should be used when the user asks to "design multi-agent system", "implement supervisor pattern", "create swarm architecture", "coordinate multiple agents", or mentions multi-agent patterns, context isolation, agent handoffs, sub-agents, or parallel agent execution.
+description: このスキルは、ユーザーが「マルチエージェントシステムを設計」「スーパーバイザーパターンを実装」「スウォームアーキテクチャを作成」「複数のエージェントを調整」と依頼した場合、またはマルチエージェントパターン、コンテキスト隔離、エージェントハンドオフ、サブエージェント、並列エージェント実行に言及した場合に使用してください。
 ---
 
-# Multi-Agent Architecture Patterns
+# マルチエージェントアーキテクチャパターン
 
-Multi-agent architectures distribute work across multiple language model instances, each with its own context window. When designed well, this distribution enables capabilities beyond single-agent limits. When designed poorly, it introduces coordination overhead that negates benefits. The critical insight is that sub-agents exist primarily to isolate context, not to anthropomorphize role division.
+マルチエージェントアーキテクチャは、それぞれ独自のコンテキストウィンドウを持つ複数の言語モデルインスタンス間で作業を分散させます。適切に設計された場合、この分散は単一エージェントの限界を超える能力を実現します。設計が不十分な場合、調整のオーバーヘッドが利点を打ち消します。重要な洞察は、サブエージェントは主に役割分担を擬人化するためではなく、コンテキストを隔離するために存在するということです。
 
-## When to Activate
+## いつアクティブにするか
 
-Activate this skill when:
-- Single-agent context limits constrain task complexity
-- Tasks decompose naturally into parallel subtasks
-- Different subtasks require different tool sets or system prompts
-- Building systems that must handle multiple domains simultaneously
-- Scaling agent capabilities beyond single-context limits
-- Designing production agent systems with multiple specialized components
+以下の場合にこのスキルをアクティブにしてください：
+- 単一エージェントのコンテキスト制限がタスクの複雑さを制約している場合
+- タスクが自然に並列サブタスクに分解できる場合
+- 異なるサブタスクが異なるツールセットやシステムプロンプトを必要とする場合
+- 複数のドメインを同時に処理するシステムを構築する場合
+- 単一コンテキストの限界を超えてエージェント能力を拡張する場合
+- 複数の専門コンポーネントを持つ本番エージェントシステムを設計する場合
 
-## Core Concepts
+## 主要コンセプト
 
-Multi-agent systems address single-agent context limitations through distribution. Three dominant patterns exist: supervisor/orchestrator for centralized control, peer-to-peer/swarm for flexible handoffs, and hierarchical for layered abstraction. The critical design principle is context isolation—sub-agents exist primarily to partition context rather than to simulate organizational roles.
+マルチエージェントシステムは、分散を通じて単一エージェントのコンテキスト制限に対処します。3つの主要パターンが存在します：集中制御のためのスーパーバイザー/オーケストレーター、柔軟なハンドオフのためのピアツーピア/スウォーム、階層的抽象化のためのヒエラルキカルパターン。重要な設計原則はコンテキスト隔離です—サブエージェントは組織的な役割をシミュレートするためではなく、主にコンテキストを分割するために存在します。
 
-Effective multi-agent systems require explicit coordination protocols, consensus mechanisms that avoid sycophancy, and careful attention to failure modes including bottlenecks, divergence, and error propagation.
+効果的なマルチエージェントシステムには、明示的な調整プロトコル、迎合を避けるコンセンサスメカニズム、ボトルネック、発散、エラー伝播を含む障害モードへの注意が必要です。
 
-## Detailed Topics
+## 詳細トピック
 
-### Why Multi-Agent Architectures
+### マルチエージェントアーキテクチャの理由
 
-**The Context Bottleneck**
-Single agents face inherent ceilings in reasoning capability, context management, and tool coordination. As tasks grow more complex, context windows fill with accumulated history, retrieved documents, and tool outputs. Performance degrades according to predictable patterns: the lost-in-middle effect, attention scarcity, and context poisoning.
+**コンテキストのボトルネック**
+単一エージェントは、推論能力、コンテキスト管理、ツール調整において本質的な上限に直面します。タスクが複雑になるにつれ、コンテキストウィンドウは蓄積された履歴、取得したドキュメント、ツール出力で満たされます。パフォーマンスは予測可能なパターンに従って低下します：中間喪失効果、アテンション不足、コンテキスト汚染。
 
-Multi-agent architectures address these limitations by partitioning work across multiple context windows. Each agent operates in a clean context focused on its subtask. Results aggregate at a coordination layer without any single context bearing the full burden.
+マルチエージェントアーキテクチャは、複数のコンテキストウィンドウ間で作業を分割することでこれらの制限に対処します。各エージェントは自身のサブタスクに特化したクリーンなコンテキストで動作します。結果は調整レイヤーで集約され、単一のコンテキストが全負荷を負担することはありません。
 
-**The Token Economics Reality**
-Multi-agent systems consume significantly more tokens than single-agent approaches. Production data shows:
+**トークンエコノミクスの現実**
+マルチエージェントシステムは、単一エージェントアプローチよりも大幅に多くのトークンを消費します。本番データは以下を示しています：
 
-| Architecture | Token Multiplier | Use Case |
+| アーキテクチャ | トークン倍率 | ユースケース |
 |--------------|------------------|----------|
-| Single agent chat | 1× baseline | Simple queries |
-| Single agent with tools | ~4× baseline | Tool-using tasks |
-| Multi-agent system | ~15× baseline | Complex research/coordination |
+| 単一エージェントチャット | 1×ベースライン | 単純なクエリ |
+| ツール付き単一エージェント | 約4×ベースライン | ツール使用タスク |
+| マルチエージェントシステム | 約15×ベースライン | 複雑なリサーチ/調整 |
 
-Research on the BrowseComp evaluation found that three factors explain 95% of performance variance: token usage (80% of variance), number of tool calls, and model choice. This validates the multi-agent approach of distributing work across agents with separate context windows to add capacity for parallel reasoning.
+BrowseComp評価に関する研究では、パフォーマンスの分散の95%を3つの要因が説明することが判明しました：トークン使用量（分散の80%）、ツール呼び出し回数、モデルの選択。これは、並列推論のための容量を追加するために、別々のコンテキストウィンドウを持つエージェント間で作業を分散させるマルチエージェントアプローチを検証しています。
 
-Critically, upgrading to better models often provides larger performance gains than doubling token budgets. Claude Sonnet 4.5 showed larger gains than doubling tokens on earlier Sonnet versions. GPT-5.2's thinking mode similarly outperforms raw token increases. This suggests model selection and multi-agent architecture are complementary strategies.
+重要なことに、より優れたモデルへのアップグレードは、トークンバジェットの倍増よりも大きなパフォーマンス向上をもたらすことが多いです。Claude Sonnet 4.5は以前のSonnetバージョンでトークンを倍増させるよりも大きな向上を示しました。GPT-5.2の思考モードも同様に、単純なトークン増加を上回ります。これは、モデル選択とマルチエージェントアーキテクチャが相補的な戦略であることを示唆しています。
 
-**The Parallelization Argument**
-Many tasks contain parallelizable subtasks that a single agent must execute sequentially. A research task might require searching multiple independent sources, analyzing different documents, or comparing competing approaches. A single agent processes these sequentially, accumulating context with each step.
+**並列化の論拠**
+多くのタスクには、単一エージェントが順番に実行しなければならない並列化可能なサブタスクが含まれています。リサーチタスクでは、複数の独立したソースの検索、異なるドキュメントの分析、競合するアプローチの比較が必要になることがあります。単一エージェントはこれらを順番に処理し、各ステップでコンテキストを蓄積します。
 
-Multi-agent architectures assign each subtask to a dedicated agent with a fresh context. All agents work simultaneously, then return results to a coordinator. The total real-world time approaches the duration of the longest subtask rather than the sum of all subtasks.
+マルチエージェントアーキテクチャは、各サブタスクを新しいコンテキストを持つ専用エージェントに割り当てます。すべてのエージェントが同時に作業し、結果をコーディネーターに返します。実時間の合計は、すべてのサブタスクの合計ではなく、最長のサブタスクの所要時間に近づきます。
 
-**The Specialization Argument**
-Different tasks benefit from different agent configurations: different system prompts, different tool sets, different context structures. A general-purpose agent must carry all possible configurations in context. Specialized agents carry only what they need.
+**専門化の論拠**
+異なるタスクは異なるエージェント構成から恩恵を受けます：異なるシステムプロンプト、異なるツールセット、異なるコンテキスト構造。汎用エージェントはすべての可能な構成をコンテキストに含める必要があります。専門化されたエージェントは必要なもののみを含みます。
 
-Multi-agent architectures enable specialization without combinatorial explosion. The coordinator routes to specialized agents; each agent operates with lean context optimized for its domain.
+マルチエージェントアーキテクチャは、組み合わせ爆発なしに専門化を可能にします。コーディネーターが専門エージェントにルーティングし、各エージェントはそのドメインに最適化された軽量なコンテキストで動作します。
 
-### Architectural Patterns
+### アーキテクチャパターン
 
-**Pattern 1: Supervisor/Orchestrator**
-The supervisor pattern places a central agent in control, delegating to specialists and synthesizing results. The supervisor maintains global state and trajectory, decomposes user objectives into subtasks, and routes to appropriate workers.
+**パターン1: スーパーバイザー/オーケストレーター**
+スーパーバイザーパターンは、中央のエージェントを制御に配置し、スペシャリストに委任して結果を統合します。スーパーバイザーはグローバルな状態と軌跡を維持し、ユーザーの目標をサブタスクに分解し、適切なワーカーにルーティングします。
 
 ```
 User Query -> Supervisor -> [Specialist, Specialist, Specialist] -> Aggregation -> Final Output
 ```
 
-When to use: Complex tasks with clear decomposition, tasks requiring coordination across domains, tasks where human oversight is important.
+使用場面：明確な分解が可能な複雑なタスク、ドメイン横断の調整を必要とするタスク、人間による監視が重要なタスク。
 
-Advantages: Strict control over workflow, easier to implement human-in-the-loop interventions, ensures adherence to predefined plans.
+利点：ワークフローの厳密な制御、ヒューマンインザループ介入の実装が容易、事前定義された計画への準拠を保証。
 
-Disadvantages: Supervisor context becomes bottleneck, supervisor failures cascade to all workers, "telephone game" problem where supervisors paraphrase sub-agent responses incorrectly.
+欠点：スーパーバイザーのコンテキストがボトルネックになる、スーパーバイザーの障害がすべてのワーカーに波及、スーパーバイザーがサブエージェントの応答を不正確に言い換える「伝言ゲーム」問題。
 
-**The Telephone Game Problem and Solution**
-LangGraph benchmarks found supervisor architectures initially performed 50% worse than optimized versions due to the "telephone game" problem where supervisors paraphrase sub-agent responses incorrectly, losing fidelity.
+**伝言ゲーム問題と解決策**
+LangGraphのベンチマークでは、スーパーバイザーアーキテクチャがスーパーバイザーがサブエージェントの応答を不正確に言い換える「伝言ゲーム」問題により、最適化バージョンよりも当初50%パフォーマンスが低いことが判明しました。
 
-The fix: implement a `forward_message` tool allowing sub-agents to pass responses directly to users:
+解決策：サブエージェントが応答をユーザーに直接渡せる `forward_message` ツールを実装します：
 
 ```python
 def forward_message(message: str, to_user: bool = True):
@@ -90,12 +90,12 @@ def forward_message(message: str, to_user: bool = True):
     return {"type": "supervisor_input", "content": message}
 ```
 
-With this pattern, swarm architectures slightly outperform supervisors because sub-agents respond directly to users, eliminating translation errors.
+このパターンにより、サブエージェントがユーザーに直接応答し翻訳エラーを排除するため、スウォームアーキテクチャがスーパーバイザーをわずかに上回ります。
 
-Implementation note: Implement direct pass-through mechanisms allowing sub-agents to pass responses directly to users rather than through supervisor synthesis when appropriate.
+実装上の注意：適切な場合に、サブエージェントがスーパーバイザーの統合を経ずにユーザーに直接応答を渡せるダイレクトパススルーメカニズムを実装してください。
 
-**Pattern 2: Peer-to-Peer/Swarm**
-The peer-to-peer pattern removes central control, allowing agents to communicate directly based on predefined protocols. Any agent can transfer control to any other through explicit handoff mechanisms.
+**パターン2: ピアツーピア/スウォーム**
+ピアツーピアパターンは中央制御を排除し、事前定義されたプロトコルに基づいてエージェントが直接通信できるようにします。任意のエージェントが明示的なハンドオフメカニズムを通じて他のエージェントに制御を移すことができます。
 
 ```python
 def transfer_to_agent_b():
@@ -107,88 +107,88 @@ agent_a = Agent(
 )
 ```
 
-When to use: Tasks requiring flexible exploration, tasks where rigid planning is counterproductive, tasks with emergent requirements that defy upfront decomposition.
+使用場面：柔軟な探索を必要とするタスク、厳密な計画が逆効果となるタスク、事前分解を拒む創発的な要件を持つタスク。
 
-Advantages: No single point of failure, scales effectively for breadth-first exploration, enables emergent problem-solving behaviors.
+利点：単一障害点がない、幅優先探索に効果的にスケール、創発的な問題解決行動を可能にする。
 
-Disadvantages: Coordination complexity increases with agent count, risk of divergence without central state keeper, requires robust convergence constraints.
+欠点：エージェント数の増加に伴い調整の複雑さが増大、中央状態管理者なしでの発散リスク、堅牢な収束制約が必要。
 
-Implementation note: Define explicit handoff protocols with state passing. Ensure agents can communicate their context needs to receiving agents.
+実装上の注意：状態渡しを伴う明示的なハンドオフプロトコルを定義してください。エージェントが受信エージェントにコンテキストのニーズを伝達できるようにしてください。
 
-**Pattern 3: Hierarchical**
-Hierarchical structures organize agents into layers of abstraction: strategic, planning, and execution layers. Strategy layer agents define goals and constraints; planning layer agents break goals into actionable plans; execution layer agents perform atomic tasks.
+**パターン3: ヒエラルキカル**
+ヒエラルキカル構造は、エージェントを抽象化のレイヤーに整理します：戦略レイヤー、計画レイヤー、実行レイヤー。戦略レイヤーのエージェントは目標と制約を定義し、計画レイヤーのエージェントは目標を実行可能な計画に分解し、実行レイヤーのエージェントはアトミックなタスクを実行します。
 
 ```
 Strategy Layer (Goal Definition) -> Planning Layer (Task Decomposition) -> Execution Layer (Atomic Tasks)
 ```
 
-When to use: Large-scale projects with clear hierarchical structure, enterprise workflows with management layers, tasks requiring both high-level planning and detailed execution.
+使用場面：明確な階層構造を持つ大規模プロジェクト、管理レイヤーを持つエンタープライズワークフロー、高レベルの計画と詳細な実行の両方を必要とするタスク。
 
-Advantages: Mirrors organizational structures, clear separation of concerns, enables different context structures at different levels.
+利点：組織構造を反映、明確な関心の分離、異なるレベルで異なるコンテキスト構造を可能にする。
 
-Disadvantages: Coordination overhead between layers, potential for misalignment between strategy and execution, complex error propagation.
+欠点：レイヤー間の調整オーバーヘッド、戦略と実行間の不整合の可能性、複雑なエラー伝播。
 
-### Context Isolation as Design Principle
+### 設計原則としてのコンテキスト隔離
 
-The primary purpose of multi-agent architectures is context isolation. Each sub-agent operates in a clean context window focused on its subtask without carrying accumulated context from other subtasks.
+マルチエージェントアーキテクチャの主な目的はコンテキスト隔離です。各サブエージェントは、他のサブタスクからの蓄積されたコンテキストを持たない、サブタスクに特化したクリーンなコンテキストウィンドウで動作します。
 
-**Isolation Mechanisms**
-Full context delegation: For complex tasks where the sub-agent needs complete understanding, the planner shares its entire context. The sub-agent has its own tools and instructions but receives full context for its decisions.
+**隔離メカニズム**
+フルコンテキスト委任：サブエージェントが完全な理解を必要とする複雑なタスクでは、プランナーが全コンテキストを共有します。サブエージェントは独自のツールと指示を持ちますが、意思決定のためにフルコンテキストを受け取ります。
 
-Instruction passing: For simple, well-defined subtasks, the planner creates instructions via function call. The sub-agent receives only the instructions needed for its specific task.
+指示渡し：単純で明確に定義されたサブタスクでは、プランナーが関数呼び出しを介して指示を作成します。サブエージェントは特定のタスクに必要な指示のみを受け取ります。
 
-File system memory: For complex tasks requiring shared state, agents read and write to persistent storage. The file system serves as the coordination mechanism, avoiding context bloat from shared state passing.
+ファイルシステムメモリ：共有状態を必要とする複雑なタスクでは、エージェントが永続ストレージの読み書きを行います。ファイルシステムが調整メカニズムとして機能し、共有状態渡しによるコンテキスト膨張を回避します。
 
-**Isolation Trade-offs**
-Full context delegation provides maximum capability but defeats the purpose of sub-agents. Instruction passing maintains isolation but limits sub-agent flexibility. File system memory enables shared state without context passing but introduces latency and consistency challenges.
+**隔離のトレードオフ**
+フルコンテキスト委任は最大の能力を提供しますが、サブエージェントの目的を無効にします。指示渡しは隔離を維持しますが、サブエージェントの柔軟性を制限します。ファイルシステムメモリはコンテキスト渡しなしで共有状態を可能にしますが、レイテンシと一貫性の課題を導入します。
 
-The right choice depends on task complexity, coordination needs, and acceptable latency.
+適切な選択は、タスクの複雑さ、調整のニーズ、許容可能なレイテンシに依存します。
 
-### Consensus and Coordination
+### コンセンサスと調整
 
-**The Voting Problem**
-Simple majority voting treats hallucinations from weak models as equal to reasoning from strong models. Without intervention, multi-agent discussions devolve into consensus on false premises due to inherent bias toward agreement.
+**投票問題**
+単純な多数決は、弱いモデルからのハルシネーションを強いモデルからの推論と同等に扱います。介入なしでは、マルチエージェントの議論は合意への固有のバイアスにより、誤った前提に基づくコンセンサスに退化します。
 
-**Weighted Voting**
-Weight agent votes by confidence or expertise. Agents with higher confidence or domain expertise carry more weight in final decisions.
+**重み付き投票**
+信頼度や専門性に基づいてエージェントの投票に重み付けします。信頼度やドメイン専門性が高いエージェントは最終決定においてより大きな重みを持ちます。
 
-**Debate Protocols**
-Debate protocols require agents to critique each other's outputs over multiple rounds. Adversarial critique often yields higher accuracy on complex reasoning than collaborative consensus.
+**ディベートプロトコル**
+ディベートプロトコルは、エージェントが複数ラウンドにわたって互いの出力を批評することを要求します。敵対的批評は、複雑な推論において協調的コンセンサスよりも高い精度をもたらすことが多いです。
 
-**Trigger-Based Intervention**
-Monitor multi-agent interactions for specific behavioral markers. Stall triggers activate when discussions make no progress. Sycophancy triggers detect when agents mimic each other's answers without unique reasoning.
+**トリガーベースの介入**
+特定の行動マーカーについてマルチエージェントのインタラクションを監視します。停滞トリガーは議論が進展しない場合にアクティブになります。迎合トリガーは、エージェントが独自の推論なしに互いの回答を模倣することを検出します。
 
-### Framework Considerations
+### フレームワークに関する考慮事項
 
-Different frameworks implement these patterns with different philosophies. LangGraph uses graph-based state machines with explicit nodes and edges. AutoGen uses conversational/event-driven patterns with GroupChat. CrewAI uses role-based process flows with hierarchical crew structures.
+異なるフレームワークがこれらのパターンを異なる哲学で実装しています。LangGraphは明示的なノードとエッジを持つグラフベースのステートマシンを使用します。AutoGenはGroupChatを使った会話/イベント駆動パターンを使用します。CrewAIは階層的なクルー構造を持つロールベースのプロセスフローを使用します。
 
-## Practical Guidance
+## 実践的なガイダンス
 
-### Failure Modes and Mitigations
+### 障害モードと軽減策
 
-**Failure: Supervisor Bottleneck**
-The supervisor accumulates context from all workers, becoming susceptible to saturation and degradation.
+**障害：スーパーバイザーのボトルネック**
+スーパーバイザーがすべてのワーカーからのコンテキストを蓄積し、飽和と劣化の影響を受けやすくなります。
 
-Mitigation: Implement output schema constraints so workers return only distilled summaries. Use checkpointing to persist supervisor state without carrying full history.
+軽減策：ワーカーが凝縮された要約のみを返すように出力スキーマ制約を実装します。チェックポイントを使用して、完全な履歴を保持せずにスーパーバイザーの状態を永続化します。
 
-**Failure: Coordination Overhead**
-Agent communication consumes tokens and introduces latency. Complex coordination can negate parallelization benefits.
+**障害：調整オーバーヘッド**
+エージェント間通信がトークンを消費し、レイテンシを導入します。複雑な調整は並列化の利点を打ち消す可能性があります。
 
-Mitigation: Minimize communication through clear handoff protocols. Batch results where possible. Use asynchronous communication patterns.
+軽減策：明確なハンドオフプロトコルを通じて通信を最小化します。可能な場合は結果をバッチ処理します。非同期通信パターンを使用します。
 
-**Failure: Divergence**
-Agents pursuing different goals without central coordination can drift from intended objectives.
+**障害：発散**
+中央の調整なしに異なる目標を追求するエージェントは、意図した目的から逸脱する可能性があります。
 
-Mitigation: Define clear objective boundaries for each agent. Implement convergence checks that verify progress toward shared goals. Use time-to-live limits on agent execution.
+軽減策：各エージェントに明確な目標境界を定義します。共有目標に向けた進捗を検証する収束チェックを実装します。エージェント実行にTime-to-Live制限を設定します。
 
-**Failure: Error Propagation**
-Errors in one agent's output propagate to downstream agents that consume that output.
+**障害：エラー伝播**
+あるエージェントの出力のエラーが、その出力を消費する下流のエージェントに伝播します。
 
-Mitigation: Validate agent outputs before passing to consumers. Implement retry logic with circuit breakers. Use idempotent operations where possible.
+軽減策：消費者に渡す前にエージェントの出力を検証します。サーキットブレーカー付きのリトライロジックを実装します。可能な場合はべき等操作を使用します。
 
-## Examples
+## 例
 
-**Example 1: Research Team Architecture**
+**例1: リサーチチームアーキテクチャ**
 ```text
 Supervisor
 ├── Researcher (web search, document retrieval)
@@ -197,7 +197,7 @@ Supervisor
 └── Writer (report generation, formatting)
 ```
 
-**Example 2: Handoff Protocol**
+**例2: ハンドオフプロトコル**
 ```python
 def handle_customer_request(request):
     if request.type == "billing":
@@ -210,46 +210,46 @@ def handle_customer_request(request):
         return handle_general(request)
 ```
 
-## Guidelines
+## ガイドライン
 
-1. Design for context isolation as the primary benefit of multi-agent systems
-2. Choose architecture pattern based on coordination needs, not organizational metaphor
-3. Implement explicit handoff protocols with state passing
-4. Use weighted voting or debate protocols for consensus
-5. Monitor for supervisor bottlenecks and implement checkpointing
-6. Validate outputs before passing between agents
-7. Set time-to-live limits to prevent infinite loops
-8. Test failure scenarios explicitly
+1. マルチエージェントシステムの主要な利点としてコンテキスト隔離を設計する
+2. 組織のメタファーではなく、調整ニーズに基づいてアーキテクチャパターンを選択する
+3. 状態渡しを伴う明示的なハンドオフプロトコルを実装する
+4. コンセンサスには重み付き投票またはディベートプロトコルを使用する
+5. スーパーバイザーのボトルネックを監視し、チェックポイントを実装する
+6. エージェント間で渡す前に出力を検証する
+7. 無限ループを防ぐためにTime-to-Live制限を設定する
+8. 障害シナリオを明示的にテストする
 
-## Integration
+## 統合
 
-This skill builds on context-fundamentals and context-degradation. It connects to:
+このスキルは context-fundamentals と context-degradation の上に構築されています。以下と連携します：
 
-- memory-systems - Shared state management across agents
-- tool-design - Tool specialization per agent
-- context-optimization - Context partitioning strategies
+- memory-systems - エージェント間の共有状態管理
+- tool-design - エージェントごとのツール専門化
+- context-optimization - コンテキストパーティショニング戦略
 
-## References
+## 参考資料
 
-Internal reference:
-- [Frameworks Reference](./references/frameworks.md) - Detailed framework implementation patterns
+内部参考：
+- [Frameworks Reference](./references/frameworks.md) - 詳細なフレームワーク実装パターン
 
-Related skills in this collection:
-- context-fundamentals - Context basics
-- memory-systems - Cross-agent memory
-- context-optimization - Partitioning strategies
+このコレクション内の関連スキル：
+- context-fundamentals - コンテキストの基礎
+- memory-systems - クロスエージェントメモリ
+- context-optimization - パーティショニング戦略
 
-External resources:
-- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - Multi-agent patterns and state management
-- [AutoGen Framework](https://microsoft.github.io/autogen/) - GroupChat and conversational patterns
-- [CrewAI Documentation](https://docs.crewai.com/) - Hierarchical agent processes
-- [Research on Multi-Agent Coordination](https://arxiv.org/abs/2308.00352) - Survey of multi-agent systems
+外部リソース：
+- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - マルチエージェントパターンと状態管理
+- [AutoGen Framework](https://microsoft.github.io/autogen/) - GroupChatと会話パターン
+- [CrewAI Documentation](https://docs.crewai.com/) - 階層的エージェントプロセス
+- [Research on Multi-Agent Coordination](https://arxiv.org/abs/2308.00352) - マルチエージェントシステムの調査
 
 ---
 
-## Skill Metadata
+## スキルメタデータ
 
-**Created**: 2025-12-20
-**Last Updated**: 2025-12-20
-**Author**: Agent Skills for Context Engineering Contributors
-**Version**: 1.0.0
+**作成日**: 2025-12-20
+**最終更新日**: 2025-12-20
+**著者**: Agent Skills for Context Engineering Contributors
+**バージョン**: 1.0.0

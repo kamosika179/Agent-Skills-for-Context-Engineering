@@ -1,110 +1,110 @@
 # Agent Skills for Context Engineering
 
-A comprehensive, open collection of Agent Skills focused on context engineering principles for building production-grade AI agent systems. These skills teach the art and science of curating context to maximize agent effectiveness across any agent platform.
+あらゆるエージェントプラットフォームで本番レベルのAIエージェントシステムを構築するための、コンテキストエンジニアリングの原則に焦点を当てた包括的なオープンコレクションです。これらのスキルは、エージェントの有効性を最大化するためのコンテキストキュレーションの技術と科学を教えます。
 
-## What is Context Engineering?
+## コンテキストエンジニアリングとは？
 
-Context engineering is the discipline of managing the language model's context window. Unlike prompt engineering, which focuses on crafting effective instructions, context engineering addresses the holistic curation of all information that enters the model's limited attention budget: system prompts, tool definitions, retrieved documents, message history, and tool outputs.
+コンテキストエンジニアリングとは、言語モデルのコンテキストウィンドウを管理する技術分野です。効果的な指示の作成に焦点を当てるプロンプトエンジニアリングとは異なり、コンテキストエンジニアリングは、モデルの限られたアテンション予算に入るすべての情報（システムプロンプト、ツール定義、検索されたドキュメント、メッセージ履歴、ツール出力）の包括的なキュレーションに取り組みます。
 
-The fundamental challenge is that context windows are constrained not by raw token capacity but by attention mechanics. As context length increases, models exhibit predictable degradation patterns: the "lost-in-the-middle" phenomenon, U-shaped attention curves, and attention scarcity. Effective context engineering means finding the smallest possible set of high-signal tokens that maximize the likelihood of desired outcomes.
+根本的な課題は、コンテキストウィンドウが生のトークン容量ではなく、アテンションメカニクスによって制約されることです。コンテキスト長が増加すると、モデルは予測可能な劣化パターンを示します：「lost-in-the-middle」現象、U字型アテンションカーブ、アテンション不足です。効果的なコンテキストエンジニアリングとは、望ましい結果の可能性を最大化する、最小限の高シグナルトークンセットを見つけることを意味します。
 
-## Recognition
+## 評価・引用
 
-This repository is cited in academic research as foundational work on static skill architecture:
+このリポジトリは、静的スキルアーキテクチャに関する基礎的研究として学術論文で引用されています：
 
 > "While static skills are well-recognized [Anthropic, 2025b; Muratcan Koylan, 2025], MCE is among the first to dynamically evolve them, bridging manual skill engineering and autonomous self-improvement."
 
 — [Meta Context Engineering via Agentic Skill Evolution](https://arxiv.org/pdf/2601.21557), Peking University State Key Laboratory of General Artificial Intelligence (2026)
 
-## Skills Overview
+## スキル概要
 
-### Foundational Skills
+### 基礎スキル
 
-These skills establish the foundational understanding required for all subsequent context engineering work.
+これらのスキルは、後続のすべてのコンテキストエンジニアリング作業に必要な基礎的理解を確立します。
 
-| Skill | Description |
+| スキル | 説明 |
 |-------|-------------|
-| [context-fundamentals](skills/context-fundamentals/) | Understand what context is, why it matters, and the anatomy of context in agent systems |
-| [context-degradation](skills/context-degradation/) | Recognize patterns of context failure: lost-in-middle, poisoning, distraction, and clash |
-| [context-compression](skills/context-compression/) | Design and evaluate compression strategies for long-running sessions |
+| [context-fundamentals](skills/context-fundamentals/) | コンテキストとは何か、なぜ重要なのか、エージェントシステムにおけるコンテキストの構造を理解する |
+| [context-degradation](skills/context-degradation/) | コンテキスト障害のパターンを認識する：lost-in-middle、ポイズニング、ディストラクション、クラッシュ |
+| [context-compression](skills/context-compression/) | 長時間セッション向けの圧縮戦略を設計・評価する |
 
-### Architectural Skills
+### アーキテクチャスキル
 
-These skills cover the patterns and structures for building effective agent systems.
+これらのスキルは、効果的なエージェントシステムを構築するためのパターンと構造をカバーします。
 
-| Skill | Description |
+| スキル | 説明 |
 |-------|-------------|
-| [multi-agent-patterns](skills/multi-agent-patterns/) | Master orchestrator, peer-to-peer, and hierarchical multi-agent architectures |
-| [memory-systems](skills/memory-systems/) | Design short-term, long-term, and graph-based memory architectures |
-| [tool-design](skills/tool-design/) | Build tools that agents can use effectively |
-| [filesystem-context](skills/filesystem-context/) | Use filesystems for dynamic context discovery, tool output offloading, and plan persistence |
-| [hosted-agents](skills/hosted-agents/) | **NEW** Build background coding agents with sandboxed VMs, pre-built images, multiplayer support, and multi-client interfaces |
+| [multi-agent-patterns](skills/multi-agent-patterns/) | オーケストレータ、ピアツーピア、階層型マルチエージェントアーキテクチャを習得する |
+| [memory-systems](skills/memory-systems/) | 短期、長期、グラフベースのメモリアーキテクチャを設計する |
+| [tool-design](skills/tool-design/) | エージェントが効果的に使用できるツールを構築する |
+| [filesystem-context](skills/filesystem-context/) | 動的コンテキスト検出、ツール出力のオフロード、プラン永続化にファイルシステムを活用する |
+| [hosted-agents](skills/hosted-agents/) | **NEW** サンドボックスVM、ビルド済みイメージ、マルチプレイヤーサポート、マルチクライアントインターフェースを備えたバックグラウンドコーディングエージェントを構築する |
 
-### Operational Skills
+### 運用スキル
 
-These skills address the ongoing operation and optimization of agent systems.
+これらのスキルは、エージェントシステムの継続的な運用と最適化に対応します。
 
-| Skill | Description |
+| スキル | 説明 |
 |-------|-------------|
-| [context-optimization](skills/context-optimization/) | Apply compaction, masking, and caching strategies |
-| [evaluation](skills/evaluation/) | Build evaluation frameworks for agent systems |
-| [advanced-evaluation](skills/advanced-evaluation/) | Master LLM-as-a-Judge techniques: direct scoring, pairwise comparison, rubric generation, and bias mitigation |
+| [context-optimization](skills/context-optimization/) | コンパクション、マスキング、キャッシング戦略を適用する |
+| [evaluation](skills/evaluation/) | エージェントシステムの評価フレームワークを構築する |
+| [advanced-evaluation](skills/advanced-evaluation/) | LLM-as-a-Judge技法を習得する：直接スコアリング、ペアワイズ比較、ルーブリック生成、バイアス緩和 |
 
-### Development Methodology
+### 開発方法論
 
-These skills cover the meta-level practices for building LLM-powered projects.
+これらのスキルは、LLMを活用したプロジェクト構築のメタレベルのプラクティスをカバーします。
 
-| Skill | Description |
+| スキル | 説明 |
 |-------|-------------|
-| [project-development](skills/project-development/) | Design and build LLM projects from ideation through deployment, including task-model fit analysis, pipeline architecture, and structured output design |
+| [project-development](skills/project-development/) | アイデア創出からデプロイまでのLLMプロジェクトの設計と構築。タスクモデル適合性分析、パイプラインアーキテクチャ、構造化出力設計を含む |
 
-### Cognitive Architecture Skills
+### 認知アーキテクチャスキル
 
-These skills cover formal cognitive modeling for rational agent systems.
+これらのスキルは、合理的なエージェントシステムのための形式的認知モデリングをカバーします。
 
-| Skill | Description |
+| スキル | 説明 |
 |-------|-------------|
-| [bdi-mental-states](skills/bdi-mental-states/) | **NEW** Transform external RDF context into agent mental states (beliefs, desires, intentions) using formal BDI ontology patterns for deliberative reasoning and explainability |
+| [bdi-mental-states](skills/bdi-mental-states/) | **NEW** 外部RDFコンテキストを、形式的BDIオントロジーパターンを使用してエージェントの精神状態（信念、欲求、意図）に変換し、熟慮型推論と説明可能性を実現する |
 
-## Design Philosophy
+## 設計哲学
 
-### Progressive Disclosure
+### 段階的開示
 
-Each skill is structured for efficient context use. At startup, agents load only skill names and descriptions. Full content loads only when a skill is activated for relevant tasks.
+各スキルは効率的なコンテキスト使用のために構造化されています。起動時、エージェントはスキル名と説明のみを読み込みます。フルコンテンツは、関連タスクでスキルがアクティベートされたときにのみ読み込まれます。
 
-### Platform Agnosticism
+### プラットフォーム非依存
 
-These skills focus on transferable principles rather than vendor-specific implementations. The patterns work across Claude Code, Cursor, and any agent platform that supports skills or allows custom instructions.
+これらのスキルは、ベンダー固有の実装ではなく、移植可能な原則に焦点を当てています。パターンはClaude Code、Cursor、およびスキルをサポートするかカスタム指示を許可するあらゆるエージェントプラットフォームで機能します。
 
-### Conceptual Foundation with Practical Examples
+### 概念的基盤と実践的サンプル
 
-Scripts and examples demonstrate concepts using Python pseudocode that works across environments without requiring specific dependency installations.
+スクリプトとサンプルは、特定の依存関係のインストールを必要とせず、環境を問わず動作するPython疑似コードを使用してコンセプトを実演します。
 
-## Usage
+## 使い方
 
-### Usage with Claude Code
+### Claude Codeでの使い方
 
-This repository is a **Claude Code Plugin Marketplace** containing context engineering skills that Claude automatically discovers and activates based on your task context.
+このリポジトリは、Claudeがタスクコンテキストに基づいて自動的に検出・アクティベートするコンテキストエンジニアリングスキルを含む**Claude Codeプラグインマーケットプレイス**です。
 
-### Installation
+### インストール
 
-**Step 1: Add the Marketplace**
+**ステップ1：マーケットプレイスの追加**
 
-Run this command in Claude Code to register this repository as a plugin source:
+Claude Codeで以下のコマンドを実行し、このリポジトリをプラグインソースとして登録します：
 
 ```
 /plugin marketplace add muratcankoylan/Agent-Skills-for-Context-Engineering
 ```
 
-**Step 2: Browse and Install**
+**ステップ2：ブラウズとインストール**
 
-Option A - Browse available plugins:
-1. Select `Browse and install plugins`
-2. Select `context-engineering-marketplace`
-3. Choose a plugin (e.g., `context-engineering-fundamentals`, `agent-architecture`)
-4. Select `Install now`
+オプションA - 利用可能なプラグインをブラウズ：
+1. `Browse and install plugins` を選択
+2. `context-engineering-marketplace` を選択
+3. プラグインを選択（例：`context-engineering-fundamentals`、`agent-architecture`）
+4. `Install now` を選択
 
-Option B - Direct install via command:
+オプションB - コマンドで直接インストール：
 
 ```
 /plugin install context-engineering-fundamentals@context-engineering-marketplace
@@ -114,9 +114,9 @@ Option B - Direct install via command:
 /plugin install cognitive-architecture@context-engineering-marketplace
 ```
 
-### Available Plugins
+### 利用可能なプラグイン
 
-| Plugin | Skills Included |
+| プラグイン | 含まれるスキル |
 |--------|-----------------|
 | `context-engineering-fundamentals` | context-fundamentals, context-degradation, context-compression, context-optimization |
 | `agent-architecture` | multi-agent-patterns, memory-systems, tool-design, filesystem-context, hosted-agents |
@@ -124,9 +124,9 @@ Option B - Direct install via command:
 | `agent-development` | project-development |
 | `cognitive-architecture` | bdi-mental-states |
 
-### Skill Triggers
+### スキルトリガー
 
-| Skill | Triggers On |
+| スキル | トリガー条件 |
 |-------|-------------|
 | `context-fundamentals` | "understand context", "explain context windows", "design agent architecture" |
 | `context-degradation` | "diagnose context problems", "fix lost-in-middle", "debug agent failures" |
@@ -142,95 +142,95 @@ Option B - Direct install via command:
 | `project-development` | "start LLM project", "design batch pipeline", "evaluate task-model fit" |
 | `bdi-mental-states` | "model agent mental states", "implement BDI architecture", "transform RDF to beliefs", "build cognitive agent" |
 
-<img width="1014" height="894" alt="Screenshot 2025-12-26 at 12 34 47 PM" src="https://github.com/user-attachments/assets/f79aaf03-fd2d-4c71-a630-7027adeb9bfe" />
+<img width="1014" height="894" alt="スクリーンショット 2025-12-26 at 12 34 47 PM" src="https://github.com/user-attachments/assets/f79aaf03-fd2d-4c71-a630-7027adeb9bfe" />
 
-### For Cursor & Codex & IDE
+### Cursor & Codex & IDE向け
 
-Copy skill content into `.rules` or create project-specific Skills folders. The skills provide the context and guidelines that agent needs for effective context engineering and agent design.
+スキルの内容を `.rules` にコピーするか、プロジェクト固有のSkillsフォルダを作成してください。スキルは、効果的なコンテキストエンジニアリングとエージェント設計のためにエージェントが必要とするコンテキストとガイドラインを提供します。
 
-### For Custom Implementations
+### カスタム実装向け
 
-Extract the principles and patterns from any skill and implement them in your agent framework. The skills are deliberately platform-agnostic.
+任意のスキルから原則とパターンを抽出し、お使いのエージェントフレームワークに実装してください。スキルは意図的にプラットフォーム非依存で設計されています。
 
-## Examples
+## サンプル
 
-The [examples](examples/) folder contains complete system designs that demonstrate how multiple skills work together in practice.
+[examples](examples/) フォルダには、複数のスキルが実際にどのように連携するかを示す完全なシステム設計が含まれています。
 
-| Example | Description | Skills Applied |
+| サンプル | 説明 | 適用スキル |
 |---------|-------------|----------------|
-| [digital-brain-skill](examples/digital-brain-skill/) | **NEW** Personal operating system for founders and creators. Complete Claude Code skill with 6 modules, 4 automation scripts | context-fundamentals, context-optimization, memory-systems, tool-design, multi-agent-patterns, evaluation, project-development |
-| [x-to-book-system](examples/x-to-book-system/) | Multi-agent system that monitors X accounts and generates daily synthesized books | multi-agent-patterns, memory-systems, context-optimization, tool-design, evaluation |
-| [llm-as-judge-skills](examples/llm-as-judge-skills/) | Production-ready LLM evaluation tools with TypeScript implementation, 19 passing tests | advanced-evaluation, tool-design, context-fundamentals, evaluation |
-| [book-sft-pipeline](examples/book-sft-pipeline/) | Train models to write in any author's style. Includes Gertrude Stein case study with 70% human score on Pangram, $2 total cost | project-development, context-compression, multi-agent-patterns, evaluation |
+| [digital-brain-skill](examples/digital-brain-skill/) | **NEW** 創業者やクリエイター向けのパーソナルオペレーティングシステム。6モジュール、4つの自動化スクリプトを備えた完全なClaude Codeスキル | context-fundamentals, context-optimization, memory-systems, tool-design, multi-agent-patterns, evaluation, project-development |
+| [x-to-book-system](examples/x-to-book-system/) | Xアカウントを監視し、日次で合成書籍を生成するマルチエージェントシステム | multi-agent-patterns, memory-systems, context-optimization, tool-design, evaluation |
+| [llm-as-judge-skills](examples/llm-as-judge-skills/) | TypeScript実装による本番対応のLLM評価ツール、19件のテスト合格 | advanced-evaluation, tool-design, context-fundamentals, evaluation |
+| [book-sft-pipeline](examples/book-sft-pipeline/) | 任意の著者のスタイルで執筆するモデルを訓練。Gertrude Steinのケーススタディを含み、Pangramで70%の人間スコア、総コスト$2 | project-development, context-compression, multi-agent-patterns, evaluation |
 
-Each example includes:
-- Complete PRD with architecture decisions
-- Skills mapping showing which concepts informed each decision
-- Implementation guidance
+各サンプルには以下が含まれます：
+- アーキテクチャ決定を含む完全なPRD
+- 各決定にどのコンセプトが反映されたかを示すスキルマッピング
+- 実装ガイダンス
 
-### Digital Brain Skill Example
+### Digital Brain Skillサンプル
 
-The [digital-brain-skill](examples/digital-brain-skill/) example is a complete personal operating system demonstrating comprehensive skills application:
+[digital-brain-skill](examples/digital-brain-skill/) サンプルは、包括的なスキル適用を実演する完全なパーソナルオペレーティングシステムです：
 
-- **Progressive Disclosure**: 3-level loading (SKILL.md → MODULE.md → data files)
-- **Module Isolation**: 6 independent modules (identity, content, knowledge, network, operations, agents)
-- **Append-Only Memory**: JSONL files with schema-first lines for agent-friendly parsing
-- **Automation Scripts**: 4 consolidated tools (weekly_review, content_ideas, stale_contacts, idea_to_draft)
+- **段階的開示**：3レベルローディング（SKILL.md → MODULE.md → データファイル）
+- **モジュール分離**：6つの独立モジュール（identity, content, knowledge, network, operations, agents）
+- **追記専用メモリ**：エージェントフレンドリーなパース用のスキーマファーストラインを持つJSONLファイル
+- **自動化スクリプト**：4つの統合ツール（weekly_review, content_ideas, stale_contacts, idea_to_draft）
 
-Includes detailed traceability in [HOW-SKILLS-BUILT-THIS.md](examples/digital-brain-skill/HOW-SKILLS-BUILT-THIS.md) mapping every architectural decision to specific skill principles.
+[HOW-SKILLS-BUILT-THIS.md](examples/digital-brain-skill/HOW-SKILLS-BUILT-THIS.md) に、すべてのアーキテクチャ決定を特定のスキル原則にマッピングした詳細なトレーサビリティが含まれています。
 
-### LLM-as-Judge Skills Example
+### LLM-as-Judge Skillsサンプル
 
-The [llm-as-judge-skills](examples/llm-as-judge-skills/) example is a complete TypeScript implementation demonstrating:
+[llm-as-judge-skills](examples/llm-as-judge-skills/) サンプルは、以下を実演する完全なTypeScript実装です：
 
-- **Direct Scoring**: Evaluate responses against weighted criteria with rubric support
-- **Pairwise Comparison**: Compare responses with position bias mitigation
-- **Rubric Generation**: Create domain-specific evaluation standards
-- **EvaluatorAgent**: High-level agent combining all evaluation capabilities
+- **直接スコアリング**：ルーブリックサポート付きの重み付け基準に対してレスポンスを評価
+- **ペアワイズ比較**：位置バイアス緩和を伴うレスポンス比較
+- **ルーブリック生成**：ドメイン固有の評価基準を作成
+- **EvaluatorAgent**：すべての評価機能を統合するハイレベルエージェント
 
-### Book SFT Pipeline Example
+### Book SFTパイプラインサンプル
 
-The [book-sft-pipeline](examples/book-sft-pipeline/) example demonstrates training small models (8B) to write in any author's style:
+[book-sft-pipeline](examples/book-sft-pipeline/) サンプルは、任意の著者のスタイルで執筆するための小型モデル（8B）の訓練を実演します：
 
-- **Intelligent Segmentation**: Two-tier chunking with overlap for maximum training examples
-- **Prompt Diversity**: 15+ templates to prevent memorization and force style learning
-- **Tinker Integration**: Complete LoRA training workflow with $2 total cost
-- **Validation Methodology**: Modern scenario testing proves style transfer vs content memorization
+- **インテリジェントセグメンテーション**：訓練サンプル最大化のためのオーバーラップ付き2段階チャンキング
+- **プロンプト多様性**：暗記を防ぎスタイル学習を促す15以上のテンプレート
+- **Tinker統合**：総コスト$2の完全なLoRA訓練ワークフロー
+- **検証方法論**：スタイル転移とコンテンツ暗記の違いを証明するモダンなシナリオテスト
 
-Integrates with context engineering skills: project-development, context-compression, multi-agent-patterns, evaluation.
+コンテキストエンジニアリングスキルとの統合：project-development, context-compression, multi-agent-patterns, evaluation。
 
-## Star History
+## Star履歴
 <img width="3664" height="2648" alt="star-history-2026224" src="https://github.com/user-attachments/assets/b3bdbf23-4b6a-4774-ae85-42ef4d9b2d79" />
 
-## Structure
+## 構造
 
-Each skill follows the Agent Skills specification:
+各スキルはAgent Skills仕様に従います：
 
 ```
 skill-name/
-├── SKILL.md              # Required: instructions + metadata
-├── scripts/              # Optional: executable code demonstrating concepts
-└── references/           # Optional: additional documentation and resources
+├── SKILL.md              # 必須：指示 + メタデータ
+├── scripts/              # 任意：コンセプトを実演する実行可能コード
+└── references/           # 任意：追加ドキュメントとリソース
 ```
 
-See the [template](template/) folder for the canonical skill structure.
+正規のスキル構造については [template](template/) フォルダを参照してください。
 
-## Contributing
+## コントリビューション
 
-This repository follows the Agent Skills open development model. Contributions are welcome from the broader ecosystem. When contributing:
+このリポジトリはAgent Skillsオープン開発モデルに従っています。幅広いエコシステムからのコントリビューションを歓迎します。コントリビューション時の注意事項：
 
-1. Follow the skill template structure
-2. Provide clear, actionable instructions
-3. Include working examples where appropriate
-4. Document trade-offs and potential issues
-5. Keep SKILL.md under 500 lines for optimal performance
+1. スキルテンプレート構造に従う
+2. 明確で実行可能な指示を提供する
+3. 適切な場合は動作するサンプルを含める
+4. トレードオフと潜在的な問題点を文書化する
+5. 最適なパフォーマンスのためSKILL.mdを500行以下に保つ
 
-Feel free to contact [Muratcan Koylan](https://x.com/koylanai) for collaboration opportunities or any inquiries.
+コラボレーションの機会やお問い合わせについては、[Muratcan Koylan](https://x.com/koylanai) までお気軽にご連絡ください。
 
-## License
+## ライセンス
 
-MIT License - see LICENSE file for details.
+MIT License - 詳細はLICENSEファイルを参照してください。
 
-## References
+## 参考文献
 
-The principles in these skills are derived from research and production experience at leading AI labs and framework developers. Each skill includes references to the underlying research and case studies that inform its recommendations.
+これらのスキルの原則は、主要なAI研究機関やフレームワーク開発者の研究と本番経験から導き出されています。各スキルには、その推奨事項の根拠となる研究やケーススタディへの参照が含まれています。

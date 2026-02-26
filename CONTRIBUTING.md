@@ -1,78 +1,78 @@
-# Contributing to Agent Skills for Context Engineering
+# コンテキストエンジニアリングのためのエージェントスキルへの貢献
 
-Thank you for your interest in contributing to this collection of Agent Skills for Context Engineering. This document provides guidelines and instructions for contributing.
+コンテキストエンジニアリングのためのエージェントスキル集への貢献にご関心をお寄せいただきありがとうございます。このドキュメントでは、貢献のためのガイドラインと手順を説明します。
 
-## How to Contribute
+## 貢献の方法
 
-### Reporting Issues
+### Issue の報告
 
-If you find errors, unclear explanations, or missing topics, please open an issue with:
-- A clear description of the problem
-- The skill and section where the issue was found
-- Suggested improvements if you have them
+誤り、わかりにくい説明、不足しているトピックを見つけた場合は、以下の情報を含めて Issue を作成してください：
+- 問題の明確な説明
+- 問題が見つかったスキルとセクション
+- 改善案があればその提案
 
-### Submitting Changes
+### 変更の提出
 
-For substantive changes, please:
+大きな変更を行う場合は、以下の手順に従ってください：
 
-1. Fork the repository
-2. Create a feature branch for your changes
-3. Make changes following the skill template structure
-4. Ensure SKILL.md files remain under 500 lines
-5. Add references or scripts as appropriate
-6. Submit a pull request with a clear description of changes
+1. リポジトリをフォークする
+2. 変更用のフィーチャーブランチを作成する
+3. スキルテンプレートの構造に従って変更を行う
+4. `SKILL.md` ファイルが500行以内に収まっていることを確認する
+5. 必要に応じてリファレンスやスクリプトを追加する
+6. 変更内容の明確な説明を添えてプルリクエストを提出する
 
-### Adding New Skills
+### 新しいスキルの追加
 
-When adding new skills:
+新しいスキルを追加する場合：
 
-1. Use the template in `template/SKILL.md`
-2. Follow naming conventions (lowercase with hyphens)
-3. Include both SKILL.md and appropriate references/scripts
-4. Update the root README.md to include the new skill
-5. Ensure content is platform-agnostic (works across Cursor, Claude Code, etc.)
+1. `template/SKILL.md` のテンプレートを使用する
+2. 命名規則に従う（小文字とハイフンを使用）
+3. `SKILL.md` と適切なリファレンス/スクリプトの両方を含める
+4. ルートの README.md を更新して新しいスキルを追加する
+5. コンテンツがプラットフォームに依存しないことを確認する（Cursor、Claude Code など横断的に動作すること）
 
-## Skill Structure Requirements
+## スキル構造の要件
 
-Each skill must include:
+各スキルには以下を含める必要があります：
 
-- YAML frontmatter with `name` and `description` fields
-- Clear sections with logical organization
-- Practical examples where appropriate
-- Integration notes linking to related skills
+- `name` と `description` フィールドを持つ YAML フロントマター
+- 論理的に整理された明確なセクション
+- 適切な箇所での実践的な例
+- 関連スキルへのリンクを含むインテグレーションノート
 
-Optional additions:
+オプションの追加項目：
 
-- `references/` directory with additional documentation
-- `scripts/` directory with executable examples
-- Multiple markdown files for complex skills
+- `references/` ディレクトリ（追加ドキュメント用）
+- `scripts/` ディレクトリ（実行可能なサンプル用）
+- 複雑なスキル用の複数のマークダウンファイル
 
-## Content Guidelines
+## コンテンツガイドライン
 
-### Writing Style
+### 文体
 
-- Be direct and precise
-- Use technical terminology appropriately
-- Include specific guidance, not vague recommendations
-- Provide concrete examples
-- Point out complexity and trade-offs
+- 直接的かつ正確に書く
+- 技術用語を適切に使用する
+- 曖昧な推奨ではなく、具体的なガイダンスを含める
+- 具体的な例を提供する
+- 複雑さとトレードオフを指摘する
 
-### Avoiding Platform Specificity
+### プラットフォーム依存の回避
 
-Skills should work across agent platforms. Avoid:
-- Platform-specific tool names without abstraction
-- Vendor-locked examples
-- Features specific to one agent product
+スキルはエージェントプラットフォーム全体で動作する必要があります。以下は避けてください：
+- 抽象化されていないプラットフォーム固有のツール名
+- ベンダーロックインされた例
+- 特定のエージェント製品に固有の機能
 
-### Keeping Skills Focused
+### スキルの焦点を絞る
 
-Each skill should have a single focus. If a topic grows too large, consider splitting into multiple skills with clear dependencies.
+各スキルは単一の焦点を持つべきです。トピックが大きくなりすぎた場合は、明確な依存関係を持つ複数のスキルに分割することを検討してください。
 
-## Code of Conduct
+## 行動規範
 
-This project follows a professional, technical collaboration model. Be respectful of different perspectives and focus on improving the collective knowledge base.
+このプロジェクトは、専門的かつ技術的なコラボレーションモデルに従います。異なる視点を尊重し、集合知の向上に注力してください。
 
-## Questions
+## ご質問
 
-For questions about contributing, please open an issue for discussion.
+貢献に関するご質問は、ディスカッション用の Issue を作成してください。
 

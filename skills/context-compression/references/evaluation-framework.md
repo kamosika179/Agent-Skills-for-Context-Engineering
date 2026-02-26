@@ -1,122 +1,122 @@
-# Context Compression Evaluation Framework
+# コンテキスト圧縮評価フレームワーク
 
-This document provides the complete evaluation framework for measuring context compression quality, including probe types, scoring rubrics, and LLM judge configuration.
+このドキュメントは、コンテキスト圧縮の品質を測定するための完全な評価フレームワークを提供します。プローブタイプ、スコアリングルーブリック、LLM ジャッジの設定を含みます。
 
-## Probe Types
+## プローブタイプ
 
-### Recall Probes
+### リコールプローブ
 
-Test factual retention of specific details from conversation history.
+会話履歴から特定の詳細の事実保持をテストします。
 
-**Structure:**
+**構造：**
 ```
 Question: [Ask for specific fact from truncated history]
 Expected: [Exact detail that should be preserved]
 Scoring: Match accuracy of technical details
 ```
 
-**Examples:**
-- "What was the original error message that started this debugging session?"
-- "What version of the dependency did we decide to use?"
-- "What was the exact command that failed?"
+**例：**
+- 「このデバッグセッションのきっかけとなった元のエラーメッセージは何でしたか？」
+- 「使用することに決めた依存関係のバージョンは何でしたか？」
+- 「失敗した正確なコマンドは何でしたか？」
 
-### Artifact Probes
+### アーティファクトプローブ
 
-Test file tracking and modification awareness.
+ファイルの追跡と変更の認識をテストします。
 
-**Structure:**
+**構造：**
 ```
 Question: [Ask about files created, modified, or examined]
 Expected: [Complete list with change descriptions]
 Scoring: Completeness of file list and accuracy of change descriptions
 ```
 
-**Examples:**
-- "Which files have we modified? Describe what changed in each."
-- "What new files did we create in this session?"
-- "Which configuration files did we examine but not change?"
+**例：**
+- 「どのファイルを変更しましたか？各ファイルで何が変わったか説明してください。」
+- 「このセッションでどのような新しいファイルを作成しましたか？」
+- 「どの設定ファイルを確認しましたが変更しませんでしたか？」
 
-### Continuation Probes
+### 継続プローブ
 
-Test ability to continue work without re-fetching context.
+コンテキストを再取得せずに作業を続行する能力をテストします。
 
-**Structure:**
+**構造：**
 ```
 Question: [Ask about next steps or current state]
 Expected: [Actionable next steps based on session history]
 Scoring: Ability to continue without requesting re-read of files
 ```
 
-**Examples:**
-- "What should we do next?"
-- "What tests are still failing and why?"
-- "What was left incomplete from our last step?"
+**例：**
+- 「次に何をすべきですか？」
+- 「まだ失敗しているテストはどれで、その理由は何ですか？」
+- 「前のステップで未完了だったものは何ですか？」
 
-### Decision Probes
+### 意思決定プローブ
 
-Test retention of reasoning chains and decision rationale.
+推論チェーンと意思決定の根拠の保持をテストします。
 
-**Structure:**
+**構造：**
 ```
 Question: [Ask about why a decision was made]
 Expected: [Reasoning that led to the decision]
 Scoring: Preservation of decision context and alternatives considered
 ```
 
-**Examples:**
-- "We discussed options for the Redis issue. What did we decide and why?"
-- "Why did we choose connection pooling over per-request connections?"
-- "What alternatives did we consider for the authentication fix?"
+**例：**
+- 「Redis の問題についてオプションを議論しました。何を決定し、その理由は何ですか？」
+- 「リクエストごとの接続ではなくコネクションプーリングを選んだ理由は何ですか？」
+- 「認証の修正にどのような代替案を検討しましたか？」
 
-## Scoring Rubrics
+## スコアリングルーブリック
 
-### Accuracy Dimension
+### 正確性ディメンション
 
-| Criterion | Question | Score 0 | Score 3 | Score 5 |
+| 基準 | 質問 | スコア 0 | スコア 3 | スコア 5 |
 |-----------|----------|---------|---------|---------|
-| accuracy_factual | Are facts, file paths, and technical details correct? | Completely incorrect or fabricated | Mostly accurate with minor errors | Perfectly accurate |
-| accuracy_technical | Are code references and technical concepts correct? | Major technical errors | Generally correct with minor issues | Technically precise |
+| accuracy_factual | 事実、ファイルパス、技術的な詳細は正しいか？ | 完全に不正確または捏造 | おおむね正確で軽微なエラーあり | 完全に正確 |
+| accuracy_technical | コード参照と技術的概念は正しいか？ | 重大な技術的エラー | おおむね正確で軽微な問題あり | 技術的に正確 |
 
-### Context Awareness Dimension
+### コンテキスト認識ディメンション
 
-| Criterion | Question | Score 0 | Score 3 | Score 5 |
+| 基準 | 質問 | スコア 0 | スコア 3 | スコア 5 |
 |-----------|----------|---------|---------|---------|
-| context_conversation_state | Does the response reflect current conversation state? | No awareness of prior context | General awareness with gaps | Full awareness of conversation history |
-| context_artifact_state | Does the response reflect which files/artifacts were accessed? | No awareness of artifacts | Partial artifact awareness | Complete artifact state awareness |
+| context_conversation_state | レスポンスは現在の会話状態を反映しているか？ | 以前のコンテキストの認識なし | 一般的な認識はあるがギャップあり | 会話履歴の完全な認識 |
+| context_artifact_state | レスポンスはどのファイル/アーティファクトにアクセスしたかを反映しているか？ | アーティファクトの認識なし | 部分的なアーティファクト認識 | 完全なアーティファクト状態の認識 |
 
-### Artifact Trail Dimension
+### アーティファクトトレイルディメンション
 
-| Criterion | Question | Score 0 | Score 3 | Score 5 |
+| 基準 | 質問 | スコア 0 | スコア 3 | スコア 5 |
 |-----------|----------|---------|---------|---------|
-| artifact_files_created | Does the agent know which files were created? | No knowledge | Knows most files | Perfect knowledge |
-| artifact_files_modified | Does the agent know which files were modified and what changed? | No knowledge | Good knowledge of most modifications | Perfect knowledge of all modifications |
-| artifact_key_details | Does the agent remember function names, variable names, error messages? | No recall | Recalls most key details | Perfect recall |
+| artifact_files_created | エージェントはどのファイルが作成されたか知っているか？ | 知識なし | ほとんどのファイルを把握 | 完全な知識 |
+| artifact_files_modified | エージェントはどのファイルが変更され、何が変わったか知っているか？ | 知識なし | ほとんどの変更の良好な知識 | すべての変更の完全な知識 |
+| artifact_key_details | エージェントは関数名、変数名、エラーメッセージを覚えているか？ | 想起なし | ほとんどの重要な詳細を想起 | 完全な想起 |
 
-### Completeness Dimension
+### 完全性ディメンション
 
-| Criterion | Question | Score 0 | Score 3 | Score 5 |
+| 基準 | 質問 | スコア 0 | スコア 3 | スコア 5 |
 |-----------|----------|---------|---------|---------|
-| completeness_coverage | Does the response address all parts of the question? | Ignores most parts | Addresses most parts | Addresses all parts thoroughly |
-| completeness_depth | Is sufficient detail provided? | Superficial or missing detail | Adequate detail | Comprehensive detail |
+| completeness_coverage | レスポンスは質問のすべての部分に対応しているか？ | ほとんどの部分を無視 | ほとんどの部分に対応 | すべての部分に徹底的に対応 |
+| completeness_depth | 十分な詳細が提供されているか？ | 表面的または詳細の欠如 | 適切な詳細 | 包括的な詳細 |
 
-### Continuity Dimension
+### 継続性ディメンション
 
-| Criterion | Question | Score 0 | Score 3 | Score 5 |
+| 基準 | 質問 | スコア 0 | スコア 3 | スコア 5 |
 |-----------|----------|---------|---------|---------|
-| continuity_work_state | Can the agent continue without re-fetching previously accessed information? | Cannot continue without re-fetching all context | Can continue with minimal re-fetching | Can continue seamlessly |
-| continuity_todo_state | Does the agent maintain awareness of pending tasks? | Lost track of all TODOs | Good awareness with some gaps | Perfect task awareness |
-| continuity_reasoning | Does the agent retain rationale behind previous decisions? | No memory of reasoning | Generally remembers reasoning | Excellent retention |
+| continuity_work_state | エージェントは以前アクセスした情報を再取得せずに続行できるか？ | すべてのコンテキストの再取得なしには続行不可 | 最小限の再取得で続行可能 | シームレスに続行可能 |
+| continuity_todo_state | エージェントは保留中のタスクの認識を維持しているか？ | すべての TODO を見失った | おおむね認識しているがギャップあり | 完全なタスク認識 |
+| continuity_reasoning | エージェントは以前の決定の根拠を保持しているか？ | 推論の記憶なし | おおむね推論を覚えている | 優れた保持 |
 
-### Instruction Following Dimension
+### 指示遵守ディメンション
 
-| Criterion | Question | Score 0 | Score 3 | Score 5 |
+| 基準 | 質問 | スコア 0 | スコア 3 | スコア 5 |
 |-----------|----------|---------|---------|---------|
-| instruction_format | Does the response follow the requested format? | Ignores format | Generally follows format | Perfectly follows format |
-| instruction_constraints | Does the response respect stated constraints? | Ignores constraints | Mostly respects constraints | Fully respects all constraints |
+| instruction_format | レスポンスは要求されたフォーマットに従っているか？ | フォーマットを無視 | おおむねフォーマットに従う | 完全にフォーマットに従う |
+| instruction_constraints | レスポンスは記載された制約を尊重しているか？ | 制約を無視 | おおむね制約を尊重 | すべての制約を完全に尊重 |
 
-## LLM Judge Configuration
+## LLM ジャッジの設定
 
-### System Prompt
+### システムプロンプト
 
 ```
 You are an expert evaluator assessing AI assistant responses in software development conversations.
@@ -130,7 +130,7 @@ Your task is to grade responses against specific rubric criteria. For each crite
 Be objective and consistent. Focus on what is present in the response, not what could have been included.
 ```
 
-### Judge Input Format
+### ジャッジ入力フォーマット
 
 ```json
 {
@@ -142,7 +142,7 @@ Be objective and consistent. Focus on what is present in the response, not what 
 }
 ```
 
-### Judge Output Format
+### ジャッジ出力フォーマット
 
 ```json
 {
@@ -165,49 +165,49 @@ Be objective and consistent. Focus on what is present in the response, not what 
 }
 ```
 
-## Benchmark Results Reference
+## ベンチマーク結果リファレンス
 
-Performance across compression methods (based on 36,000+ messages):
+圧縮方式間のパフォーマンス（36,000件以上のメッセージに基づく）：
 
-| Method | Overall | Accuracy | Context | Artifact | Complete | Continuity | Instruction |
+| 方式 | 総合 | 正確性 | コンテキスト | アーティファクト | 完全性 | 継続性 | 指示遵守 |
 |--------|---------|----------|---------|----------|----------|------------|-------------|
 | Anchored Iterative | 3.70 | 4.04 | 4.01 | 2.45 | 4.44 | 3.80 | 4.99 |
 | Regenerative | 3.44 | 3.74 | 3.56 | 2.33 | 4.37 | 3.67 | 4.95 |
 | Opaque | 3.35 | 3.43 | 3.64 | 2.19 | 4.37 | 3.77 | 4.92 |
 
-**Key Findings:**
+**主な知見：**
 
-1. **Accuracy gap**: 0.61 points between best and worst methods
-2. **Context awareness gap**: 0.45 points, favoring anchored iterative
-3. **Artifact trail**: Universally weak (2.19-2.45), needs specialized handling
-4. **Completeness and instruction following**: Minimal differentiation
+1. **正確性のギャップ**：最良と最悪の方式間で0.61ポイント
+2. **コンテキスト認識のギャップ**：0.45ポイント、Anchored Iterative が優位
+3. **アーティファクトトレイル**：全体的に弱い（2.19-2.45）、専門的な対応が必要
+4. **完全性と指示遵守**：差異は最小限
 
-## Statistical Considerations
+## 統計的考慮事項
 
-- Differences of 0.26-0.35 points are consistent across task types and session lengths
-- Pattern holds for both short and long sessions
-- Pattern holds across debugging, feature implementation, and code review tasks
-- Sample size: 36,611 messages across hundreds of compression points
+- 0.26-0.35ポイントの差異は、タスクタイプとセッション長にわたって一貫している
+- パターンは短いセッションと長いセッションの両方で維持される
+- パターンはデバッグ、機能実装、コードレビューのタスク全体で維持される
+- サンプルサイズ：数百の圧縮ポイントにわたる36,611メッセージ
 
-## Implementation Notes
+## 実装に関する注意事項
 
-### Probe Generation
+### プローブ生成
 
-Generate probes at each compression point based on truncated history:
-1. Extract factual claims for recall probes
-2. Extract file operations for artifact probes
-3. Extract incomplete tasks for continuation probes
-4. Extract decision points for decision probes
+各圧縮ポイントで切り詰められた履歴に基づいてプローブを生成します：
+1. リコールプローブ用に事実の主張を抽出する
+2. アーティファクトプローブ用にファイル操作を抽出する
+3. 継続プローブ用に未完了タスクを抽出する
+4. 意思決定プローブ用に意思決定ポイントを抽出する
 
-### Grading Process
+### 採点プロセス
 
-1. Feed probe question + model response + compressed context to judge
-2. Evaluate against each criterion in rubric
-3. Output structured JSON with scores and reasoning
-4. Compute dimension scores as weighted averages
-5. Compute overall score as unweighted average of dimensions
+1. プローブの質問＋モデルのレスポンス＋圧縮されたコンテキストをジャッジに入力する
+2. ルーブリックの各基準に対して評価する
+3. スコアと理由を含む構造化されたJSONを出力する
+4. ディメンションスコアを加重平均として計算する
+5. 総合スコアをディメンションの非加重平均として計算する
 
-### Blinding
+### ブラインド化
 
-The judge should not know which compression method produced the response being evaluated. This prevents bias toward known methods.
+ジャッジは、評価対象のレスポンスがどの圧縮方式で生成されたかを知るべきではありません。これにより、既知の方式に対するバイアスを防ぎます。
 

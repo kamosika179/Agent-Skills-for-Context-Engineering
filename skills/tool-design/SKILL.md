@@ -1,143 +1,143 @@
 ---
 name: tool-design
-description: This skill should be used when the user asks to "design agent tools", "create tool descriptions", "reduce tool complexity", "implement MCP tools", or mentions tool consolidation, architectural reduction, tool naming conventions, or agent-tool interfaces.
+description: このスキルは、ユーザーが「エージェントツールを設計する」「ツール記述を作成する」「ツールの複雑さを軽減する」「MCPツールを実装する」と依頼した場合、またはツール統合、アーキテクチャ削減、ツール命名規則、エージェント-ツールインターフェースに言及した場合に使用します。
 ---
 
-# Tool Design for Agents
+# エージェント向けツール設計
 
-Tools are the primary mechanism through which agents interact with the world. They define the contract between deterministic systems and non-deterministic agents. Unlike traditional software APIs designed for developers, tool APIs must be designed for language models that reason about intent, infer parameter values, and generate calls from natural language requests. Poor tool design creates failure modes that no amount of prompt engineering can fix. Effective tool design follows specific principles that account for how agents perceive and use tools.
+ツールは、エージェントが外部世界とやり取りするための主要なメカニズムです。ツールは決定論的システムと非決定論的エージェントの間の契約を定義します。開発者向けに設計された従来のソフトウェアAPIとは異なり、ツールAPIは意図を推論し、パラメータ値を推測し、自然言語のリクエストから呼び出しを生成する言語モデル向けに設計する必要があります。不適切なツール設計は、どれだけプロンプトエンジニアリングを行っても修正できない障害モードを生み出します。効果的なツール設計は、エージェントがツールをどのように認識し使用するかを考慮した特定の原則に従います。
 
-## When to Activate
+## アクティベーション条件
 
-Activate this skill when:
-- Creating new tools for agent systems
-- Debugging tool-related failures or misuse
-- Optimizing existing tool sets for better agent performance
-- Designing tool APIs from scratch
-- Evaluating third-party tools for agent integration
-- Standardizing tool conventions across a codebase
+以下の場合にこのスキルをアクティベートしてください：
+- エージェントシステム用の新しいツールを作成する場合
+- ツール関連の障害や誤用をデバッグする場合
+- エージェントのパフォーマンス向上のために既存のツールセットを最適化する場合
+- ツールAPIをゼロから設計する場合
+- エージェント統合のためにサードパーティツールを評価する場合
+- コードベース全体でツール規則を標準化する場合
 
-## Core Concepts
+## コアコンセプト
 
-Tools are contracts between deterministic systems and non-deterministic agents. The consolidation principle states that if a human engineer cannot definitively say which tool should be used in a given situation, an agent cannot be expected to do better. Effective tool descriptions are prompt engineering that shapes agent behavior.
+ツールは決定論的システムと非決定論的エージェントの間の契約です。統合原則は、人間のエンジニアが特定の状況でどのツールを使用すべきか明確に判断できない場合、エージェントにそれ以上の判断を期待することはできないと述べています。効果的なツール記述は、エージェントの振る舞いを形作るプロンプトエンジニアリングです。
 
-Key principles include: clear descriptions that answer what, when, and what returns; response formats that balance completeness and token efficiency; error messages that enable recovery; and consistent conventions that reduce cognitive load.
+主要な原則には以下が含まれます：何を、いつ、何を返すかに答える明確な記述、完全性とトークン効率のバランスを取るレスポンスフォーマット、リカバリーを可能にするエラーメッセージ、認知負荷を軽減する一貫した規則。
 
-## Detailed Topics
+## 詳細トピック
 
-### The Tool-Agent Interface
+### ツール-エージェントインターフェース
 
-**Tools as Contracts**
-Tools are contracts between deterministic systems and non-deterministic agents. When humans call APIs, they understand the contract and make appropriate requests. Agents must infer the contract from descriptions and generate calls that match expected formats.
+**契約としてのツール**
+ツールは決定論的システムと非決定論的エージェントの間の契約です。人間がAPIを呼び出す際は契約を理解し適切なリクエストを行います。エージェントは記述から契約を推論し、期待されるフォーマットに一致する呼び出しを生成する必要があります。
 
-This fundamental difference requires rethinking API design. The contract must be unambiguous, examples must illustrate expected patterns, and error messages must guide correction. Every ambiguity in tool definitions becomes a potential failure mode.
+この根本的な違いにより、API設計の再考が必要になります。契約は曖昧さがないものでなければならず、例は期待されるパターンを示し、エラーメッセージは修正を導く必要があります。ツール定義のあらゆる曖昧さが潜在的な障害モードとなります。
 
-**Tool Description as Prompt**
-Tool descriptions are loaded into agent context and collectively steer behavior. The descriptions are not just documentation—they are prompt engineering that shapes how agents reason about tool use.
+**プロンプトとしてのツール記述**
+ツール記述はエージェントのコンテキストにロードされ、全体として振る舞いを導きます。記述は単なるドキュメントではなく、エージェントがツール使用についてどのように推論するかを形作るプロンプトエンジニアリングです。
 
-Poor descriptions like "Search the database" with cryptic parameter names force agents to guess. Optimized descriptions include usage context, examples, and defaults. The description answers: what the tool does, when to use it, and what it produces.
+「データベースを検索する」のような不適切な記述と暗号的なパラメータ名は、エージェントに推測を強います。最適化された記述には使用コンテキスト、例、デフォルト値が含まれます。記述は次の質問に答えます：ツールが何をするか、いつ使用するか、何を生成するか。
 
-**Namespacing and Organization**
-As tool collections grow, organization becomes critical. Namespacing groups related tools under common prefixes, helping agents select appropriate tools at the right time.
+**名前空間と整理**
+ツールコレクションが増えるにつれ、整理が重要になります。名前空間は関連するツールを共通のプレフィックスでグループ化し、エージェントが適切なタイミングで適切なツールを選択するのを助けます。
 
-Namespacing creates clear boundaries between functionality. When an agent needs database information, it routes to the database namespace. When it needs web search, it routes to web namespace.
+名前空間は機能間に明確な境界を作ります。エージェントがデータベース情報を必要とする場合はデータベースの名前空間にルーティングし、ウェブ検索が必要な場合はウェブの名前空間にルーティングします。
 
-### The Consolidation Principle
+### 統合原則
 
-**Single Comprehensive Tools**
-The consolidation principle states that if a human engineer cannot definitively say which tool should be used in a given situation, an agent cannot be expected to do better. This leads to a preference for single comprehensive tools over multiple narrow tools.
+**単一の包括的ツール**
+統合原則は、人間のエンジニアが特定の状況でどのツールを使用すべきか明確に判断できない場合、エージェントにそれ以上の判断を期待することはできないと述べています。これにより、複数の狭いツールよりも単一の包括的ツールが優先されます。
 
-Instead of implementing list_users, list_events, and create_event, implement schedule_event that finds availability and schedules. The comprehensive tool handles the full workflow internally rather than requiring agents to chain multiple calls.
+list_users、list_events、create_eventを個別に実装する代わりに、空き状況を確認してスケジュールするschedule_eventを実装します。包括的ツールは、エージェントに複数の呼び出しをチェーンさせるのではなく、完全なワークフローを内部で処理します。
 
-**Why Consolidation Works**
-Agents have limited context and attention. Each tool in the collection competes for attention in the tool selection phase. Each tool adds description tokens that consume context budget. Overlapping functionality creates ambiguity about which tool to use.
+**統合が機能する理由**
+エージェントのコンテキストと注意力は限られています。コレクション内の各ツールはツール選択フェーズで注意力を競い合います。各ツールはコンテキスト予算を消費する記述トークンを追加します。重複する機能はどのツールを使用するかについて曖昧さを生みます。
 
-Consolidation reduces token consumption by eliminating redundant descriptions. It eliminates ambiguity by having one tool cover each workflow. It reduces tool selection complexity by shrinking the effective tool set.
+統合は冗長な記述を排除することでトークン消費を削減します。各ワークフローを1つのツールがカバーすることで曖昧さを排除します。有効なツールセットを縮小することでツール選択の複雑さを軽減します。
 
-**When Not to Consolidate**
-Consolidation is not universally correct. Tools with fundamentally different behaviors should remain separate. Tools used in different contexts benefit from separation. Tools that might be called independently should not be artificially bundled.
+**統合すべきでない場合**
+統合は常に正しいわけではありません。根本的に異なる振る舞いを持つツールは分離したままにすべきです。異なるコンテキストで使用されるツールは分離の恩恵を受けます。独立して呼び出される可能性のあるツールは人工的にバンドルすべきではありません。
 
-### Architectural Reduction
+### アーキテクチャ削減
 
-The consolidation principle, taken to its logical extreme, leads to architectural reduction: removing most specialized tools in favor of primitive, general-purpose capabilities. Production evidence shows this approach can outperform sophisticated multi-tool architectures.
+統合原則を論理的な極限まで推し進めると、アーキテクチャ削減に至ります：ほとんどの専門化されたツールを排除し、プリミティブで汎用的な機能を優先します。本番環境の実績は、このアプローチが洗練されたマルチツールアーキテクチャを上回る可能性があることを示しています。
 
-**The File System Agent Pattern**
-Instead of building custom tools for data exploration, schema lookup, and query validation, provide direct file system access through a single command execution tool. The agent uses standard Unix utilities (grep, cat, find, ls) to explore, understand, and operate on your system.
+**ファイルシステムエージェントパターン**
+データ探索、スキーマ検索、クエリ検証のためのカスタムツールを構築する代わりに、単一のコマンド実行ツールを通じて直接ファイルシステムアクセスを提供します。エージェントは標準的なUnixユーティリティ（grep、cat、find、ls）を使用してシステムを探索、理解、操作します。
 
-This works because:
-1. File systems are a proven abstraction that models understand deeply
-2. Standard tools have predictable, well-documented behavior
-3. The agent can chain primitives flexibly rather than being constrained to predefined workflows
-4. Good documentation in files replaces the need for summarization tools
+これが機能する理由：
+1. ファイルシステムはモデルが深く理解している実証済みの抽象化である
+2. 標準ツールは予測可能で十分にドキュメント化された振る舞いを持つ
+3. エージェントは事前定義されたワークフローに制約されるのではなく、プリミティブを柔軟にチェーンできる
+4. ファイル内の良質なドキュメントが要約ツールの必要性を置き換える
 
-**When Reduction Outperforms Complexity**
-Reduction works when:
-- Your data layer is well-documented and consistently structured
-- The model has sufficient reasoning capability to navigate complexity
-- Your specialized tools were constraining rather than enabling the model
-- You're spending more time maintaining scaffolding than improving outcomes
+**削減が複雑さを上回る場合**
+削減が機能する場合：
+- データレイヤーが十分にドキュメント化され、一貫して構造化されている場合
+- モデルが複雑さを処理するための十分な推論能力を持っている場合
+- 専門化されたツールがモデルを有効化するのではなく制約していた場合
+- 成果の改善よりもスキャフォールディングの維持に多くの時間を費やしている場合
 
-Reduction fails when:
-- Your underlying data is messy, inconsistent, or poorly documented
-- The domain requires specialized knowledge the model lacks
-- Safety constraints require limiting what the agent can do
-- Operations are truly complex and benefit from structured workflows
+削減が失敗する場合：
+- 基礎データが乱雑で、一貫性がなく、ドキュメント化が不十分な場合
+- ドメインがモデルに欠けている専門知識を必要とする場合
+- 安全制約によりエージェントができることを制限する必要がある場合
+- 操作が本当に複雑で、構造化されたワークフローの恩恵を受ける場合
 
-**Stop Constraining Reasoning**
-A common anti-pattern is building tools to "protect" the model from complexity. Pre-filtering context, constraining options, wrapping interactions in validation logic. These guardrails often become liabilities as models improve.
+**推論の制約を止める**
+よくあるアンチパターンは、モデルを複雑さから「保護」するためのツールを構築することです。コンテキストの事前フィルタリング、オプションの制約、バリデーションロジックでのインタラクションのラッピング。これらのガードレールは、モデルが改善されるにつれて負債になることがよくあります。
 
-The question to ask: are your tools enabling new capabilities, or are they constraining reasoning the model could handle on its own?
+問うべき質問：あなたのツールは新しい機能を有効にしているのか、それともモデルが自力で処理できる推論を制約しているのか？
 
-**Build for Future Models**
-Models improve faster than tooling can keep up. An architecture optimized for today's model may be over-constrained for tomorrow's. Build minimal architectures that can benefit from model improvements rather than sophisticated architectures that lock in current limitations.
+**将来のモデルに向けて構築する**
+モデルはツールが追いつけるよりも速く改善されます。今日のモデルに最適化されたアーキテクチャは、明日のモデルには過度に制約されている可能性があります。現在の制限を固定する洗練されたアーキテクチャではなく、モデルの改善から恩恵を受けることができる最小限のアーキテクチャを構築してください。
 
-See [Architectural Reduction Case Study](./references/architectural_reduction.md) for production evidence.
+本番環境の実績については[アーキテクチャ削減ケーススタディ](./references/architectural_reduction.md)を参照してください。
 
-### Tool Description Engineering
+### ツール記述エンジニアリング
 
-**Description Structure**
-Effective tool descriptions answer four questions:
+**記述の構造**
+効果的なツール記述は4つの質問に答えます：
 
-What does the tool do? Clear, specific description of functionality. Avoid vague language like "helps with" or "can be used for." State exactly what the tool accomplishes.
+ツールは何をするか？機能の明確で具体的な記述。「〜に役立つ」や「〜に使用できる」のような曖昧な表現を避けてください。ツールが達成することを正確に述べてください。
 
-When should it be used? Specific triggers and contexts. Include both direct triggers ("User asks about pricing") and indirect signals ("Need current market rates").
+いつ使用すべきか？具体的なトリガーとコンテキスト。直接的なトリガー（「ユーザーが価格について質問する」）と間接的なシグナル（「現在の市場レートが必要」）の両方を含めてください。
 
-What inputs does it accept? Parameter descriptions with types, constraints, and defaults. Explain what each parameter controls.
+どのような入力を受け付けるか？型、制約、デフォルト値を含むパラメータの記述。各パラメータが何を制御するかを説明してください。
 
-What does it return? Output format and structure. Include examples of successful responses and error conditions.
+何を返すか？出力フォーマットと構造。成功レスポンスとエラー条件の例を含めてください。
 
-**Default Parameter Selection**
-Defaults should reflect common use cases. They reduce agent burden by eliminating unnecessary parameter specification. They prevent errors from omitted parameters.
+**デフォルトパラメータの選択**
+デフォルト値は一般的なユースケースを反映すべきです。不必要なパラメータ指定を排除することでエージェントの負担を軽減します。省略されたパラメータによるエラーを防止します。
 
-### Response Format Optimization
+### レスポンスフォーマットの最適化
 
-Tool response size significantly impacts context usage. Implementing response format options gives agents control over verbosity.
+ツールのレスポンスサイズはコンテキスト使用量に大きく影響します。レスポンスフォーマットオプションを実装することで、エージェントに冗長性の制御を委ねます。
 
-Concise format returns essential fields only, appropriate for confirmation or basic information. Detailed format returns complete objects with all fields, appropriate when full context is needed for decisions.
+簡潔フォーマットは必須フィールドのみを返し、確認や基本情報に適しています。詳細フォーマットはすべてのフィールドを含む完全なオブジェクトを返し、意思決定に完全なコンテキストが必要な場合に適しています。
 
-Include guidance in tool descriptions about when to use each format. Agents learn to select appropriate formats based on task requirements.
+各フォーマットをいつ使用するかのガイダンスをツール記述に含めてください。エージェントはタスク要件に基づいて適切なフォーマットを選択することを学習します。
 
-### Error Message Design
+### エラーメッセージ設計
 
-Error messages serve two audiences: developers debugging issues and agents recovering from failures. For agents, error messages must be actionable. They must tell the agent what went wrong and how to correct it.
+エラーメッセージには2つの対象者がいます：問題をデバッグする開発者と障害から回復するエージェントです。エージェントにとって、エラーメッセージはアクション可能でなければなりません。何が問題で、どう修正するかをエージェントに伝える必要があります。
 
-Design error messages that enable recovery. For retryable errors, include retry guidance. For input errors, include corrected format. For missing data, include what's needed.
+リカバリーを可能にするエラーメッセージを設計してください。再試行可能なエラーには再試行のガイダンスを含めてください。入力エラーには修正されたフォーマットを含めてください。不足データにはどのデータが必要かを含めてください。
 
-### Tool Definition Schema
+### ツール定義スキーマ
 
-Use a consistent schema across all tools. Establish naming conventions: verb-noun pattern for tool names, consistent parameter names across tools, consistent return field names.
+すべてのツールで一貫したスキーマを使用してください。命名規則を確立します：ツール名には動詞-名詞パターン、ツール間で一貫したパラメータ名、一貫した戻り値フィールド名。
 
-### Tool Collection Design
+### ツールコレクション設計
 
-Research shows tool description overlap causes model confusion. More tools do not always lead to better outcomes. A reasonable guideline is 10-20 tools for most applications. If more are needed, use namespacing to create logical groupings.
+研究によると、ツール記述の重複はモデルの混乱を引き起こします。ツールが多いほど常に良い結果につながるわけではありません。ほとんどのアプリケーションでは10〜20個のツールが妥当なガイドラインです。それ以上必要な場合は、名前空間を使用して論理的なグループを作成してください。
 
-Implement mechanisms to help agents select the right tool: tool grouping, example-based selection, and hierarchy with umbrella tools that route to specialized sub-tools.
+エージェントが適切なツールを選択するのを助けるメカニズムを実装してください：ツールのグルーピング、例ベースの選択、専門的なサブツールにルーティングするアンブレラツールによる階層構造。
 
-### MCP Tool Naming Requirements
+### MCPツール命名要件
 
-When using MCP (Model Context Protocol) tools, always use fully qualified tool names to avoid "tool not found" errors.
+MCP（Model Context Protocol）ツールを使用する場合は、「ツールが見つかりません」エラーを回避するために、常に完全修飾ツール名を使用してください。
 
-Format: `ServerName:tool_name`
+フォーマット：`ServerName:tool_name`
 
 ```python
 # Correct: Fully qualified names
@@ -148,13 +148,13 @@ Format: `ServerName:tool_name`
 "Use the bigquery_schema tool..."  # May fail with multiple servers
 ```
 
-Without the server prefix, agents may fail to locate tools, especially when multiple MCP servers are available. Establish naming conventions that include server context in all tool references.
+サーバープレフィックスがないと、特に複数のMCPサーバーが利用可能な場合、エージェントがツールを見つけられない可能性があります。すべてのツール参照にサーバーコンテキストを含む命名規則を確立してください。
 
-### Using Agents to Optimize Tools
+### エージェントによるツール最適化
 
-Claude can optimize its own tools. When given a tool and observed failure modes, it diagnoses issues and suggests improvements. Production testing shows this approach achieves 40% reduction in task completion time by helping future agents avoid mistakes.
+Claudeは自身のツールを最適化できます。ツールと観察された障害モードが与えられると、問題を診断し改善を提案します。本番テストでは、このアプローチにより将来のエージェントがミスを回避するのを助け、タスク完了時間を40%削減することが示されています。
 
-**The Tool-Testing Agent Pattern**:
+**ツールテストエージェントパターン**：
 
 ```python
 def optimize_tool_description(tool_spec, failure_examples):
@@ -186,36 +186,36 @@ def optimize_tool_description(tool_spec, failure_examples):
     return get_agent_response(prompt)
 ```
 
-This creates a feedback loop: agents using tools generate failure data, which agents then use to improve tool descriptions, which reduces future failures.
+これによりフィードバックループが生まれます：ツールを使用するエージェントが障害データを生成し、それをエージェントがツール記述の改善に使用し、将来の障害を減らします。
 
-### Testing Tool Design
+### ツール設計のテスト
 
-Evaluate tool designs against criteria: unambiguity, completeness, recoverability, efficiency, and consistency. Test tools by presenting representative agent requests and evaluating the resulting tool calls.
+ツール設計を以下の基準に対して評価してください：曖昧さのなさ、完全性、回復可能性、効率性、一貫性。代表的なエージェントリクエストを提示し、結果として得られるツール呼び出しを評価することでツールをテストしてください。
 
-## Practical Guidance
+## 実践的ガイダンス
 
-### Anti-Patterns to Avoid
+### 避けるべきアンチパターン
 
-Vague descriptions: "Search the database for customer information" leaves too many questions unanswered.
+曖昧な記述：「顧客情報についてデータベースを検索する」は多くの質問に答えていません。
 
-Cryptic parameter names: Parameters named x, val, or param1 force agents to guess meaning.
+暗号的なパラメータ名：x、val、param1というパラメータはエージェントに意味を推測させます。
 
-Missing error handling: Tools that fail with generic errors provide no recovery guidance.
+エラーハンドリングの欠如：一般的なエラーで失敗するツールはリカバリーのガイダンスを提供しません。
 
-Inconsistent naming: Using id in some tools, identifier in others, and customer_id in some creates confusion.
+一貫性のない命名：一部のツールでid、別のツールでidentifier、さらに別のツールでcustomer_idを使用すると混乱を招きます。
 
-### Tool Selection Framework
+### ツール選択フレームワーク
 
-When designing tool collections:
-1. Identify distinct workflows agents must accomplish
-2. Group related actions into comprehensive tools
-3. Ensure each tool has a clear, unambiguous purpose
-4. Document error cases and recovery paths
-5. Test with actual agent interactions
+ツールコレクションを設計する際：
+1. エージェントが達成すべき個別のワークフローを特定する
+2. 関連するアクションを包括的なツールにグループ化する
+3. 各ツールが明確で曖昧さのない目的を持つようにする
+4. エラーケースとリカバリーパスをドキュメント化する
+5. 実際のエージェントインタラクションでテストする
 
-## Examples
+## 例
 
-**Example 1: Well-Designed Tool**
+**例1：適切に設計されたツール**
 ```python
 def get_customer(customer_id: str, format: str = "concise"):
     """
@@ -239,9 +239,9 @@ def get_customer(customer_id: str, format: str = "concise"):
     """
 ```
 
-**Example 2: Poor Tool Design**
+**例2：不適切なツール設計**
 
-This example demonstrates several tool design anti-patterns:
+この例はツール設計のアンチパターンをいくつか示しています：
 
 ```python
 def search(query):
@@ -249,63 +249,63 @@ def search(query):
     pass
 ```
 
-**Problems with this design:**
+**この設計の問題点：**
 
-1. **Vague name**: "search" is ambiguous - search what, for what purpose?
-2. **Missing parameters**: What database? What format should query take?
-3. **No return description**: What does this function return? A list? A string? Error handling?
-4. **No usage context**: When should an agent use this versus other tools?
-5. **No error handling**: What happens if the database is unavailable?
+1. **曖昧な名前**：「search」は曖昧 - 何を、何の目的で検索するのか？
+2. **パラメータの欠如**：どのデータベース？クエリはどのフォーマットにすべきか？
+3. **戻り値の記述なし**：この関数は何を返すのか？リスト？文字列？エラーハンドリングは？
+4. **使用コンテキストなし**：エージェントはいつこれを他のツールの代わりに使用すべきか？
+5. **エラーハンドリングなし**：データベースが利用できない場合はどうなるか？
 
-**Failure modes:**
-- Agents may call this tool when they should use a more specific tool
-- Agents cannot determine correct query format
-- Agents cannot interpret results
-- Agents cannot recover from failures
+**障害モード：**
+- エージェントがより具体的なツールを使用すべき場合にこのツールを呼び出す可能性がある
+- エージェントが正しいクエリフォーマットを判断できない
+- エージェントが結果を解釈できない
+- エージェントが障害から回復できない
 
-## Guidelines
+## ガイドライン
 
-1. Write descriptions that answer what, when, and what returns
-2. Use consolidation to reduce ambiguity
-3. Implement response format options for token efficiency
-4. Design error messages for agent recovery
-5. Establish and follow consistent naming conventions
-6. Limit tool count and use namespacing for organization
-7. Test tool designs with actual agent interactions
-8. Iterate based on observed failure modes
-9. Question whether each tool enables or constrains the model
-10. Prefer primitive, general-purpose tools over specialized wrappers
-11. Invest in documentation quality over tooling sophistication
-12. Build minimal architectures that benefit from model improvements
+1. 何を、いつ、何を返すかに答える記述を書く
+2. 曖昧さを減らすために統合を使用する
+3. トークン効率のためにレスポンスフォーマットオプションを実装する
+4. エージェントのリカバリーのためにエラーメッセージを設計する
+5. 一貫した命名規則を確立し従う
+6. ツール数を制限し、整理のために名前空間を使用する
+7. 実際のエージェントインタラクションでツール設計をテストする
+8. 観察された障害モードに基づいて反復する
+9. 各ツールがモデルを有効にしているか制約しているかを検討する
+10. 専門化されたラッパーよりもプリミティブで汎用的なツールを優先する
+11. ツールの洗練さよりもドキュメントの品質に投資する
+12. モデルの改善から恩恵を受ける最小限のアーキテクチャを構築する
 
-## Integration
+## 統合
 
-This skill connects to:
-- context-fundamentals - How tools interact with context
-- multi-agent-patterns - Specialized tools per agent
-- evaluation - Evaluating tool effectiveness
+このスキルは以下と関連します：
+- context-fundamentals - ツールとコンテキストの相互作用
+- multi-agent-patterns - エージェントごとの専門化されたツール
+- evaluation - ツールの有効性評価
 
-## References
+## 参考資料
 
-Internal references:
-- [Best Practices Reference](./references/best_practices.md) - Detailed tool design guidelines
-- [Architectural Reduction Case Study](./references/architectural_reduction.md) - Production evidence for tool minimalism
+内部参考資料：
+- [ベストプラクティスリファレンス](./references/best_practices.md) - 詳細なツール設計ガイドライン
+- [アーキテクチャ削減ケーススタディ](./references/architectural_reduction.md) - ツールミニマリズムの本番実績
 
-Related skills in this collection:
-- context-fundamentals - Tool context interactions
-- evaluation - Tool testing patterns
+このコレクション内の関連スキル：
+- context-fundamentals - ツールコンテキストの相互作用
+- evaluation - ツールテストパターン
 
-External resources:
-- MCP (Model Context Protocol) documentation
-- Framework tool conventions
-- API design best practices for agents
-- Vercel d0 agent architecture case study
+外部リソース：
+- MCP（Model Context Protocol）ドキュメント
+- フレームワークツール規則
+- エージェント向けAPI設計のベストプラクティス
+- Vercel d0エージェントアーキテクチャのケーススタディ
 
 ---
 
-## Skill Metadata
+## スキルメタデータ
 
-**Created**: 2025-12-20
-**Last Updated**: 2025-12-23
-**Author**: Agent Skills for Context Engineering Contributors
-**Version**: 1.1.0
+**作成日**: 2025-12-20
+**最終更新日**: 2025-12-23
+**著者**: Agent Skills for Context Engineering Contributors
+**バージョン**: 1.1.0

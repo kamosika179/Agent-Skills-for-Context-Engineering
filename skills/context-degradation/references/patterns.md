@@ -1,12 +1,12 @@
-# Context Degradation Patterns: Technical Reference
+# コンテキスト劣化パターン：テクニカルリファレンス
 
-This document provides technical details on diagnosing and measuring context degradation.
+このドキュメントは、コンテキスト劣化の診断と測定に関する技術的な詳細を提供します。
 
-## Attention Distribution Analysis
+## アテンション分布分析
 
-### U-Shaped Curve Measurement
+### U字型カーブの測定
 
-Measure attention distribution across context positions:
+コンテキスト位置全体でのアテンション分布を測定します：
 
 ```python
 def measure_attention_distribution(model, context_tokens, query):
@@ -38,9 +38,9 @@ def measure_attention_distribution(model, context_tokens, query):
     return attention_by_position
 ```
 
-### Lost-in-Middle Detection
+### Lost-in-Middle の検出
 
-Detect when critical information falls in degraded attention regions:
+重要な情報がアテンション劣化領域に入った場合を検出します：
 
 ```python
 def detect_lost_in_middle(critical_positions, attention_distribution):
@@ -78,11 +78,11 @@ def detect_lost_in_middle(critical_positions, attention_distribution):
     return results
 ```
 
-## Context Poisoning Detection
+## コンテキストポイズニングの検出
 
-### Hallucination Tracking
+### ハルシネーショントラッキング
 
-Track potential hallucinations across conversation turns:
+会話ターン全体で潜在的なハルシネーションを追跡します：
 
 ```python
 class HallucinationTracker:
@@ -117,9 +117,9 @@ class HallucinationTracker:
         }
 ```
 
-### Error Propagation Analysis
+### エラー伝搬分析
 
-Track how errors flow through context:
+エラーがコンテキスト内でどのように伝搬するかを追跡します：
 
 ```python
 def analyze_error_propagation(context, error_points):
@@ -152,11 +152,11 @@ def analyze_error_propagation(context, error_points):
     }
 ```
 
-## Distraction Metrics
+## ディストラクションメトリクス
 
-### Relevance Scoring
+### 関連性スコアリング
 
-Score relevance of context elements to current task:
+コンテキスト要素の現在のタスクに対する関連性をスコアリングします：
 
 ```python
 def score_context_relevance(context_elements, task_description):
@@ -191,11 +191,11 @@ def score_context_relevance(context_elements, task_description):
     }
 ```
 
-## Degradation Monitoring System
+## 劣化モニタリングシステム
 
-### Context Health Dashboard
+### コンテキストヘルスダッシュボード
 
-Implement continuous monitoring of context health:
+コンテキストヘルスの継続的なモニタリングを実装します：
 
 ```python
 class ContextHealthMonitor:
@@ -254,9 +254,9 @@ class ContextHealthMonitor:
             return "critical"
 ```
 
-### Alert Thresholds
+### アラート閾値
 
-Configure appropriate alert thresholds:
+適切なアラート閾値を設定します：
 
 ```python
 CONTEXT_ALERTS = {
@@ -268,11 +268,11 @@ CONTEXT_ALERTS = {
 }
 ```
 
-## Recovery Procedures
+## リカバリー手順
 
-### Context Truncation Strategy
+### コンテキスト切り詰め戦略
 
-When context degrades beyond recovery, truncate strategically:
+コンテキストが回復不能なほど劣化した場合、戦略的に切り詰めます：
 
 ```python
 def truncate_context_for_recovery(context, preserved_elements, target_size):

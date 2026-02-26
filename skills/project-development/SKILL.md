@@ -1,118 +1,118 @@
 ---
 name: project-development
-description: This skill should be used when the user asks to "start an LLM project", "design batch pipeline", "evaluate task-model fit", "structure agent project", or mentions pipeline architecture, agent-assisted development, cost estimation, or choosing between LLM and traditional approaches.
+description: このスキルは、ユーザーが「LLMプロジェクトを開始する」「バッチパイプラインを設計する」「タスク-モデル適合性を評価する」「エージェントプロジェクトを構造化する」と依頼した場合、またはパイプラインアーキテクチャ、エージェント支援開発、コスト見積もり、LLMと従来のアプローチの選択に言及した場合に使用してください。
 ---
 
-# Project Development Methodology
+# プロジェクト開発方法論
 
-This skill covers the principles for identifying tasks suited to LLM processing, designing effective project architectures, and iterating rapidly using agent-assisted development. The methodology applies whether building a batch processing pipeline, a multi-agent research system, or an interactive agent application.
+このスキルは、LLM処理に適したタスクの特定、効果的なプロジェクトアーキテクチャの設計、エージェント支援開発を使用した迅速な反復の原則をカバーします。この方法論は、バッチ処理パイプライン、マルチエージェントリサーチシステム、インタラクティブなエージェントアプリケーションのいずれを構築する場合にも適用されます。
 
-## When to Activate
+## アクティベーション条件
 
-Activate this skill when:
-- Starting a new project that might benefit from LLM processing
-- Evaluating whether a task is well-suited for agents versus traditional code
-- Designing the architecture for an LLM-powered application
-- Planning a batch processing pipeline with structured outputs
-- Choosing between single-agent and multi-agent approaches
-- Estimating costs and timelines for LLM-heavy projects
+以下の場合にこのスキルをアクティベートしてください：
+- LLM処理の恩恵を受ける可能性のある新しいプロジェクトを開始する場合
+- タスクがエージェントに適しているか従来のコードに適しているかを評価する場合
+- LLMを活用したアプリケーションのアーキテクチャを設計する場合
+- 構造化出力を持つバッチ処理パイプラインを計画する場合
+- シングルエージェントとマルチエージェントのアプローチを選択する場合
+- LLMを多用するプロジェクトのコストとタイムラインを見積もる場合
 
-## Core Concepts
+## コアコンセプト
 
-### Task-Model Fit Recognition
+### タスク-モデル適合性の認識
 
-Not every problem benefits from LLM processing. The first step in any project is evaluating whether the task characteristics align with LLM strengths. This evaluation should happen before writing any code.
+すべての問題がLLM処理の恩恵を受けるわけではありません。プロジェクトの最初のステップは、タスクの特性がLLMの強みと一致しているかを評価することです。この評価はコードを書く前に行うべきです。
 
-**LLM-suited tasks share these characteristics:**
+**LLMに適したタスクの特性：**
 
-| Characteristic | Why It Fits |
-|----------------|-------------|
-| Synthesis across sources | LLMs excel at combining information from multiple inputs |
-| Subjective judgment with rubrics | LLMs handle grading, evaluation, and classification with criteria |
-| Natural language output | When the goal is human-readable text, not structured data |
-| Error tolerance | Individual failures do not break the overall system |
-| Batch processing | No conversational state required between items |
-| Domain knowledge in training | The model already has relevant context |
+| 特性 | 適している理由 |
+|------|--------------|
+| ソース間の統合 | LLMは複数の入力からの情報を組み合わせることに優れている |
+| ルーブリック付きの主観的判断 | LLMは基準に基づく採点、評価、分類を処理できる |
+| 自然言語出力 | 目標が構造化データではなく人間が読めるテキストの場合 |
+| エラー耐性 | 個々の失敗がシステム全体を壊さない |
+| バッチ処理 | アイテム間で会話状態が不要 |
+| 学習データにドメイン知識がある | モデルが既に関連するコンテキストを持っている |
 
-**LLM-unsuited tasks share these characteristics:**
+**LLMに不向きなタスクの特性：**
 
-| Characteristic | Why It Fails |
-|----------------|--------------|
-| Precise computation | Math, counting, and exact algorithms are unreliable |
-| Real-time requirements | LLM latency is too high for sub-second responses |
-| Perfect accuracy requirements | Hallucination risk makes 100% accuracy impossible |
-| Proprietary data dependence | The model lacks necessary context |
-| Sequential dependencies | Each step depends heavily on the previous result |
-| Deterministic output requirements | Same input must produce identical output |
+| 特性 | 失敗する理由 |
+|------|------------|
+| 精密な計算 | 数学、カウント、正確なアルゴリズムは信頼性が低い |
+| リアルタイム要件 | LLMのレイテンシはサブ秒の応答には高すぎる |
+| 完全な正確性の要件 | ハルシネーションのリスクにより100%の正確性は不可能 |
+| プロプライエタリデータ依存 | モデルに必要なコンテキストがない |
+| 逐次的な依存関係 | 各ステップが前の結果に大きく依存する |
+| 決定論的出力の要件 | 同じ入力が同一の出力を生成する必要がある |
 
-The evaluation should happen through manual prototyping: take one representative example and test it directly with the target model before building any automation.
+評価は手動プロトタイピングを通じて行うべきです：代表的な例を1つ取り、自動化を構築する前にターゲットモデルで直接テストします。
 
-### The Manual Prototype Step
+### 手動プロトタイプのステップ
 
-Before investing in automation, validate task-model fit with a manual test. Copy one representative input into the model interface. Evaluate the output quality. This takes minutes and prevents hours of wasted development.
+自動化に投資する前に、手動テストでタスク-モデル適合性を検証します。代表的な入力を1つモデルインターフェースにコピーします。出力の品質を評価します。これは数分で完了し、何時間もの無駄な開発を防ぎます。
 
-This validation answers critical questions:
-- Does the model have the knowledge required for this task?
-- Can the model produce output in the format you need?
-- What level of quality should you expect at scale?
-- Are there obvious failure modes to address?
+この検証は重要な質問に答えます：
+- モデルはこのタスクに必要な知識を持っているか？
+- モデルは必要な形式で出力を生成できるか？
+- 大規模ではどのレベルの品質が期待できるか？
+- 対処すべき明らかな失敗モードはあるか？
 
-If the manual prototype fails, the automated system will fail. If it succeeds, you have a baseline for comparison and a template for prompt design.
+手動プロトタイプが失敗すれば、自動化されたシステムも失敗します。成功すれば、比較のためのベースラインとプロンプト設計のテンプレートが得られます。
 
-### Pipeline Architecture
+### パイプラインアーキテクチャ
 
-LLM projects benefit from staged pipeline architectures where each stage is:
-- **Discrete**: Clear boundaries between stages
-- **Idempotent**: Re-running produces the same result
-- **Cacheable**: Intermediate results persist to disk
-- **Independent**: Each stage can run separately
+LLMプロジェクトは、各ステージが以下の特性を持つステージ化されたパイプラインアーキテクチャの恩恵を受けます：
+- **離散的**：ステージ間の明確な境界
+- **冪等**：再実行しても同じ結果を生成
+- **キャッシュ可能**：中間結果がディスクに永続化
+- **独立**：各ステージが個別に実行可能
 
-**The canonical pipeline structure:**
+**標準的なパイプライン構造：**
 
 ```
 acquire → prepare → process → parse → render
 ```
 
-1. **Acquire**: Fetch raw data from sources (APIs, files, databases)
-2. **Prepare**: Transform data into prompt format
-3. **Process**: Execute LLM calls (the expensive, non-deterministic step)
-4. **Parse**: Extract structured data from LLM outputs
-5. **Render**: Generate final outputs (reports, files, visualizations)
+1. **Acquire**：ソース（API、ファイル、データベース）から生データを取得
+2. **Prepare**：データをプロンプト形式に変換
+3. **Process**：LLM呼び出しを実行（高コストで非決定的なステップ）
+4. **Parse**：LLM出力から構造化データを抽出
+5. **Render**：最終出力（レポート、ファイル、ビジュアライゼーション）を生成
 
-Stages 1, 2, 4, and 5 are deterministic. Stage 3 is non-deterministic and expensive. This separation allows re-running the expensive LLM stage only when necessary, while iterating quickly on parsing and rendering.
+ステージ1、2、4、5は決定論的です。ステージ3は非決定論的で高コストです。この分離により、必要な場合にのみ高コストなLLMステージを再実行でき、解析とレンダリングを迅速に反復できます。
 
-### File System as State Machine
+### ステートマシンとしてのファイルシステム
 
-Use the file system to track pipeline state rather than databases or in-memory structures. Each processing unit gets a directory. Each stage completion is marked by file existence.
+データベースやインメモリ構造ではなく、ファイルシステムを使用してパイプラインの状態を追跡します。各処理ユニットはディレクトリを取得します。各ステージの完了はファイルの存在によって示されます。
 
 ```
 data/{id}/
-├── raw.json         # acquire stage complete
-├── prompt.md        # prepare stage complete
-├── response.md      # process stage complete
-├── parsed.json      # parse stage complete
+├── raw.json         # acquireステージ完了
+├── prompt.md        # prepareステージ完了
+├── response.md      # processステージ完了
+├── parsed.json      # parseステージ完了
 ```
 
-To check if an item needs processing: check if the output file exists. To re-run a stage: delete its output file and downstream files. To debug: read the intermediate files directly.
+アイテムが処理を必要とするかチェックするには：出力ファイルの存在を確認します。ステージを再実行するには：そのステージと下流のファイルを削除します。デバッグするには：中間ファイルを直接読みます。
 
-This pattern provides:
-- Natural idempotency (file existence gates execution)
-- Easy debugging (all state is human-readable)
-- Simple parallelization (each directory is independent)
-- Trivial caching (files persist across runs)
+このパターンが提供するもの：
+- 自然な冪等性（ファイルの存在が実行をゲート）
+- 容易なデバッグ（すべての状態が人間が読める形式）
+- シンプルな並列化（各ディレクトリが独立）
+- 簡単なキャッシング（ファイルが実行間で永続化）
 
-### Structured Output Design
+### 構造化出力の設計
 
-When LLM outputs must be parsed programmatically, prompt design directly determines parsing reliability. The prompt must specify exact format requirements with examples.
+LLM出力をプログラム的に解析する必要がある場合、プロンプト設計が解析の信頼性を直接決定します。プロンプトは例付きの正確なフォーマット要件を指定する必要があります。
 
-**Effective structure specification includes:**
+**効果的な構造指定には以下が含まれます：**
 
-1. **Section markers**: Explicit headers or prefixes for parsing
-2. **Format examples**: Show exactly what output should look like
-3. **Rationale disclosure**: "I will be parsing this programmatically"
-4. **Constrained values**: Enumerated options, score ranges, formats
+1. **セクションマーカー**：解析のための明示的なヘッダーまたはプレフィックス
+2. **フォーマット例**：出力がどのように見えるべきかを正確に示す
+3. **根拠の開示**：「これをプログラム的に解析します」
+4. **制約された値**：列挙されたオプション、スコア範囲、フォーマット
 
-**Example prompt structure:**
+**プロンプト構造の例：**
 ```
 Analyze the following and provide your response in exactly this format:
 
@@ -129,214 +129,214 @@ Rating: [1-10]
 Follow this format exactly because I will be parsing it programmatically.
 ```
 
-The parsing code must handle variations gracefully. LLMs do not follow instructions perfectly. Build parsers that:
-- Use regex patterns flexible enough to handle minor formatting variations
-- Provide sensible defaults when sections are missing
-- Log parsing failures for later review rather than crashing
+解析コードはバリエーションを柔軟に処理する必要があります。LLMは指示に完璧に従いません。以下の特性を持つパーサーを構築してください：
+- 軽微なフォーマットのバリエーションを処理できる柔軟な正規表現パターンを使用する
+- セクションが欠落している場合に適切なデフォルト値を提供する
+- クラッシュするのではなく、後のレビューのために解析失敗をログに記録する
 
-### Agent-Assisted Development
+### エージェント支援開発
 
-Modern agent-capable models can accelerate development significantly. The pattern is:
+現代のエージェント対応モデルは開発を大幅に加速できます。パターンは以下の通りです：
 
-1. Describe the project goal and constraints
-2. Let the agent generate initial implementation
-3. Test and iterate on specific failures
-4. Refine prompts and architecture based on results
+1. プロジェクトの目標と制約を記述する
+2. エージェントに初期実装を生成させる
+3. 特定の失敗をテストし反復する
+4. 結果に基づいてプロンプトとアーキテクチャを改善する
 
-This is about rapid iteration: generate, test, fix, repeat. The agent handles boilerplate and initial structure while you focus on domain-specific requirements and edge cases.
+これは迅速な反復に関するものです：生成、テスト、修正、繰り返し。エージェントがボイラープレートと初期構造を処理し、あなたはドメイン固有の要件とエッジケースに集中します。
 
-Key practices for effective agent-assisted development:
-- Provide clear, specific requirements upfront
-- Break large projects into discrete components
-- Test each component before moving to the next
-- Keep the agent focused on one task at a time
+効果的なエージェント支援開発の主要なプラクティス：
+- 事前に明確で具体的な要件を提供する
+- 大規模なプロジェクトを個別のコンポーネントに分割する
+- 次に進む前に各コンポーネントをテストする
+- エージェントを一度に1つのタスクに集中させる
 
-### Cost and Scale Estimation
+### コストとスケールの見積もり
 
-LLM processing has predictable costs that should be estimated before starting. The formula:
+LLM処理には予測可能なコストがあり、開始前に見積もるべきです。計算式：
 
 ```
 Total cost = (items × tokens_per_item × price_per_token) + API overhead
 ```
 
-For batch processing:
-- Estimate input tokens per item (prompt + context)
-- Estimate output tokens per item (typical response length)
-- Multiply by item count
-- Add 20-30% buffer for retries and failures
+バッチ処理の場合：
+- アイテムごとの入力トークン（プロンプト + コンテキスト）を見積もる
+- アイテムごとの出力トークン（典型的な応答長）を見積もる
+- アイテム数を掛ける
+- リトライと失敗のために20〜30%のバッファを追加する
 
-Track actual costs during development. If costs exceed estimates significantly, re-evaluate the approach. Consider:
-- Reducing context length through truncation
-- Using smaller models for simpler items
-- Caching and reusing partial results
-- Parallel processing to reduce wall-clock time (not token cost)
+開発中の実際のコストを追跡します。コストが見積もりを大幅に超える場合、アプローチを再評価します。以下を検討してください：
+- トランケーションによるコンテキスト長の削減
+- より単純なアイテムには小さいモデルを使用
+- 部分的な結果のキャッシュと再利用
+- 実行時間を短縮するための並列処理（トークンコストではない）
 
-## Detailed Topics
+## 詳細トピック
 
-### Choosing Single vs Multi-Agent Architecture
+### シングル vs マルチエージェントアーキテクチャの選択
 
-Single-agent pipelines work for:
-- Batch processing with independent items
-- Tasks where items do not interact
-- Simpler cost and complexity management
+シングルエージェントパイプラインが有効な場合：
+- 独立したアイテムのバッチ処理
+- アイテムが相互作用しないタスク
+- よりシンプルなコストと複雑さの管理
 
-Multi-agent architectures work for:
-- Parallel exploration of different aspects
-- Tasks exceeding single context window capacity
-- When specialized sub-agents improve quality
+マルチエージェントアーキテクチャが有効な場合：
+- 異なる側面の並行探索
+- 単一のコンテキストウィンドウの容量を超えるタスク
+- 専門化されたサブエージェントが品質を向上させる場合
 
-The primary reason for multi-agent is context isolation, not role anthropomorphization. Sub-agents get fresh context windows for focused subtasks. This prevents context degradation on long-running tasks.
+マルチエージェントの主な理由は、ロールの擬人化ではなく、コンテキストの分離です。サブエージェントは、集中したサブタスクのために新しいコンテキストウィンドウを取得します。これにより、長時間実行タスクでのコンテキスト劣化が防止されます。
 
-See `multi-agent-patterns` skill for detailed architecture guidance.
+詳細なアーキテクチャガイダンスについては、`multi-agent-patterns`スキルを参照してください。
 
-### Architectural Reduction
+### アーキテクチャの簡素化
 
-Start with minimal architecture. Add complexity only when proven necessary. Production evidence shows that removing specialized tools often improves performance.
+最小限のアーキテクチャから始めます。複雑さは必要性が証明された場合にのみ追加します。本番環境のエビデンスは、専門ツールを削除することでパフォーマンスが向上することが多いことを示しています。
 
-Vercel's d0 agent achieved 100% success rate (up from 80%) by reducing from 17 specialized tools to 2 primitives: bash command execution and SQL. The file system agent pattern uses standard Unix utilities (grep, cat, find, ls) instead of custom exploration tools.
+Vercelのd0エージェントは、17の専門ツールから2つのプリミティブ（bashコマンド実行とSQL）に削減することで、成功率を80%から100%に向上させました。ファイルシステムエージェントパターンは、カスタム探索ツールの代わりに標準Unixユーティリティ（grep、cat、find、ls）を使用します。
 
-**When reduction outperforms complexity:**
-- Your data layer is well-documented and consistently structured
-- The model has sufficient reasoning capability
-- Your specialized tools were constraining rather than enabling
-- You are spending more time maintaining scaffolding than improving outcomes
+**簡素化が複雑さに勝る場合：**
+- データレイヤーが十分に文書化され、一貫した構造を持っている
+- モデルが十分な推論能力を持っている
+- 専門ツールが有効化するのではなく制約している
+- 結果の改善よりもスキャフォールディングの保守に多くの時間を費やしている
 
-**When complexity is necessary:**
-- Your underlying data is messy, inconsistent, or poorly documented
-- The domain requires specialized knowledge the model lacks
-- Safety constraints require limiting agent capabilities
-- Operations are truly complex and benefit from structured workflows
+**複雑さが必要な場合：**
+- 基盤データが雑で、一貫性がなく、文書化が不十分
+- ドメインにモデルが欠いている専門知識が必要
+- 安全性の制約がエージェントの能力を制限する必要がある
+- 操作が真に複雑で、構造化されたワークフローの恩恵を受ける
 
-See `tool-design` skill for detailed tool architecture guidance.
+詳細なツールアーキテクチャガイダンスについては、`tool-design`スキルを参照してください。
 
-### Iteration and Refactoring
+### 反復とリファクタリング
 
-Expect to refactor. Production agent systems at scale require multiple architectural iterations. Manus refactored their agent framework five times since launch. The Bitter Lesson suggests that structures added for current model limitations become constraints as models improve.
+リファクタリングを覚悟してください。大規模な本番エージェントシステムは、複数のアーキテクチャ反復を必要とします。Manusはローンチ以来、エージェントフレームワークを5回リファクタリングしました。The Bitter Lessonは、現在のモデルの制限のために追加された構造が、モデルが改善されるにつれて制約になることを示唆しています。
 
-Build for change:
-- Keep architecture simple and unopinionated
-- Test across model strengths to verify your harness is not limiting performance
-- Design systems that benefit from model improvements rather than locking in limitations
+変更に備えて構築する：
+- アーキテクチャをシンプルで独断的でないものに保つ
+- モデルの強みを横断してテストし、ハーネスがパフォーマンスを制限していないことを確認する
+- モデルの改善から恩恵を受けるシステムを設計し、制限を固定しない
 
-## Practical Guidance
+## 実践ガイダンス
 
-### Project Planning Template
+### プロジェクト計画テンプレート
 
-1. **Task Analysis**
-   - What is the input? What is the desired output?
-   - Is this synthesis, generation, classification, or analysis?
-   - What error rate is acceptable?
-   - What is the value per successful completion?
+1. **タスク分析**
+   - 入力は何か？望ましい出力は何か？
+   - これは統合、生成、分類、分析のいずれか？
+   - 許容できるエラー率は？
+   - 成功した完了ごとの価値は？
 
-2. **Manual Validation**
-   - Test one example with target model
-   - Evaluate output quality and format
-   - Identify failure modes
-   - Estimate tokens per item
+2. **手動検証**
+   - ターゲットモデルで1つの例をテスト
+   - 出力の品質とフォーマットを評価
+   - 失敗モードを特定
+   - アイテムごとのトークンを見積もる
 
-3. **Architecture Selection**
-   - Single pipeline vs multi-agent
-   - Required tools and data sources
-   - Storage and caching strategy
-   - Parallelization approach
+3. **アーキテクチャ選択**
+   - シングルパイプライン vs マルチエージェント
+   - 必要なツールとデータソース
+   - ストレージとキャッシング戦略
+   - 並列化アプローチ
 
-4. **Cost Estimation**
-   - Items × tokens × price
-   - Development time
-   - Infrastructure requirements
-   - Ongoing operational costs
+4. **コスト見積もり**
+   - アイテム × トークン × 価格
+   - 開発時間
+   - インフラ要件
+   - 継続的な運用コスト
 
-5. **Development Plan**
-   - Stage-by-stage implementation
-   - Testing strategy per stage
-   - Iteration milestones
-   - Deployment approach
+5. **開発計画**
+   - ステージごとの実装
+   - ステージごとのテスト戦略
+   - 反復のマイルストーン
+   - デプロイメントアプローチ
 
-### Anti-Patterns to Avoid
+### 避けるべきアンチパターン
 
-**Skipping manual validation**: Building automation before verifying the model can do the task wastes significant time when the approach is fundamentally flawed.
+**手動検証の省略**：モデルがタスクを実行できることを検証する前に自動化を構築すると、アプローチが根本的に欠陥がある場合に大幅な時間の浪費になります。
 
-**Monolithic pipelines**: Combining all stages into one script makes debugging and iteration difficult. Separate stages with persistent intermediate outputs.
+**モノリシックなパイプライン**：すべてのステージを1つのスクリプトにまとめると、デバッグと反復が困難になります。永続的な中間出力でステージを分離してください。
 
-**Over-constraining the model**: Adding guardrails, pre-filtering, and validation logic that the model could handle on its own. Test whether your scaffolding helps or hurts.
+**モデルの過度な制約**：モデル自体が処理できるガードレール、事前フィルタリング、検証ロジックの追加。スキャフォールディングが助けになるか害になるかテストしてください。
 
-**Ignoring costs until production**: Token costs compound quickly at scale. Estimate and track from the beginning.
+**本番までコストを無視**：トークンコストは大規模に急速に増加します。最初から見積もりと追跡を行ってください。
 
-**Perfect parsing requirements**: Expecting LLMs to follow format instructions perfectly. Build robust parsers that handle variations.
+**完全な解析の要求**：LLMがフォーマット指示に完璧に従うことを期待する。バリエーションを処理する堅牢なパーサーを構築してください。
 
-**Premature optimization**: Adding caching, parallelization, and optimization before the basic pipeline works correctly.
+**早すぎる最適化**：基本的なパイプラインが正しく動作する前に、キャッシュ、並列化、最適化を追加する。
 
-## Examples
+## 例
 
-**Example 1: Batch Analysis Pipeline (Karpathy's HN Time Capsule)**
+**例1：バッチ分析パイプライン（KarpathyのHN Time Capsule）**
 
-Task: Analyze 930 HN discussions from 10 years ago with hindsight grading.
+タスク：10年前の930件のHNディスカッションを後知恵で評価分析。
 
-Architecture:
-- 5-stage pipeline: fetch → prompt → analyze → parse → render
-- File system state: data/{date}/{item_id}/ with stage output files
-- Structured output: 6 sections with explicit format requirements
-- Parallel execution: 15 workers for LLM calls
+アーキテクチャ：
+- 5ステージパイプライン：fetch → prompt → analyze → parse → render
+- ファイルシステム状態：data/{date}/{item_id}/ にステージ出力ファイル
+- 構造化出力：明示的なフォーマット要件を持つ6セクション
+- 並列実行：LLM呼び出し用に15ワーカー
 
-Results: $58 total cost, ~1 hour execution, static HTML output.
+結果：総コスト$58、実行時間約1時間、静的HTML出力。
 
-**Example 2: Architectural Reduction (Vercel d0)**
+**例2：アーキテクチャの簡素化（Vercel d0）**
 
-Task: Text-to-SQL agent for internal analytics.
+タスク：内部アナリティクス用のText-to-SQLエージェント。
 
-Before: 17 specialized tools, 80% success rate, 274s average execution.
+変更前：17の専門ツール、成功率80%、平均実行時間274秒。
 
-After: 2 tools (bash + SQL), 100% success rate, 77s average execution.
+変更後：2つのツール（bash + SQL）、成功率100%、平均実行時間77秒。
 
-Key insight: The semantic layer was already good documentation. Claude just needed access to read files directly.
+重要な洞察：セマンティックレイヤーは既に良い文書化でした。Claudeはファイルを直接読むためのアクセスだけが必要でした。
 
-See [Case Studies](./references/case-studies.md) for detailed analysis.
+詳細な分析については、[Case Studies](./references/case-studies.md)を参照してください。
 
-## Guidelines
+## ガイドライン
 
-1. Validate task-model fit with manual prototyping before building automation
-2. Structure pipelines as discrete, idempotent, cacheable stages
-3. Use the file system for state management and debugging
-4. Design prompts for structured, parseable outputs with explicit format examples
-5. Start with minimal architecture; add complexity only when proven necessary
-6. Estimate costs early and track throughout development
-7. Build robust parsers that handle LLM output variations
-8. Expect and plan for multiple architectural iterations
-9. Test whether scaffolding helps or constrains model performance
-10. Use agent-assisted development for rapid iteration on implementation
+1. 自動化を構築する前に手動プロトタイピングでタスク-モデル適合性を検証する
+2. パイプラインを離散的で冪等でキャッシュ可能なステージとして構成する
+3. 状態管理とデバッグにファイルシステムを使用する
+4. 明示的なフォーマット例を持つ構造化された解析可能な出力のためのプロンプトを設計する
+5. 最小限のアーキテクチャから始め、必要性が証明された場合にのみ複雑さを追加する
+6. 早期にコストを見積もり、開発全体を通じて追跡する
+7. LLM出力のバリエーションを処理する堅牢なパーサーを構築する
+8. 複数のアーキテクチャ反復を予期し計画する
+9. スキャフォールディングがモデルのパフォーマンスを助けるか制約するかテストする
+10. 実装の迅速な反復のためにエージェント支援開発を使用する
 
-## Integration
+## 統合
 
-This skill connects to:
-- context-fundamentals - Understanding context constraints for prompt design
-- tool-design - Designing tools for agent systems within pipelines
-- multi-agent-patterns - When to use multi-agent versus single pipelines
-- evaluation - Evaluating pipeline outputs and agent performance
-- context-compression - Managing context when pipelines exceed limits
+このスキルは以下と接続します：
+- context-fundamentals - プロンプト設計のためのコンテキスト制約の理解
+- tool-design - パイプライン内のエージェントシステムのためのツール設計
+- multi-agent-patterns - マルチエージェントとシングルパイプラインの使い分け
+- evaluation - パイプライン出力とエージェントパフォーマンスの評価
+- context-compression - パイプラインが制限を超えた場合のコンテキスト管理
 
-## References
+## 参考資料
 
-Internal references:
-- [Case Studies](./references/case-studies.md) - Karpathy HN Capsule, Vercel d0, Manus patterns
-- [Pipeline Patterns](./references/pipeline-patterns.md) - Detailed pipeline architecture guidance
+内部参考資料：
+- [Case Studies](./references/case-studies.md) - Karpathy HN Capsule、Vercel d0、Manusパターン
+- [Pipeline Patterns](./references/pipeline-patterns.md) - 詳細なパイプラインアーキテクチャガイダンス
 
-Related skills in this collection:
-- tool-design - Tool architecture and reduction patterns
-- multi-agent-patterns - When to use multi-agent architectures
-- evaluation - Output evaluation frameworks
+このコレクションの関連スキル：
+- tool-design - ツールアーキテクチャと簡素化パターン
+- multi-agent-patterns - マルチエージェントアーキテクチャの使い分け
+- evaluation - 出力評価フレームワーク
 
-External resources:
+外部リソース：
 - Karpathy's HN Time Capsule project: https://github.com/karpathy/hn-time-capsule
 - Vercel d0 architectural reduction: https://vercel.com/blog/we-removed-80-percent-of-our-agents-tools
-- Manus context engineering: Peak Ji's blog on context engineering lessons
-- Anthropic multi-agent research: How we built our multi-agent research system
+- Manus context engineering: Peak Jiのコンテキストエンジニアリングに関するブログ
+- Anthropic multi-agent research: マルチエージェントリサーチシステムの構築方法
 
 ---
 
-## Skill Metadata
+## スキルメタデータ
 
-**Created**: 2025-12-25
-**Last Updated**: 2025-12-25
-**Author**: Agent Skills for Context Engineering Contributors
-**Version**: 1.0.0
+**作成日**: 2025-12-25
+**最終更新日**: 2025-12-25
+**著者**: Agent Skills for Context Engineering Contributors
+**バージョン**: 1.0.0
 

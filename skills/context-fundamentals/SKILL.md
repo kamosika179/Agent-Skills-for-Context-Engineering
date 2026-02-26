@@ -1,110 +1,110 @@
 ---
 name: context-fundamentals
-description: This skill should be used when the user asks to "understand context", "explain context windows", "design agent architecture", "debug context issues", "optimize context usage", or discusses context components, attention mechanics, progressive disclosure, or context budgeting. Provides foundational understanding of context engineering for AI agent systems.
+description: このスキルは、ユーザーが「コンテキストを理解する」「コンテキストウィンドウを説明する」「エージェントアーキテクチャを設計する」「コンテキストの問題をデバッグする」「コンテキスト使用を最適化する」と求めた場合、またはコンテキストの構成要素、アテンションメカニクス、段階的開示、コンテキストバジェッティングについて議論する場合に使用します。AIエージェントシステムのコンテキストエンジニアリングの基礎的な理解を提供します。
 ---
 
-# Context Engineering Fundamentals
+# コンテキストエンジニアリングの基礎
 
-Context is the complete state available to a language model at inference time. It includes everything the model can attend to when generating responses: system instructions, tool definitions, retrieved documents, message history, and tool outputs. Understanding context fundamentals is prerequisite to effective context engineering.
+コンテキストとは、推論時に言語モデルが利用できる完全な状態のことです。モデルが応答を生成する際に注意を向けることができるすべてのものが含まれます：システム命令、ツール定義、検索されたドキュメント、メッセージ履歴、ツール出力です。コンテキストの基礎を理解することは、効果的なコンテキストエンジニアリングの前提条件です。
 
-## When to Activate
+## 有効化のタイミング
 
-Activate this skill when:
-- Designing new agent systems or modifying existing architectures
-- Debugging unexpected agent behavior that may relate to context
-- Optimizing context usage to reduce token costs or improve performance
-- Onboarding new team members to context engineering concepts
-- Reviewing context-related design decisions
+以下の場合にこのスキルを有効化してください：
+- 新しいエージェントシステムの設計または既存アーキテクチャの変更時
+- コンテキストに関連する可能性のある予期しないエージェント動作のデバッグ時
+- トークンコストの削減やパフォーマンス向上のためのコンテキスト使用の最適化時
+- コンテキストエンジニアリングの概念に関する新しいチームメンバーのオンボーディング時
+- コンテキスト関連の設計判断のレビュー時
 
-## Core Concepts
+## コアコンセプト
 
-Context comprises several distinct components, each with different characteristics and constraints. The attention mechanism creates a finite budget that constrains effective context usage. Progressive disclosure manages this constraint by loading information only as needed. The engineering discipline is curating the smallest high-signal token set that achieves desired outcomes.
+コンテキストは、それぞれ異なる特性と制約を持つ複数の異なるコンポーネントで構成されます。アテンションメカニズムは、効果的なコンテキスト使用を制約する有限のバジェットを作成します。段階的開示は、必要な時にのみ情報をロードすることでこの制約を管理します。エンジニアリングの規律は、望ましい結果を達成する最小の高シグナルトークンセットをキュレーションすることです。
 
-## Detailed Topics
+## 詳細トピック
 
-### The Anatomy of Context
+### コンテキストの構造
 
-**System Prompts**
-System prompts establish the agent's core identity, constraints, and behavioral guidelines. They are loaded once at session start and typically persist throughout the conversation. System prompts should be extremely clear and use simple, direct language at the right altitude for the agent.
+**システムプロンプト**
+システムプロンプトは、エージェントのコアアイデンティティ、制約、および動作ガイドラインを確立します。セッション開始時に一度ロードされ、通常は会話全体を通じて持続します。システムプロンプトは、エージェントに適した抽象度で、非常に明確でシンプルかつ直接的な言語を使用すべきです。
 
-The right altitude balances two failure modes. At one extreme, engineers hardcode complex brittle logic that creates fragility and maintenance burden. At the other extreme, engineers provide vague high-level guidance that fails to give concrete signals for desired outputs or falsely assumes shared context. The optimal altitude strikes a balance: specific enough to guide behavior effectively, yet flexible enough to provide strong heuristics.
+適切な抽象度は、2つの失敗モードのバランスを取ります。一方の極端では、エンジニアが複雑で脆い論理をハードコードし、脆弱性とメンテナンス負荷を生み出します。もう一方の極端では、エンジニアが曖昧な高レベルのガイダンスを提供し、望ましい出力に対する具体的なシグナルを与えられなかったり、共有コンテキストを誤って仮定したりします。最適な抽象度はバランスを取ります：効果的に動作を導くのに十分な具体性を持ちつつ、強力なヒューリスティクスを提供するのに十分な柔軟性を持つことです。
 
-Organize prompts into distinct sections using XML tagging or Markdown headers to delineate background information, instructions, tool guidance, and output description. The exact formatting matters less as models become more capable, but structural clarity remains valuable.
+XMLタグやMarkdownヘッダーを使用して、プロンプトを背景情報、指示、ツールガイダンス、出力説明に明確なセクションに整理します。モデルがより高性能になるにつれて正確なフォーマットの重要性は低下しますが、構造的な明確さは依然として価値があります。
 
-**Tool Definitions**
-Tool definitions specify the actions an agent can take. Each tool includes a name, description, parameters, and return format. Tool definitions live near the front of context after serialization, typically before or after the system prompt.
+**ツール定義**
+ツール定義は、エージェントが実行できるアクションを指定します。各ツールには、名前、説明、パラメータ、および返却フォーマットが含まれます。ツール定義は、シリアライズ後のコンテキストの先頭付近に配置され、通常はシステムプロンプトの前後にあります。
 
-Tool descriptions collectively steer agent behavior. Poor descriptions force agents to guess; optimized descriptions include usage context, examples, and defaults. The consolidation principle states that if a human engineer cannot definitively say which tool should be used in a given situation, an agent cannot be expected to do better.
+ツールの説明は、集合的にエージェントの動作を導きます。不十分な説明はエージェントに推測を強います。最適化された説明には、使用コンテキスト、例、およびデフォルト値が含まれます。統合の原則は、人間のエンジニアが特定の状況でどのツールを使用すべきかを明確に判断できない場合、エージェントがそれ以上のことを期待できないということです。
 
-**Retrieved Documents**
-Retrieved documents provide domain-specific knowledge, reference materials, or task-relevant information. Agents use retrieval augmented generation to pull relevant documents into context at runtime rather than pre-loading all possible information.
+**検索されたドキュメント**
+検索されたドキュメントは、ドメイン固有の知識、参考資料、またはタスクに関連する情報を提供します。エージェントは、可能なすべての情報を事前にロードするのではなく、検索拡張生成（RAG）を使用して実行時に関連するドキュメントをコンテキストに取り込みます。
 
-The just-in-time approach maintains lightweight identifiers (file paths, stored queries, web links) and uses these references to load data into context dynamically. This mirrors human cognition: we generally do not memorize entire corpuses of information but rather use external organization and indexing systems to retrieve relevant information on demand.
+ジャストインタイムアプローチは、軽量な識別子（ファイルパス、保存されたクエリ、Webリンク）を維持し、これらの参照を使用してコンテキストにデータを動的にロードします。これは人間の認知を反映しています：私たちは一般に情報の全体を暗記するのではなく、外部の組織化やインデックスシステムを使用して、必要に応じて関連情報を取得します。
 
-**Message History**
-Message history contains the conversation between the user and agent, including previous queries, responses, and reasoning. For long-running tasks, message history can grow to dominate context usage.
+**メッセージ履歴**
+メッセージ履歴には、ユーザーとエージェント間の会話が含まれます。これには、以前のクエリ、応答、および推論が含まれます。長時間実行されるタスクでは、メッセージ履歴がコンテキスト使用の大部分を占めるまで成長する可能性があります。
 
-Message history serves as scratchpad memory where agents track progress, maintain task state, and preserve reasoning across turns. Effective management of message history is critical for long-horizon task completion.
+メッセージ履歴は、エージェントが進捗を追跡し、タスクの状態を維持し、ターン間で推論を保持するスクラッチパッドメモリとして機能します。メッセージ履歴の効果的な管理は、長期的なタスク完了に不可欠です。
 
-**Tool Outputs**
-Tool outputs are the results of agent actions: file contents, search results, command execution output, API responses, and similar data. Tool outputs comprise the majority of tokens in typical agent trajectories, with research showing observations (tool outputs) can reach 83.9% of total context usage.
+**ツール出力**
+ツール出力は、エージェントのアクションの結果です：ファイルの内容、検索結果、コマンド実行の出力、APIレスポンス、および類似のデータです。ツール出力は、典型的なエージェントの軌跡においてトークンの大部分を占めており、研究によると観察（ツール出力）はコンテキスト使用全体の83.9%に達する可能性があります。
 
-Tool outputs consume context whether they are relevant to current decisions or not. This creates pressure for strategies like observation masking, compaction, and selective tool result retention.
+ツール出力は、現在の判断に関連するかどうかに関わらずコンテキストを消費します。これにより、観察マスキング、コンパクション、選択的なツール結果の保持などの戦略へのニーズが生まれます。
 
-### Context Windows and Attention Mechanics
+### コンテキストウィンドウとアテンションメカニクス
 
-**The Attention Budget Constraint**
-Language models process tokens through attention mechanisms that create pairwise relationships between all tokens in context. For n tokens, this creates n² relationships that must be computed and stored. As context length increases, the model's ability to capture these relationships gets stretched thin.
+**アテンションバジェット制約**
+言語モデルは、コンテキスト内のすべてのトークン間にペアワイズの関係を作成するアテンションメカニズムを通じてトークンを処理します。n個のトークンに対して、計算および保存する必要があるn²の関係が作成されます。コンテキストの長さが増加すると、これらの関係を捕捉するモデルの能力は薄く引き伸ばされます。
 
-Models develop attention patterns from training data distributions where shorter sequences predominate. This means models have less experience with and fewer specialized parameters for context-wide dependencies. The result is an "attention budget" that depletes as context grows.
+モデルは、短いシーケンスが支配的な学習データ分布からアテンションパターンを発達させます。これは、モデルがコンテキスト全体の依存関係に対する経験と専門的なパラメータが少ないことを意味します。結果として、コンテキストが成長するにつれて枯渇する「アテンションバジェット」が生まれます。
 
-**Position Encoding and Context Extension**
-Position encoding interpolation allows models to handle longer sequences by adapting them to originally trained smaller contexts. However, this adaptation introduces degradation in token position understanding. Models remain highly capable at longer contexts but show reduced precision for information retrieval and long-range reasoning compared to performance on shorter contexts.
+**位置エンコーディングとコンテキスト拡張**
+位置エンコーディング補間により、モデルは元々学習されたより短いコンテキストに適応させることで、より長いシーケンスを処理できます。しかし、この適応はトークン位置理解の劣化をもたらします。モデルはより長いコンテキストでも高い能力を維持しますが、短いコンテキストでのパフォーマンスと比較して、情報検索や長距離推論の精度が低下します。
 
-**The Progressive Disclosure Principle**
-Progressive disclosure manages context efficiently by loading information only as needed. At startup, agents load only skill names and descriptions—sufficient to know when a skill might be relevant. Full content loads only when a skill is activated for specific tasks.
+**段階的開示の原則**
+段階的開示は、必要な時にのみ情報をロードすることで、コンテキストを効率的に管理します。起動時に、エージェントはスキルの名前と説明のみをロードします—スキルがいつ関連する可能性があるかを知るのに十分です。完全なコンテンツは、特定のタスクのためにスキルが有効化された時にのみロードされます。
 
-This approach keeps agents fast while giving them access to more context on demand. The principle applies at multiple levels: skill selection, document loading, and even tool result retrieval.
+このアプローチにより、エージェントはオンデマンドでより多くのコンテキストにアクセスしながら高速性を維持できます。この原則は複数のレベルで適用されます：スキルの選択、ドキュメントのロード、さらにはツール結果の取得です。
 
-### Context Quality Versus Context Quantity
+### コンテキストの品質対コンテキストの量
 
-The assumption that larger context windows solve memory problems has been empirically debunked. Context engineering means finding the smallest possible set of high-signal tokens that maximize the likelihood of desired outcomes.
+より大きなコンテキストウィンドウがメモリの問題を解決するという仮定は、実証的に否定されています。コンテキストエンジニアリングとは、望ましい結果の可能性を最大化する最小の高シグナルトークンセットを見つけることを意味します。
 
-Several factors create pressure for context efficiency. Processing cost grows disproportionately with context length—not just double the cost for double the tokens, but exponentially more in time and computing resources. Model performance degrades beyond certain context lengths even when the window technically supports more tokens. Long inputs remain expensive even with prefix caching.
+コンテキストの効率性に対するプレッシャーを生み出すいくつかの要因があります。処理コストはコンテキストの長さに対して不均衡に増大します—トークンが2倍になっても単にコストが2倍になるのではなく、時間と計算リソースにおいて指数関数的に増加します。ウィンドウが技術的にはより多くのトークンをサポートしていても、特定のコンテキスト長を超えるとモデルのパフォーマンスは低下します。プレフィックスキャッシングを使用しても、長い入力は依然として高コストです。
 
-The guiding principle is informativity over exhaustiveness. Include what matters for the decision at hand, exclude what does not, and design systems that can access additional information on demand.
+指導原則は、網羅性よりも情報性です。当面の判断に重要なものを含め、重要でないものを除外し、必要に応じて追加情報にアクセスできるシステムを設計します。
 
-### Context as Finite Resource
+### 有限リソースとしてのコンテキスト
 
-Context must be treated as a finite resource with diminishing marginal returns. Like humans with limited working memory, language models have an attention budget drawn on when parsing large volumes of context.
+コンテキストは、限界収益逓減を伴う有限リソースとして扱わなければなりません。限られたワーキングメモリを持つ人間と同様に、言語モデルには大量のコンテキストを解析する際に引き出されるアテンションバジェットがあります。
 
-Every new token introduced depletes this budget by some amount. This creates the need for careful curation of available tokens. The engineering problem is optimizing utility against inherent constraints.
+導入される新しいトークンごとに、このバジェットがある程度枯渇します。これにより、利用可能なトークンの慎重なキュレーションの必要性が生まれます。エンジニアリングの問題は、固有の制約に対してユーティリティを最適化することです。
 
-Context engineering is iterative and the curation phase happens each time you decide what to pass to the model. It is not a one-time prompt writing exercise but an ongoing discipline of context management.
+コンテキストエンジニアリングは反復的であり、キュレーションフェーズはモデルに何を渡すかを決定するたびに発生します。これは一度きりのプロンプト作成の演習ではなく、コンテキスト管理の継続的な規律です。
 
-## Practical Guidance
+## 実践ガイダンス
 
-### File-System-Based Access
+### ファイルシステムベースのアクセス
 
-Agents with filesystem access can use progressive disclosure naturally. Store reference materials, documentation, and data externally. Load files only when needed using standard filesystem operations. This pattern avoids stuffing context with information that may not be relevant.
+ファイルシステムアクセスを持つエージェントは、段階的開示を自然に使用できます。参考資料、ドキュメント、データを外部に保存します。標準的なファイルシステム操作を使用して、必要な時にのみファイルをロードします。このパターンは、関連性のない可能性のある情報でコンテキストを埋め尽くすことを回避します。
 
-The file system itself provides structure that agents can navigate. File sizes suggest complexity; naming conventions hint at purpose; timestamps serve as proxies for relevance. Metadata of file references provides a mechanism to efficiently refine behavior.
+ファイルシステム自体が、エージェントがナビゲートできる構造を提供します。ファイルサイズは複雑さを示唆し、命名規則は目的をほのめかし、タイムスタンプは関連性の代理として機能します。ファイル参照のメタデータは、動作を効率的に改善するメカニズムを提供します。
 
-### Hybrid Strategies
+### ハイブリッド戦略
 
-The most effective agents employ hybrid strategies. Pre-load some context for speed (like CLAUDE.md files or project rules), but enable autonomous exploration for additional context as needed. The decision boundary depends on task characteristics and context dynamics.
+最も効果的なエージェントは、ハイブリッド戦略を採用しています。速度のために一部のコンテキストを事前にロードしますが（CLAUDE.mdファイルやプロジェクトルールなど）、必要に応じて追加コンテキストの自律的な探索を可能にします。判断の境界は、タスクの特性とコンテキストのダイナミクスに依存します。
 
-For contexts with less dynamic content, pre-loading more upfront makes sense. For rapidly changing or highly specific information, just-in-time loading avoids stale context.
+動的コンテンツが少ないコンテキストでは、事前により多くをロードすることが理にかなっています。急速に変化する情報や非常に特定の情報については、ジャストインタイムロードにより古くなったコンテキストを回避できます。
 
-### Context Budgeting
+### コンテキストバジェッティング
 
-Design with explicit context budgets in mind. Know the effective context limit for your model and task. Monitor context usage during development. Implement compaction triggers at appropriate thresholds. Design systems assuming context will degrade rather than hoping it will not.
+明示的なコンテキストバジェットを念頭に置いて設計します。モデルとタスクの効果的なコンテキスト制限を把握します。開発中にコンテキスト使用を監視します。適切な閾値でコンパクショントリガーを実装します。コンテキストが劣化しないことを期待するのではなく、劣化することを前提としたシステムを設計します。
 
-Effective context budgeting requires understanding not just raw token counts but also attention distribution patterns. The middle of context receives less attention than the beginning and end. Place critical information at attention-favored positions.
+効果的なコンテキストバジェッティングには、生のトークン数だけでなく、アテンション分布パターンの理解も必要です。コンテキストの中間部分は、先頭と末尾よりも少ないアテンションを受けます。重要な情報をアテンションが優遇されるポジションに配置します。
 
-## Examples
+## 例
 
-**Example 1: Organizing System Prompts**
+**例1：システムプロンプトの整理**
 ```markdown
 <BACKGROUND_INFORMATION>
 You are a Python expert helping a development team.
@@ -129,7 +129,7 @@ Explain non-obvious decisions in comments.
 </OUTPUT_DESCRIPTION>
 ```
 
-**Example 2: Progressive Document Loading**
+**例2：段階的ドキュメントロード**
 ```markdown
 # Instead of loading all documentation at once:
 
@@ -141,45 +141,45 @@ docs/api/endpoints.md        # Only when API calls needed
 docs/api/authentication.md   # Only when auth context needed
 ```
 
-## Guidelines
+## ガイドライン
 
-1. Treat context as a finite resource with diminishing returns
-2. Place critical information at attention-favored positions (beginning and end)
-3. Use progressive disclosure to defer loading until needed
-4. Organize system prompts with clear section boundaries
-5. Monitor context usage during development
-6. Implement compaction triggers at 70-80% utilization
-7. Design for context degradation rather than hoping to avoid it
-8. Prefer smaller high-signal context over larger low-signal context
+1. コンテキストを限界収益逓減を伴う有限リソースとして扱う
+2. 重要な情報をアテンションが優遇されるポジション（先頭と末尾）に配置する
+3. 段階的開示を使用して、必要になるまでロードを延期する
+4. 明確なセクション境界でシステムプロンプトを整理する
+5. 開発中にコンテキスト使用を監視する
+6. 利用率70〜80%でコンパクショントリガーを実装する
+7. コンテキストの劣化を回避することを期待するのではなく、劣化に備えて設計する
+8. より大きな低シグナルコンテキストよりも、小さな高シグナルコンテキストを優先する
 
-## Integration
+## 統合
 
-This skill provides foundational context that all other skills build upon. It should be studied first before exploring:
+このスキルは、他のすべてのスキルが基盤とする基礎的なコンテキストを提供します。以下を探索する前に最初に学習すべきです：
 
-- context-degradation - Understanding how context fails
-- context-optimization - Techniques for extending context capacity
-- multi-agent-patterns - How context isolation enables multi-agent systems
-- tool-design - How tool definitions interact with context
+- context-degradation - コンテキストがどのように失敗するかの理解
+- context-optimization - コンテキスト容量を拡張する技術
+- multi-agent-patterns - コンテキスト分離がマルチエージェントシステムをどのように実現するか
+- tool-design - ツール定義がコンテキストとどのように相互作用するか
 
-## References
+## 参考文献
 
-Internal reference:
-- [Context Components Reference](./references/context-components.md) - Detailed technical reference
+内部参考：
+- [Context Components Reference](./references/context-components.md) - 詳細な技術リファレンス
 
-Related skills in this collection:
-- context-degradation - Understanding context failure patterns
-- context-optimization - Techniques for efficient context use
+このコレクションの関連スキル：
+- context-degradation - コンテキスト障害パターンの理解
+- context-optimization - 効率的なコンテキスト使用の技術
 
-External resources:
-- Research on transformer attention mechanisms
-- Production engineering guides from leading AI labs
-- Framework documentation on context window management
+外部リソース：
+- Transformerアテンションメカニズムに関する研究
+- 主要AIラボからのプロダクションエンジニアリングガイド
+- コンテキストウィンドウ管理に関するフレームワークドキュメント
 
 ---
 
-## Skill Metadata
+## スキルメタデータ
 
-**Created**: 2025-12-20
-**Last Updated**: 2025-12-20
-**Author**: Agent Skills for Context Engineering Contributors
-**Version**: 1.0.0
+**作成日**: 2025-12-20
+**最終更新日**: 2025-12-20
+**著者**: Agent Skills for Context Engineering Contributors
+**バージョン**: 1.0.0
