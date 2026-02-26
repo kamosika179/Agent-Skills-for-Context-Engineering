@@ -1,12 +1,12 @@
-# Context Components: Technical Reference
+# コンテキストコンポーネント：テクニカルリファレンス
 
-This document provides detailed technical reference for each context component in agent systems.
+このドキュメントは、エージェントシステムにおける各コンテキストコンポーネントの詳細なテクニカルリファレンスを提供します。
 
-## System Prompt Engineering
+## システムプロンプトエンジニアリング
 
-### Section Structure
+### セクション構造
 
-Organize system prompts into distinct sections with clear boundaries. A recommended structure:
+システムプロンプトを明確な境界を持つ個別のセクションに整理します。推奨される構造：
 
 ```
 <BACKGROUND_INFORMATION>
@@ -26,13 +26,13 @@ Expected output format and quality standards
 </OUTPUT_DESCRIPTION>
 ```
 
-This structure allows agents to locate relevant information quickly and enables selective context loading in advanced implementations.
+この構造により、エージェントは関連情報を素早く見つけることができ、高度な実装では選択的なコンテキストローディングが可能になります。
 
-### Altitude Calibration
+### 抽象度の調整
 
-The "altitude" of instructions refers to the level of abstraction. Consider these examples:
+指示の「抽象度」とは、抽象化のレベルを指します。以下の例を検討してください：
 
-**Too Low (Brittle):**
+**低すぎる（脆弱）：**
 ```
 If the user asks about pricing, check the pricing table in docs/pricing.md.
 If the table shows USD, convert to EUR using the exchange rate in
@@ -41,12 +41,12 @@ applicable rate from config/vat_rates.json. Format the response with
 the currency symbol, two decimal places, and a note about VAT.
 ```
 
-**Too High (Vague):**
+**高すぎる（曖昧）：**
 ```
 Help users with pricing questions. Be helpful and accurate.
 ```
 
-**Optimal (Heuristic-Driven):**
+**最適（ヒューリスティック駆動）：**
 ```
 For pricing inquiries:
 1. Retrieve current rates from docs/pricing.md
@@ -57,13 +57,13 @@ Prefer exact figures over estimates. When rates are unavailable,
 say so explicitly rather than projecting.
 ```
 
-The optimal altitude provides clear steps while allowing flexibility in execution.
+最適な抽象度は、明確な手順を提供しつつ、実行の柔軟性を確保します。
 
-## Tool Definition Specification
+## ツール定義仕様
 
-### Schema Structure
+### スキーマ構造
 
-Each tool should define:
+各ツールは以下を定義する必要があります：
 
 ```python
 {
@@ -87,16 +87,16 @@ Each tool should define:
 }
 ```
 
-### Description Engineering
+### 説明文の設計
 
-Tool descriptions should answer: what the tool does, when to use it, and what it produces. Include usage context, examples, and edge cases.
+ツールの説明文は、ツールが何をするか、いつ使うか、何を生成するかに答えるべきです。使用コンテキスト、例、エッジケースを含めてください。
 
-**Weak Description:**
+**弱い説明文：**
 ```
 Search the database for customer information.
 ```
 
-**Strong Description:**
+**強い説明文：**
 ```
 Retrieve customer information by ID or email.
 
@@ -112,27 +112,27 @@ Returns customer object with:
 Returns null if customer not found. Returns error if database unreachable.
 ```
 
-## Retrieved Document Management
+## 取得ドキュメントの管理
 
-### Identifier Design
+### 識別子の設計
 
-Design identifiers that convey meaning and enable efficient retrieval:
+意味を伝え、効率的な取得を可能にする識別子を設計します：
 
-**Poor identifiers:**
+**悪い識別子：**
 - `data/file1.json`
 - `ref/ref.md`
 - `2024/q3/report`
 
-**Strong identifiers:**
+**良い識別子：**
 - `customer_pricing_rates.json`
 - `engineering_onboarding_checklist.md`
 - `2024_q3_revenue_report.pdf`
 
-Strong identifiers allow agents to locate relevant files even without search tools.
+良い識別子により、エージェントは検索ツールがなくても関連ファイルを見つけることができます。
 
-### Document Chunking Strategy
+### ドキュメントチャンキング戦略
 
-For large documents, chunk strategically to preserve semantic coherence:
+大きなドキュメントの場合、意味的な一貫性を保つために戦略的にチャンク分割します：
 
 ```python
 # Pseudocode for semantic chunking
@@ -151,13 +151,13 @@ def chunk_document(content):
     return chunks
 ```
 
-Avoid arbitrary character limits that split mid-sentence or mid-concept.
+文の途中や概念の途中で分割するような任意の文字数制限は避けてください。
 
-## Message History Management
+## メッセージ履歴管理
 
-### Turn Representation
+### ターン表現
 
-Structure message history to preserve key information:
+重要な情報を保持するようにメッセージ履歴を構造化します：
 
 ```python
 {
@@ -170,9 +170,9 @@ Structure message history to preserve key information:
 }
 ```
 
-### Summary Injection Pattern
+### 要約注入パターン
 
-For long conversations, inject summaries at intervals:
+長い会話の場合、一定間隔で要約を注入します：
 
 ```python
 def inject_summaries(messages, summary_interval=20):
@@ -190,11 +190,11 @@ def inject_summaries(messages, summary_interval=20):
     return summarized
 ```
 
-## Tool Output Optimization
+## ツール出力の最適化
 
-### Response Formats
+### レスポンスフォーマット
 
-Provide response format options to control token usage:
+トークン使用量を制御するためのレスポンスフォーマットオプションを提供します：
 
 ```python
 def get_customer_response_format():
@@ -204,11 +204,11 @@ def get_customer_response_format():
     }
 ```
 
-The concise format returns essential fields only; detailed returns complete objects.
+簡潔フォーマットは必須フィールドのみを返し、詳細フォーマットは完全なオブジェクトを返します。
 
-### Observation Masking
+### オブザベーションマスキング
 
-For verbose tool outputs, consider masking patterns:
+冗長なツール出力に対して、マスキングパターンの検討を推奨します：
 
 ```python
 def mask_observation(output, max_length=500):
@@ -220,37 +220,37 @@ def mask_observation(output, max_length=500):
     return f"[Previous observation elided. Full content stored at reference {reference_id}]"
 ```
 
-This preserves information access while reducing token usage.
+これにより、トークン使用量を削減しつつ、情報へのアクセスを保持します。
 
-## Context Budget Estimation
+## コンテキストバジェットの見積もり
 
-### Token Counting Approximation
+### トークン数の概算
 
-For planning purposes, estimate tokens at approximately 4 characters per token for English text:
+計画目的では、英語テキストの場合、1トークンあたり約4文字として見積もります：
 
 ```
 1000 words ≈ 7500 characters ≈ 1800-2000 tokens
 ```
 
-This is a rough approximation; actual tokenization varies by model and content type.
+これは大まかな概算であり、実際のトークン化はモデルやコンテンツタイプによって異なります。
 
-### Context Budget Allocation
+### コンテキストバジェットの配分
 
-Allocate context budget across components:
+コンポーネント間でコンテキストバジェットを配分します：
 
-| Component | Typical Range | Notes |
+| コンポーネント | 一般的な範囲 | 備考 |
 |-----------|---------------|-------|
-| System prompt | 500-2000 tokens | Stable across session |
-| Tool definitions | 100-500 per tool | Grows with tool count |
-| Retrieved documents | Variable | Often largest consumer |
-| Message history | Variable | Grows with conversation |
-| Tool outputs | Variable | Can dominate context |
+| システムプロンプト | 500-2000 トークン | セッション全体で安定 |
+| ツール定義 | ツールあたり 100-500 | ツール数に応じて増加 |
+| 取得ドキュメント | 可変 | 最大の消費者となることが多い |
+| メッセージ履歴 | 可変 | 会話に応じて増加 |
+| ツール出力 | 可変 | コンテキストを支配する可能性あり |
 
-Monitor actual usage during development to establish baseline allocations.
+開発中に実際の使用量を監視し、ベースラインの配分を確立してください。
 
-## Progressive Disclosure Implementation
+## プログレッシブディスクロージャーの実装
 
-### Skill Activation Pattern
+### スキルアクティベーションパターン
 
 ```python
 def activate_skill_context(skill_name, task_description):
@@ -268,7 +268,7 @@ def activate_skill_context(skill_name, task_description):
         inject_into_context(skill_context)
 ```
 
-### Reference Loading Pattern
+### リファレンスローディングパターン
 
 ```python
 def get_reference(file_reference):
@@ -279,5 +279,5 @@ def get_reference(file_reference):
     return file_reference.content
 ```
 
-This pattern ensures files are loaded once and cached for the session.
+このパターンにより、ファイルは一度だけ読み込まれ、セッション中キャッシュされます。
 

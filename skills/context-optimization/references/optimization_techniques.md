@@ -1,44 +1,44 @@
-# Context Optimization Reference
+# コンテキスト最適化リファレンス
 
-This document provides detailed technical reference for context optimization techniques and strategies.
+このドキュメントは、コンテキスト最適化のテクニックと戦略に関する詳細なテクニカルリファレンスを提供します。
 
-## Compaction Strategies
+## コンパクション戦略
 
-### Summary-Based Compaction
+### 要約ベースのコンパクション
 
-Summary-based compaction replaces verbose content with concise summaries while preserving key information. The approach works by identifying sections that can be compressed, generating summaries that capture essential points, and replacing full content with summaries.
+要約ベースのコンパクションは、重要な情報を保持しながら冗長なコンテンツを簡潔な要約に置き換えます。このアプローチは、圧縮可能なセクションを特定し、本質的なポイントを捉えた要約を生成し、完全なコンテンツを要約に置き換えることで機能します。
 
-The effectiveness of compaction depends on what information is preserved. Critical decisions, user preferences, and current task state should never be compacted. Intermediate results and supporting evidence can be summarized more aggressively. Boilerplate, repeated information, and exploratory reasoning can often be removed entirely.
+コンパクションの効果は、どの情報が保持されるかに依存します。重要な意思決定、ユーザーの好み、および現在のタスク状態は決してコンパクションすべきではありません。中間結果や補足的な証拠はより積極的に要約できます。ボイラープレート、繰り返し情報、探索的な推論は完全に削除できることが多いです。
 
-### Token Budget Allocation
+### トークンバジェットの配分
 
-Effective context budgeting requires understanding how different context components consume tokens and allocating budget strategically:
+効果的なコンテキストバジェット管理には、異なるコンテキストコンポーネントがどのようにトークンを消費するかを理解し、戦略的にバジェットを配分することが必要です：
 
-| Component | Typical Range | Notes |
+| コンポーネント | 一般的な範囲 | 備考 |
 |-----------|---------------|-------|
-| System prompt | 500-2000 tokens | Stable across session |
-| Tool definitions | 100-500 per tool | Grows with tool count |
-| Retrieved documents | Variable | Often largest consumer |
-| Message history | Variable | Grows with conversation |
-| Tool outputs | Variable | Can dominate context |
+| システムプロンプト | 500-2000 トークン | セッション全体で安定 |
+| ツール定義 | ツールあたり 100-500 | ツール数に応じて増加 |
+| 取得ドキュメント | 可変 | 最大の消費者となることが多い |
+| メッセージ履歴 | 可変 | 会話に応じて増加 |
+| ツール出力 | 可変 | コンテキストを支配する可能性あり |
 
-### Compaction Thresholds
+### コンパクション閾値
 
-Trigger compaction at appropriate thresholds to maintain performance:
+パフォーマンスを維持するために適切な閾値でコンパクションをトリガーします：
 
-- Warning threshold at 70% of effective context limit
-- Compaction trigger at 80% of effective context limit
-- Aggressive compaction at 90% of effective context limit
+- 有効コンテキスト上限の70%で警告閾値
+- 有効コンテキスト上限の80%でコンパクショントリガー
+- 有効コンテキスト上限の90%で積極的コンパクション
 
-The exact thresholds depend on model behavior and task characteristics. Some models show graceful degradation while others exhibit sharp performance cliffs.
+正確な閾値はモデルの動作とタスクの特性に依存します。グレースフルデグラデーションを示すモデルもあれば、急激なパフォーマンス低下を示すモデルもあります。
 
-## Observation Masking Patterns
+## オブザベーションマスキングパターン
 
-### Selective Masking
+### 選択的マスキング
 
-Not all observations should be masked equally. Consider masking observations that have served their purpose and are no longer needed for active reasoning. Keep observations that are central to the current task. Keep observations from the most recent turn. Keep observations that may be referenced again.
+すべてのオブザベーションを同等にマスキングすべきではありません。目的を果たし、アクティブな推論に不要になったオブザベーションのマスキングを検討してください。現在のタスクの中心となるオブザベーションは保持してください。最新のターンからのオブザベーションは保持してください。再度参照される可能性のあるオブザベーションは保持してください。
 
-### Masking Implementation
+### マスキングの実装
 
 ```python
 def selective_mask(observations: List[Dict], current_task: Dict) -> List[Dict]:
@@ -69,22 +69,22 @@ def selective_mask(observations: List[Dict], current_task: Dict) -> List[Dict]:
     return masked
 ```
 
-## KV-Cache Optimization
+## KVキャッシュ最適化
 
-### Prefix Stability
+### プレフィックスの安定性
 
-KV-cache hit rates depend on prefix stability. Stable prefixes enable cache reuse across requests. Dynamic prefixes invalidate cache and force recomputation.
+KVキャッシュのヒット率はプレフィックスの安定性に依存します。安定したプレフィックスはリクエスト間でのキャッシュの再利用を可能にします。動的なプレフィックスはキャッシュを無効にし、再計算を強制します。
 
-Elements that should remain stable include system prompts, tool definitions, and frequently used templates. Elements that may vary include timestamps, session identifiers, and query-specific content.
+安定すべき要素にはシステムプロンプト、ツール定義、頻繁に使用されるテンプレートが含まれます。変動し得る要素にはタイムスタンプ、セッション識別子、クエリ固有のコンテンツが含まれます。
 
-### Cache-Friendly Design
+### キャッシュフレンドリーな設計
 
-Design prompts to maximize cache hit rates:
+キャッシュヒット率を最大化するようにプロンプトを設計します：
 
-1. Place stable content at the beginning
-2. Use consistent formatting across requests
-3. Avoid dynamic content in prompts when possible
-4. Use placeholders for dynamic content
+1. 安定したコンテンツを先頭に配置する
+2. リクエスト間で一貫したフォーマットを使用する
+3. 可能な限りプロンプト内の動的コンテンツを避ける
+4. 動的コンテンツにはプレースホルダーを使用する
 
 ```python
 # Cache-unfriendly: Dynamic timestamp in prompt
@@ -100,13 +100,13 @@ Current time is provided separately when relevant.
 """
 ```
 
-## Context Partitioning Strategies
+## コンテキストパーティショニング戦略
 
-### Sub-Agent Isolation
+### サブエージェントの分離
 
-Partition work across sub-agents to prevent any single context from growing too large. Each sub-agent operates with a clean context focused on its subtask.
+単一のコンテキストが大きくなりすぎることを防ぐために、サブエージェント間で作業を分割します。各サブエージェントは、そのサブタスクに焦点を当てたクリーンなコンテキストで動作します。
 
-### Partition Planning
+### パーティション計画
 
 ```python
 def plan_partitioning(task: Dict, context_limit: int) -> Dict:
@@ -133,73 +133,73 @@ def plan_partitioning(task: Dict, context_limit: int) -> Dict:
     }
 ```
 
-## Optimization Decision Framework
+## 最適化の意思決定フレームワーク
 
-### When to Optimize
+### いつ最適化するか
 
-Consider context optimization when context utilization exceeds 70%, when response quality degrades as conversations extend, when costs increase due to long contexts, or when latency increases with conversation length.
+コンテキスト使用率が70%を超えた場合、会話が長くなるにつれてレスポンス品質が低下する場合、長いコンテキストによりコストが増加する場合、または会話の長さに応じてレイテンシが増加する場合に、コンテキスト最適化を検討してください。
 
-### What Optimization to Apply
+### どの最適化を適用するか
 
-Choose optimization strategies based on context composition:
+コンテキストの構成に基づいて最適化戦略を選択します：
 
-If tool outputs dominate context, apply observation masking. If retrieved documents dominate context, apply summarization or partitioning. If message history dominates context, apply compaction with summarization. If multiple components contribute, combine strategies.
+ツール出力がコンテキストを支配している場合は、オブザベーションマスキングを適用します。取得ドキュメントがコンテキストを支配している場合は、要約またはパーティショニングを適用します。メッセージ履歴がコンテキストを支配している場合は、要約付きコンパクションを適用します。複数のコンポーネントが寄与している場合は、戦略を組み合わせます。
 
-### Evaluation of Optimization
+### 最適化の評価
 
-After applying optimization, evaluate effectiveness:
+最適化を適用した後、効果を評価します：
 
-- Measure token reduction achieved
-- Measure quality preservation (output quality should not degrade)
-- Measure latency improvement
-- Measure cost reduction
+- 達成されたトークン削減量を測定する
+- 品質の保持を測定する（出力品質が低下すべきではない）
+- レイテンシの改善を測定する
+- コスト削減を測定する
 
-Iterate on optimization strategies based on evaluation results.
+評価結果に基づいて最適化戦略を反復します。
 
-## Common Pitfalls
+## よくある落とし穴
 
-### Over-Aggressive Compaction
+### 過度なコンパクション
 
-Compacting too aggressively can remove critical information. Always preserve task goals, user preferences, and recent conversation context. Test compaction at increasing aggressiveness levels to find the optimal balance.
+過度に積極的なコンパクションは、重要な情報を削除する可能性があります。タスクの目標、ユーザーの好み、および最近の会話コンテキストを常に保持してください。最適なバランスを見つけるために、積極性のレベルを段階的に上げてコンパクションをテストしてください。
 
-### Masking Critical Observations
+### 重要なオブザベーションのマスキング
 
-Masking observations that are still needed can cause errors. Track observation usage and only mask content that is no longer referenced. Consider keeping references to masked content that could be retrieved if needed.
+まだ必要なオブザベーションをマスキングするとエラーが発生する可能性があります。オブザベーションの使用状況を追跡し、参照されなくなったコンテンツのみをマスキングしてください。必要に応じて取得できるよう、マスキングされたコンテンツへの参照を保持することを検討してください。
 
-### Ignoring Attention Distribution
+### アテンション分布の無視
 
-The lost-in-middle phenomenon means that information placement matters. Place critical information at attention-favored positions (beginning and end of context). Use explicit markers to highlight important content.
+Lost-in-Middle 現象は、情報の配置が重要であることを意味します。重要な情報をアテンションが優位な位置（コンテキストの先頭と末尾）に配置してください。明示的なマーカーを使用して重要なコンテンツを強調してください。
 
-### Premature Optimization
+### 早すぎる最適化
 
-Not all contexts require optimization. Adding optimization machinery has overhead. Optimize only when context limits actually constrain agent performance.
+すべてのコンテキストが最適化を必要とするわけではありません。最適化の仕組みを追加するとオーバーヘッドが発生します。コンテキストの制限が実際にエージェントのパフォーマンスを制約している場合にのみ最適化してください。
 
-## Monitoring and Alerting
+## モニタリングとアラート
 
-### Key Metrics
+### 主要メトリクス
 
-Track these metrics to understand optimization needs:
+最適化のニーズを理解するために以下のメトリクスを追跡します：
 
-- Context token count over time
-- Cache hit rates for repeated patterns
-- Response quality metrics by context size
-- Cost per conversation by context length
-- Latency by context size
+- 時間経過によるコンテキストトークン数
+- 繰り返しパターンのキャッシュヒット率
+- コンテキストサイズ別のレスポンス品質メトリクス
+- コンテキスト長別の会話あたりコスト
+- コンテキストサイズ別のレイテンシ
 
-### Alert Thresholds
+### アラート閾値
 
-Set alerts for:
+以下のアラートを設定します：
 
-- Context utilization above 80%
-- Cache hit rate below 50%
-- Quality score drop of more than 10%
-- Cost increase above baseline
+- コンテキスト使用率が80%超
+- キャッシュヒット率が50%未満
+- 品質スコアが10%以上低下
+- コストがベースラインを超えて増加
 
-## Integration Patterns
+## インテグレーションパターン
 
-### Integration with Agent Framework
+### エージェントフレームワークとの統合
 
-Integrate optimization into agent workflow:
+最適化をエージェントのワークフローに統合します：
 
 ```python
 class OptimizingAgent:
@@ -221,9 +221,9 @@ class OptimizingAgent:
         return response
 ```
 
-### Integration with Memory Systems
+### メモリシステムとの統合
 
-Connect optimization with memory systems:
+最適化をメモリシステムと接続します：
 
 ```python
 class MemoryAwareOptimizer:
@@ -244,29 +244,29 @@ class MemoryAwareOptimizer:
         return current_context
 ```
 
-## Performance Benchmarks
+## パフォーマンスベンチマーク
 
-### Compaction Performance
+### コンパクションのパフォーマンス
 
-Compaction should reduce token count while preserving quality. Target:
+コンパクションは品質を保持しながらトークン数を削減すべきです。目標：
 
-- 50-70% token reduction for aggressive compaction
-- Less than 5% quality degradation from compaction
-- Less than 10% latency increase from compaction overhead
+- 積極的コンパクションで50-70%のトークン削減
+- コンパクションによる品質低下は5%未満
+- コンパクションのオーバーヘッドによるレイテンシ増加は10%未満
 
-### Masking Performance
+### マスキングのパフォーマンス
 
-Observation masking should reduce token count significantly:
+オブザベーションマスキングはトークン数を大幅に削減すべきです：
 
-- 60-80% reduction in masked observations
-- Less than 2% quality impact from masking
-- Near-zero latency overhead
+- マスキングされたオブザベーションで60-80%の削減
+- マスキングによる品質への影響は2%未満
+- レイテンシのオーバーヘッドはほぼゼロ
 
-### Cache Performance
+### キャッシュのパフォーマンス
 
-KV-cache optimization should improve cost and latency:
+KVキャッシュ最適化はコストとレイテンシを改善すべきです：
 
-- 70%+ cache hit rate for stable workloads
-- 50%+ cost reduction from cache hits
-- 40%+ latency reduction from cache hits
+- 安定したワークロードで70%以上のキャッシュヒット率
+- キャッシュヒットによる50%以上のコスト削減
+- キャッシュヒットによる40%以上のレイテンシ削減
 
