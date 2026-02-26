@@ -1,54 +1,54 @@
 ---
 name: filesystem-context
-description: This skill should be used when the user asks to "offload context to files", "implement dynamic context discovery", "use filesystem for agent memory", "reduce context window bloat", or mentions file-based context management, tool output persistence, agent scratch pads, or just-in-time context loading.
+description: このスキルは、ユーザーが「コンテキストをファイルにオフロードする」「動的コンテキスト発見を実装する」「エージェントメモリにファイルシステムを使用する」「コンテキストウィンドウの肥大化を削減する」と依頼した場合、またはファイルベースのコンテキスト管理、ツール出力の永続化、エージェントスクラッチパッド、ジャストインタイムのコンテキストローディングに言及した場合に使用します。
 ---
 
-# Filesystem-Based Context Engineering
+# ファイルシステムベースのコンテキストエンジニアリング
 
-The filesystem provides a single interface through which agents can flexibly store, retrieve, and update an effectively unlimited amount of context. This pattern addresses the fundamental constraint that context windows are limited while tasks often require more information than fits in a single window.
+ファイルシステムは、エージェントが事実上無制限の量のコンテキストを柔軟に保存、取得、更新できる単一のインターフェースを提供します。このパターンは、コンテキストウィンドウが限られている一方で、タスクが単一のウィンドウに収まる以上の情報を必要とすることが多いという根本的な制約に対処します。
 
-The core insight is that files enable dynamic context discovery: agents pull relevant context on demand rather than carrying everything in the context window. This contrasts with static context, which is always included regardless of relevance.
+核心的な洞察は、ファイルが動的コンテキスト発見を可能にするということです：エージェントはコンテキストウィンドウにすべてを保持するのではなく、必要に応じて関連するコンテキストをオンデマンドで取得します。これは、関連性に関係なく常に含まれる静的コンテキストとは対照的です。
 
-## When to Activate
+## アクティベーション条件
 
-Activate this skill when:
-- Tool outputs are bloating the context window
-- Agents need to persist state across long trajectories
-- Sub-agents must share information without direct message passing
-- Tasks require more context than fits in the window
-- Building agents that learn and update their own instructions
-- Implementing scratch pads for intermediate results
-- Terminal outputs or logs need to be accessible to agents
+以下の場合にこのスキルをアクティベートしてください：
+- ツール出力がコンテキストウィンドウを肥大化させている場合
+- エージェントが長いトラジェクトリにわたって状態を永続化する必要がある場合
+- サブエージェントが直接メッセージパッシングなしで情報を共有する必要がある場合
+- タスクがウィンドウに収まる以上のコンテキストを必要とする場合
+- エージェントが自身の指示を学習・更新するシステムを構築する場合
+- 中間結果のためのスクラッチパッドを実装する場合
+- ターミナル出力やログをエージェントがアクセスできるようにする必要がある場合
 
-## Core Concepts
+## コアコンセプト
 
-Context engineering can fail in four predictable ways. First, when the context an agent needs is not in the total available context. Second, when retrieved context fails to encapsulate needed context. Third, when retrieved context far exceeds needed context, wasting tokens and degrading performance. Fourth, when agents cannot discover niche information buried in many files.
+コンテキストエンジニアリングは4つの予測可能な方法で失敗する可能性があります。第一に、エージェントが必要とするコンテキストが利用可能な総コンテキストに含まれていない場合。第二に、取得されたコンテキストが必要なコンテキストを十分にカプセル化できない場合。第三に、取得されたコンテキストが必要なコンテキストを大幅に超え、トークンを浪費しパフォーマンスを低下させる場合。第四に、エージェントが多数のファイルに埋もれたニッチな情報を発見できない場合。
 
-The filesystem addresses these failures by providing a persistent layer where agents write once and read selectively, offloading bulk content while preserving the ability to retrieve specific information through search tools.
+ファイルシステムはこれらの障害に対処するために、エージェントが一度書き込み選択的に読み取る永続レイヤーを提供し、検索ツールを通じて特定の情報を取得する能力を維持しながら大量のコンテンツをオフロードします。
 
-## Detailed Topics
+## 詳細トピック
 
-### The Static vs Dynamic Context Trade-off
+### 静的コンテキスト vs 動的コンテキストのトレードオフ
 
-**Static Context**
-Static context is always included in the prompt: system instructions, tool definitions, and critical rules. Static context consumes tokens regardless of task relevance. As agents accumulate more capabilities (tools, skills, instructions), static context grows and crowds out space for dynamic information.
+**静的コンテキスト**
+静的コンテキストは常にプロンプトに含まれます：システム指示、ツール定義、重要なルール。静的コンテキストはタスクの関連性に関係なくトークンを消費します。エージェントがより多くの機能（ツール、スキル、指示）を蓄積するにつれ、静的コンテキストが増大し、動的情報のためのスペースを圧迫します。
 
-**Dynamic Context Discovery**
-Dynamic context is loaded on-demand when relevant to the current task. The agent receives minimal static pointers (names, descriptions, file paths) and uses search tools to load full content when needed.
+**動的コンテキスト発見**
+動的コンテキストは現在のタスクに関連する場合にオンデマンドでロードされます。エージェントは最小限の静的ポインター（名前、記述、ファイルパス）を受け取り、必要に応じて検索ツールを使用して完全なコンテンツをロードします。
 
-Dynamic discovery is more token-efficient because only necessary data enters the context window. It can also improve response quality by reducing potentially confusing or contradictory information.
+動的発見は必要なデータのみがコンテキストウィンドウに入るため、トークン効率が高くなります。また、混乱や矛盾する可能性のある情報を減らすことで、レスポンスの品質を向上させることもできます。
 
-The trade-off: dynamic discovery requires the model to correctly identify when to load additional context. This works well with current frontier models but may fail with less capable models that do not recognize when they need more information.
+トレードオフ：動的発見はモデルが追加コンテキストをロードすべきタイミングを正しく識別する必要があります。これは現在のフロンティアモデルではうまく機能しますが、追加情報が必要な場合にそれを認識できない能力の低いモデルでは失敗する可能性があります。
 
-### Pattern 1: Filesystem as Scratch Pad
+### パターン1：スクラッチパッドとしてのファイルシステム
 
-**The Problem**
-Tool calls can return massive outputs. A web search may return 10k tokens of raw content. A database query may return hundreds of rows. If this content enters the message history, it remains for the entire conversation, inflating token costs and potentially degrading attention to more relevant information.
+**問題**
+ツール呼び出しは大量の出力を返すことがあります。ウェブ検索は10kトークンの生のコンテンツを返す場合があります。データベースクエリは数百行を返す場合があります。このコンテンツがメッセージ履歴に入ると、会話全体にわたって残り、トークンコストを増大させ、より関連性の高い情報への注意を低下させる可能性があります。
 
-**The Solution**
-Write large tool outputs to files instead of returning them directly to the context. The agent then uses targeted retrieval (grep, line-specific reads) to extract only the relevant portions.
+**解決策**
+大きなツール出力をコンテキストに直接返すのではなく、ファイルに書き込みます。その後、エージェントはターゲットを絞った取得（grep、行指定の読み取り）を使用して関連部分のみを抽出します。
 
-**Implementation**
+**実装**
 ```python
 def handle_tool_output(output: str, threshold: int = 2000) -> str:
     if len(output) < threshold:
@@ -63,23 +63,23 @@ def handle_tool_output(output: str, threshold: int = 2000) -> str:
     return f"[Output written to {file_path}. Summary: {key_summary}]"
 ```
 
-The agent can then use `grep` to search for specific patterns or `read_file` with line ranges to retrieve targeted sections.
+エージェントは`grep`を使用して特定のパターンを検索したり、行範囲を指定した`read_file`を使用してターゲットセクションを取得できます。
 
-**Benefits**
-- Reduces token accumulation over long conversations
-- Preserves full output for later reference
-- Enables targeted retrieval instead of carrying everything
+**メリット**
+- 長い会話でのトークン蓄積を削減
+- 後で参照するための完全な出力を保存
+- すべてを保持するのではなく、ターゲットを絞った取得を可能にする
 
-### Pattern 2: Plan Persistence
+### パターン2：プラン永続化
 
-**The Problem**
-Long-horizon tasks require agents to make plans and follow them. But as conversations extend, plans can fall out of attention or be lost to summarization. The agent loses track of what it was supposed to do.
+**問題**
+長期的なタスクではエージェントがプランを立て、それに従う必要があります。しかし、会話が延長されると、プランが注意から外れたり、要約によって失われたりする可能性があります。エージェントは何をすべきかを見失います。
 
-**The Solution**
-Write plans to the filesystem. The agent can re-read its plan at any point, reminding itself of the current objective and progress. This is sometimes called "manipulating attention through recitation."
+**解決策**
+プランをファイルシステムに書き込みます。エージェントはいつでもプランを再読み込みでき、現在の目標と進捗を思い出させることができます。これは「暗唱による注意の操作」と呼ばれることもあります。
 
-**Implementation**
-Store plans in structured format:
+**実装**
+構造化されたフォーマットでプランを保存：
 ```yaml
 # scratch/current_plan.yaml
 objective: "Refactor authentication module"
@@ -96,17 +96,17 @@ steps:
     status: pending
 ```
 
-The agent reads this file at the start of each turn or when it needs to re-orient.
+エージェントは各ターンの開始時または方向を再確認する必要がある場合にこのファイルを読み取ります。
 
-### Pattern 3: Sub-Agent Communication via Filesystem
+### パターン3：ファイルシステムを介したサブエージェント間通信
 
-**The Problem**
-In multi-agent systems, sub-agents typically report findings to a coordinator agent through message passing. This creates a "game of telephone" where information degrades through summarization at each hop.
+**問題**
+マルチエージェントシステムでは、サブエージェントは通常、メッセージパッシングを通じてコーディネーターエージェントに調査結果を報告します。これにより、各ホップでの要約によって情報が劣化する「伝言ゲーム」が発生します。
 
-**The Solution**
-Sub-agents write their findings directly to the filesystem. The coordinator reads these files directly, bypassing intermediate message passing. This preserves fidelity and reduces context accumulation in the coordinator.
+**解決策**
+サブエージェントが調査結果をファイルシステムに直接書き込みます。コーディネーターはこれらのファイルを直接読み取り、中間のメッセージパッシングをバイパスします。これにより忠実性が保たれ、コーディネーターでのコンテキスト蓄積が削減されます。
 
-**Implementation**
+**実装**
 ```
 workspace/
   agents/
@@ -120,18 +120,18 @@ workspace/
     synthesis.md         # Coordinator reads agent outputs, writes synthesis
 ```
 
-Each agent operates in relative isolation but shares state through the filesystem.
+各エージェントは相対的に独立して動作しますが、ファイルシステムを通じて状態を共有します。
 
-### Pattern 4: Dynamic Skill Loading
+### パターン4：動的スキルローディング
 
-**The Problem**
-Agents may have many skills or instruction sets, but most are irrelevant to any given task. Stuffing all instructions into the system prompt wastes tokens and can confuse the model with contradictory or irrelevant guidance.
+**問題**
+エージェントは多数のスキルや指示セットを持つ場合がありますが、特定のタスクに対してほとんどは無関係です。すべての指示をシステムプロンプトに詰め込むとトークンを浪費し、矛盾する無関係なガイダンスでモデルを混乱させる可能性があります。
 
-**The Solution**
-Store skills as files. Include only skill names and brief descriptions in static context. The agent uses search tools to load relevant skill content when the task requires it.
+**解決策**
+スキルをファイルとして保存します。静的コンテキストにはスキル名と簡単な記述のみを含めます。エージェントはタスクが必要とする場合に検索ツールを使用して関連するスキルコンテンツをロードします。
 
-**Implementation**
-Static context includes:
+**実装**
+静的コンテキストに含めるもの：
 ```
 Available skills (load with read_file when relevant):
 - database-optimization: Query tuning and indexing strategies
@@ -139,39 +139,39 @@ Available skills (load with read_file when relevant):
 - testing-strategies: Unit, integration, and e2e testing patterns
 ```
 
-Agent loads `skills/database-optimization/SKILL.md` only when working on database tasks.
+エージェントはデータベースタスクに取り組む場合にのみ`skills/database-optimization/SKILL.md`をロードします。
 
-### Pattern 5: Terminal and Log Persistence
+### パターン5：ターミナルとログの永続化
 
-**The Problem**
-Terminal output from long-running processes accumulates rapidly. Copying and pasting output into agent input is manual and inefficient.
+**問題**
+長時間実行プロセスからのターミナル出力は急速に蓄積されます。出力をコピー＆ペーストしてエージェント入力に渡すのは手動で非効率的です。
 
-**The Solution**
-Sync terminal output to files automatically. The agent can then grep for relevant sections (error messages, specific commands) without loading entire terminal histories.
+**解決策**
+ターミナル出力を自動的にファイルに同期します。エージェントはターミナル履歴全体をロードすることなく、関連するセクション（エラーメッセージ、特定のコマンド）をgrepで検索できます。
 
-**Implementation**
-Terminal sessions are persisted as files:
+**実装**
+ターミナルセッションはファイルとして永続化されます：
 ```
 terminals/
   1.txt    # Terminal session 1 output
   2.txt    # Terminal session 2 output
 ```
 
-Agents query with targeted grep:
+エージェントはターゲットを絞ったgrepでクエリします：
 ```bash
 grep -A 5 "error" terminals/1.txt
 ```
 
-### Pattern 6: Learning Through Self-Modification
+### パターン6：自己変更による学習
 
-**The Problem**
-Agents often lack context that users provide implicitly or explicitly during interactions. Traditionally, this requires manual system prompt updates between sessions.
+**問題**
+エージェントはインタラクション中にユーザーが暗黙的または明示的に提供するコンテキストを欠いていることがよくあります。従来、これにはセッション間での手動のシステムプロンプト更新が必要でした。
 
-**The Solution**
-Agents write learned information to their own instruction files. Subsequent sessions load these files, incorporating learned context automatically.
+**解決策**
+エージェントが学習した情報を自身の指示ファイルに書き込みます。以降のセッションでこれらのファイルをロードし、学習したコンテキストを自動的に組み込みます。
 
-**Implementation**
-After user provides preference:
+**実装**
+ユーザーの好みが提供された後：
 ```python
 def remember_preference(key: str, value: str):
     preferences_file = "agent/user_preferences.yaml"
@@ -180,44 +180,44 @@ def remember_preference(key: str, value: str):
     write_yaml(preferences_file, prefs)
 ```
 
-Subsequent sessions include a step to load user preferences if the file exists.
+以降のセッションでは、ファイルが存在する場合にユーザーの好みをロードするステップが含まれます。
 
-**Caution**
-This pattern is still emerging. Self-modification requires careful guardrails to prevent agents from accumulating incorrect or contradictory instructions over time.
+**注意**
+このパターンはまだ発展途上です。自己変更には、エージェントが時間の経過とともに不正確または矛盾する指示を蓄積するのを防ぐための慎重なガードレールが必要です。
 
-### Filesystem Search Techniques
+### ファイルシステム検索テクニック
 
-Models are specifically trained to understand filesystem traversal. The combination of `ls`, `glob`, `grep`, and `read_file` with line ranges provides powerful context discovery:
+モデルはファイルシステムのトラバーサルを理解するよう特別に訓練されています。`ls`、`glob`、`grep`、行範囲を指定した`read_file`の組み合わせにより、強力なコンテキスト発見が可能になります：
 
-- `ls` / `list_dir`: Discover directory structure
-- `glob`: Find files matching patterns (e.g., `**/*.py`)
-- `grep`: Search file contents for patterns, returns matching lines
-- `read_file` with ranges: Read specific line ranges without loading entire files
+- `ls` / `list_dir`：ディレクトリ構造の発見
+- `glob`：パターンに一致するファイルの検索（例：`**/*.py`）
+- `grep`：パターンに対するファイルコンテンツの検索、一致する行を返す
+- 範囲指定の`read_file`：ファイル全体をロードせずに特定の行範囲を読み取る
 
-This combination often outperforms semantic search for technical content (code, API docs) where semantic meaning is sparse but structural patterns are clear.
+この組み合わせは、意味的な意味が希薄で構造的なパターンが明確な技術コンテンツ（コード、APIドキュメント）に対して、セマンティック検索を上回ることがよくあります。
 
-Semantic search and filesystem search work well together: semantic search for conceptual queries, filesystem search for structural and exact-match queries.
+セマンティック検索とファイルシステム検索は相補的に機能します：概念的なクエリにはセマンティック検索、構造的および完全一致のクエリにはファイルシステム検索。
 
-## Practical Guidance
+## 実践的ガイダンス
 
-### When to Use Filesystem Context
+### ファイルシステムコンテキストの使用タイミング
 
-**Use filesystem patterns when:**
-- Tool outputs exceed 2000 tokens
-- Tasks span multiple conversation turns
-- Multiple agents need to share state
-- Skills or instructions exceed what fits comfortably in system prompt
-- Logs or terminal output need selective querying
+**ファイルシステムパターンを使用する場合：**
+- ツール出力が2000トークンを超える場合
+- タスクが複数の会話ターンにまたがる場合
+- 複数のエージェントが状態を共有する必要がある場合
+- スキルや指示がシステムプロンプトに快適に収まらない場合
+- ログやターミナル出力の選択的クエリが必要な場合
 
-**Avoid filesystem patterns when:**
-- Tasks complete in single turns
-- Context fits comfortably in window
-- Latency is critical (file I/O adds overhead)
-- Simple model incapable of filesystem tool use
+**ファイルシステムパターンを避ける場合：**
+- タスクが単一ターンで完了する場合
+- コンテキストがウィンドウに快適に収まる場合
+- レイテンシーが重要な場合（ファイルI/Oがオーバーヘッドを追加）
+- ファイルシステムツールの使用能力がない単純なモデルの場合
 
-### File Organization
+### ファイル整理
 
-Structure files for discoverability:
+発見可能性のためにファイルを構造化：
 ```
 project/
   scratch/           # Temporary working files
@@ -230,20 +230,20 @@ project/
   agents/            # Sub-agent workspaces
 ```
 
-Use consistent naming conventions. Include timestamps or IDs in scratch files for disambiguation.
+一貫した命名規則を使用してください。曖昧さを排除するためにスクラッチファイルにタイムスタンプやIDを含めてください。
 
-### Token Accounting
+### トークン会計
 
-Track where tokens originate:
-- Measure static vs dynamic context ratio
-- Monitor tool output sizes before and after offloading
-- Track how often dynamic context is actually loaded
+トークンの発生源を追跡：
+- 静的コンテキストと動的コンテキストの比率を測定
+- オフロード前後のツール出力サイズを監視
+- 動的コンテキストが実際にロードされる頻度を追跡
 
-Optimize based on measurements, not assumptions.
+想定ではなく、測定に基づいて最適化してください。
 
-## Examples
+## 例
 
-**Example 1: Tool Output Offloading**
+**例1：ツール出力のオフロード**
 ```
 Input: Web search returns 8000 tokens
 Before: 8000 tokens added to message history
@@ -254,7 +254,7 @@ After:
 Result: ~100 tokens in context, 8000 tokens accessible on demand
 ```
 
-**Example 2: Dynamic Skill Loading**
+**例2：動的スキルローディング**
 ```
 Input: User asks about database indexing
 Static context: "database-optimization: Query tuning and indexing"
@@ -262,7 +262,7 @@ Agent action: read_file("skills/database-optimization/SKILL.md")
 Result: Full skill loaded only when relevant
 ```
 
-**Example 3: Chat History as File Reference**
+**例3：ファイル参照としてのチャット履歴**
 ```
 Trigger: Context window limit reached, summarization required
 Action: 
@@ -272,50 +272,50 @@ Action:
 Result: Agent can search history file to recover details lost in summarization
 ```
 
-## Guidelines
+## ガイドライン
 
-1. Write large outputs to files; return summaries and references to context
-2. Store plans and state in structured files for re-reading
-3. Use sub-agent file workspaces instead of message chains
-4. Load skills dynamically rather than stuffing all into system prompt
-5. Persist terminal and log output as searchable files
-6. Combine grep/glob with semantic search for comprehensive discovery
-7. Organize files for agent discoverability with clear naming
-8. Measure token savings to validate filesystem patterns are effective
-9. Implement cleanup for scratch files to prevent unbounded growth
-10. Guard self-modification patterns with validation
+1. 大きな出力をファイルに書き込み、コンテキストにはサマリーと参照を返す
+2. 再読み込み用に構造化されたファイルにプランと状態を保存する
+3. メッセージチェーンの代わりにサブエージェントのファイルワークスペースを使用する
+4. すべてをシステムプロンプトに詰め込むのではなく、スキルを動的にロードする
+5. ターミナルとログ出力を検索可能なファイルとして永続化する
+6. 包括的な発見のためにgrep/globとセマンティック検索を組み合わせる
+7. 明確な命名でエージェントの発見可能性のためにファイルを整理する
+8. ファイルシステムパターンが効果的であることを検証するためにトークン削減を測定する
+9. 無制限な増大を防ぐためにスクラッチファイルのクリーンアップを実装する
+10. 自己変更パターンにはバリデーションによるガードを設ける
 
-## Integration
+## 統合
 
-This skill connects to:
+このスキルは以下と関連します：
 
-- context-optimization - Filesystem offloading is a form of observation masking
-- memory-systems - Filesystem-as-memory is a simple memory layer
-- multi-agent-patterns - Sub-agent file workspaces enable isolation
-- context-compression - File references enable lossless "compression"
-- tool-design - Tools should return file references for large outputs
+- context-optimization - ファイルシステムオフロードはオブザベーションマスキングの一形態
+- memory-systems - ファイルシステムをメモリとして使用するのはシンプルなメモリレイヤー
+- multi-agent-patterns - サブエージェントのファイルワークスペースが分離を可能にする
+- context-compression - ファイル参照がロスレスの「圧縮」を可能にする
+- tool-design - ツールは大きな出力に対してファイル参照を返すべき
 
-## References
+## 参考資料
 
-Internal reference:
-- [Implementation Patterns](./references/implementation-patterns.md) - Detailed pattern implementations
+内部参考資料：
+- [実装パターン](./references/implementation-patterns.md) - 詳細なパターン実装
 
-Related skills in this collection:
-- context-optimization - Token reduction techniques
-- memory-systems - Persistent storage patterns
-- multi-agent-patterns - Agent coordination
+このコレクション内の関連スキル：
+- context-optimization - トークン削減テクニック
+- memory-systems - 永続ストレージパターン
+- multi-agent-patterns - エージェント連携
 
-External resources:
-- LangChain Deep Agents: How agents can use filesystems for context engineering
-- Cursor: Dynamic context discovery patterns
-- Anthropic: Agent Skills specification
+外部リソース：
+- LangChain Deep Agents：エージェントがコンテキストエンジニアリングにファイルシステムを使用する方法
+- Cursor：動的コンテキスト発見パターン
+- Anthropic：Agent Skills仕様
 
 ---
 
-## Skill Metadata
+## スキルメタデータ
 
-**Created**: 2026-01-07
-**Last Updated**: 2026-01-07
-**Author**: Agent Skills for Context Engineering Contributors
-**Version**: 1.0.0
+**作成日**: 2026-01-07
+**最終更新日**: 2026-01-07
+**著者**: Agent Skills for Context Engineering Contributors
+**バージョン**: 1.0.0
 

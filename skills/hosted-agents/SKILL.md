@@ -1,279 +1,279 @@
 ---
 name: hosted-agents
-description: This skill should be used when the user asks to "build background agent", "create hosted coding agent", "set up sandboxed execution", "implement multiplayer agent", or mentions background agents, sandboxed VMs, agent infrastructure, Modal sandboxes, self-spawning agents, or remote coding environments.
+description: このスキルは、ユーザーが「バックグラウンドエージェントを構築する」「ホスト型コーディングエージェントを作成する」「サンドボックス実行を設定する」「マルチプレイヤーエージェントを実装する」と依頼した場合、またはバックグラウンドエージェント、サンドボックスVM、エージェントインフラストラクチャ、Modalサンドボックス、自己スポーンエージェント、リモートコーディング環境に言及した場合に使用します。
 ---
 
-# Hosted Agent Infrastructure
+# ホスト型エージェントインフラストラクチャ
 
-Hosted agents run in remote sandboxed environments rather than on local machines. When designed well, they provide unlimited concurrency, consistent execution environments, and multiplayer collaboration. The critical insight is that session speed should be limited only by model provider time-to-first-token, with all infrastructure setup completed before the user starts their session.
+ホスト型エージェントは、ローカルマシンではなくリモートのサンドボックス環境で実行されます。適切に設計されている場合、無制限の同時実行性、一貫した実行環境、マルチプレイヤーコラボレーションを提供します。重要な洞察は、セッション速度はモデルプロバイダーの最初のトークンまでの時間のみによって制限されるべきであり、すべてのインフラストラクチャのセットアップはユーザーがセッションを開始する前に完了していなければならないということです。
 
-## When to Activate
+## アクティベーション条件
 
-Activate this skill when:
-- Building background coding agents that run independently of user devices
-- Designing sandboxed execution environments for agent workloads
-- Implementing multiplayer agent sessions with shared state
-- Creating multi-client agent interfaces (Slack, Web, Chrome extensions)
-- Scaling agent infrastructure beyond local machine constraints
-- Building systems where agents spawn sub-agents for parallel work
+以下の場合にこのスキルをアクティベートしてください：
+- ユーザーデバイスから独立して実行されるバックグラウンドコーディングエージェントを構築する場合
+- エージェントワークロード用のサンドボックス実行環境を設計する場合
+- 共有状態を持つマルチプレイヤーエージェントセッションを実装する場合
+- マルチクライアントエージェントインターフェース（Slack、Web、Chrome拡張機能）を作成する場合
+- ローカルマシンの制約を超えてエージェントインフラストラクチャをスケールする場合
+- エージェントが並列作業のためにサブエージェントをスポーンするシステムを構築する場合
 
-## Core Concepts
+## コアコンセプト
 
-Hosted agents address the fundamental limitation of local agent execution: resource contention, environment inconsistency, and single-user constraints. By moving agent execution to remote sandboxed environments, teams gain unlimited concurrency, reproducible environments, and collaborative workflows.
+ホスト型エージェントは、ローカルエージェント実行の根本的な制限に対処します：リソース競合、環境の不一致、シングルユーザー制約。エージェント実行をリモートのサンドボックス環境に移行することで、チームは無制限の同時実行性、再現可能な環境、コラボレーティブなワークフローを獲得します。
 
-The architecture consists of three layers: sandbox infrastructure for isolated execution, API layer for state management and client coordination, and client interfaces for user interaction across platforms. Each layer has specific design requirements that enable the system to scale.
+アーキテクチャは3つのレイヤーで構成されます：分離された実行のためのサンドボックスインフラストラクチャ、状態管理とクライアント調整のためのAPIレイヤー、プラットフォーム間でのユーザーインタラクションのためのクライアントインターフェース。各レイヤーにはシステムのスケールを可能にする特定の設計要件があります。
 
-## Detailed Topics
+## 詳細トピック
 
-### Sandbox Infrastructure
+### サンドボックスインフラストラクチャ
 
-**The Core Challenge**
-Spinning up full development environments quickly is the primary technical challenge. Users expect near-instant session starts, but development environments require cloning repositories, installing dependencies, and running build steps.
+**中核的な課題**
+完全な開発環境を迅速に立ち上げることが主要な技術的課題です。ユーザーはほぼ即座のセッション開始を期待しますが、開発環境にはリポジトリのクローン、依存関係のインストール、ビルドステップの実行が必要です。
 
-**Image Registry Pattern**
-Pre-build environment images on a regular cadence (every 30 minutes works well). Each image contains:
-- Cloned repository at a known commit
-- All runtime dependencies installed
-- Initial setup and build commands completed
-- Cached files from running app and test suite once
+**イメージレジストリパターン**
+定期的なケイデンス（30分ごとが適切）で環境イメージを事前にビルドします。各イメージには以下が含まれます：
+- 既知のコミット時点のクローンされたリポジトリ
+- インストール済みのすべてのランタイム依存関係
+- 完了した初期セットアップとビルドコマンド
+- アプリとテストスイートの初回実行によるキャッシュファイル
 
-When starting a session, spin up a sandbox from the most recent image. The repository is at most 30 minutes out of date, making synchronization with the latest code much faster.
+セッション開始時には、最新のイメージからサンドボックスを起動します。リポジトリは最大30分遅れているだけなので、最新コードとの同期がはるかに高速になります。
 
-**Snapshot and Restore**
-Take filesystem snapshots at key points:
-- After initial image build (base snapshot)
-- When agent finishes making changes (session snapshot)
-- Before sandbox exit for potential follow-up
+**スナップショットとリストア**
+主要なポイントでファイルシステムスナップショットを取得：
+- 初期イメージビルド後（ベーススナップショット）
+- エージェントが変更を完了した時（セッションスナップショット）
+- フォローアップの可能性に備えたサンドボックス終了前
 
-This enables instant restoration for follow-up prompts without re-running setup.
+これにより、セットアップを再実行することなく、フォローアッププロンプトの即座のリストアが可能になります。
 
-**Git Configuration for Background Agents**
-Since git operations are not tied to a specific user during image builds:
-- Generate GitHub app installation tokens for repository access during clone
-- Update git config's `user.name` and `user.email` when committing and pushing changes
-- Use the prompting user's identity for commits, not the app identity
+**バックグラウンドエージェント用Git設定**
+イメージビルド中はgit操作が特定のユーザーに紐づかないため：
+- クローン時のリポジトリアクセスにはGitHubアプリインストールトークンを生成
+- 変更のコミットとプッシュ時にgit configの`user.name`と`user.email`を更新
+- コミットにはアプリのIDではなく、プロンプトを送信したユーザーのIDを使用
 
-**Warm Pool Strategy**
-Maintain a pool of pre-warmed sandboxes for high-volume repositories:
-- Sandboxes are ready before users start sessions
-- Expire and recreate pool entries as new image builds complete
-- Start warming sandbox as soon as user begins typing (predictive warm-up)
+**ウォームプール戦略**
+高トラフィックリポジトリ用の事前ウォームされたサンドボックスのプールを維持：
+- ユーザーがセッションを開始する前にサンドボックスが準備完了
+- 新しいイメージビルドが完了したらプールエントリを期限切れにして再作成
+- ユーザーが入力を始めたらすぐにサンドボックスのウォーミングを開始（予測的ウォームアップ）
 
-### Agent Framework Selection
+### エージェントフレームワーク選択
 
-**Server-First Architecture**
-Choose an agent framework structured as a server first, with TUI and desktop apps as clients. This enables:
-- Multiple custom clients without duplicating agent logic
-- Consistent behavior across all interaction surfaces
-- Plugin systems for extending functionality
-- Event-driven architectures for real-time updates
+**サーバーファーストアーキテクチャ**
+TUIやデスクトップアプリをクライアントとし、まずサーバーとして構造化されたエージェントフレームワークを選択します。これにより以下が可能になります：
+- エージェントロジックを重複させることなく複数のカスタムクライアント
+- すべてのインタラクションサーフェスで一貫した振る舞い
+- 機能拡張のためのプラグインシステム
+- リアルタイム更新のためのイベント駆動アーキテクチャ
 
-**Code as Source of Truth**
-Select frameworks where the agent can read its own source code to understand behavior. This is underrated in AI development: having the code as source of truth prevents hallucination about the agent's own capabilities.
+**ソースオブトゥルースとしてのコード**
+エージェントが自身のソースコードを読んで振る舞いを理解できるフレームワークを選択します。これはAI開発において過小評価されています：コードをソースオブトゥルースとすることで、エージェント自身の機能に関するハルシネーションを防止します。
 
-**Plugin System Requirements**
-The framework should support plugins that:
-- Listen to tool execution events (e.g., `tool.execute.before`)
-- Block or modify tool calls conditionally
-- Inject context or state at runtime
+**プラグインシステム要件**
+フレームワークは以下のプラグインをサポートすべきです：
+- ツール実行イベントのリッスン（例：`tool.execute.before`）
+- 条件付きのツール呼び出しのブロックまたは変更
+- ランタイムでのコンテキストや状態の注入
 
-### Speed Optimizations
+### 速度最適化
 
-**Predictive Warm-Up**
-Start warming the sandbox as soon as a user begins typing their prompt:
-- Clone latest changes in parallel with user typing
-- Run initial setup before user hits enter
-- For fast spin-up, sandbox can be ready before user finishes typing
+**予測的ウォームアップ**
+ユーザーがプロンプトの入力を始めたらすぐにサンドボックスのウォーミングを開始：
+- ユーザーの入力と並行して最新の変更をクローン
+- ユーザーがエンターを押す前に初期セットアップを実行
+- 高速起動では、ユーザーが入力を完了する前にサンドボックスが準備完了
 
-**Parallel File Reading**
-Allow the agent to start reading files immediately, even if sync from latest base branch is not complete:
-- In large repositories, incoming prompts rarely modify recently-changed files
-- Agent can research immediately without waiting for git sync
-- Block file edits (not reads) until synchronization completes
+**並行ファイル読み取り**
+最新のベースブランチからの同期が完了していなくても、エージェントがすぐにファイル読み取りを開始できるようにする：
+- 大規模リポジトリでは、受信プロンプトが最近変更されたファイルを変更することはほとんどない
+- エージェントはgit同期を待たずにすぐにリサーチを開始可能
+- 同期完了までファイル編集（読み取りではなく）をブロック
 
-**Maximize Build-Time Work**
-Move everything possible to the image build step:
-- Full dependency installation
-- Database schema setup
-- Initial app and test suite runs (populates caches)
-- Build-time duration is invisible to users
+**ビルド時間作業の最大化**
+可能なすべてをイメージビルドステップに移行：
+- 完全な依存関係のインストール
+- データベーススキーマのセットアップ
+- アプリとテストスイートの初回実行（キャッシュをポピュレート）
+- ビルド時間の長さはユーザーには見えない
 
-### Self-Spawning Agents
+### 自己スポーンエージェント
 
-**Agent-Spawned Sessions**
-Create tools that allow agents to spawn new sessions:
-- Research tasks across different repositories
-- Parallel subtask execution for large changes
-- Multiple smaller PRs from one major task
+**エージェントがスポーンするセッション**
+エージェントが新しいセッションをスポーンできるツールを作成：
+- 異なるリポジトリ間でのリサーチタスク
+- 大規模な変更のための並列サブタスク実行
+- 1つの大きなタスクから複数の小さなPR
 
-Frontier models are capable of containing themselves. The tools should:
-- Start a new session with specified parameters
-- Read status of any session (check-in capability)
-- Continue main work while sub-sessions run in parallel
+フロンティアモデルは自身を制御する能力を持っています。ツールは以下をすべきです：
+- 指定されたパラメータで新しいセッションを開始
+- 任意のセッションのステータスを読み取り（チェックイン機能）
+- サブセッションが並行実行中もメイン作業を継続
 
-**Prompt Engineering for Self-Spawning**
-Engineer prompts to guide when agents spawn sub-sessions:
-- Research tasks that require cross-repository exploration
-- Breaking monolithic changes into smaller PRs
-- Parallel exploration of different approaches
+**自己スポーンのプロンプトエンジニアリング**
+エージェントがサブセッションをスポーンするタイミングを導くプロンプトを設計：
+- クロスリポジトリの探索を必要とするリサーチタスク
+- モノリシックな変更をより小さなPRに分割
+- 異なるアプローチの並列探索
 
-### API Layer
+### APIレイヤー
 
-**Per-Session State Isolation**
-Each session requires its own isolated state storage:
-- Dedicated database per session (SQLite per session works well)
-- No session can impact another's performance
-- Handles hundreds of concurrent sessions
+**セッションごとの状態分離**
+各セッションには独立した状態ストレージが必要：
+- セッションごとの専用データベース（セッションごとのSQLiteが適切）
+- あるセッションが別のセッションのパフォーマンスに影響を与えない
+- 数百の同時セッションを処理
 
-**Real-Time Streaming**
-Agent work involves high-frequency updates:
-- Token streaming from model providers
-- Tool execution status updates
-- File change notifications
+**リアルタイムストリーミング**
+エージェント作業には高頻度の更新が伴います：
+- モデルプロバイダーからのトークンストリーミング
+- ツール実行ステータスの更新
+- ファイル変更通知
 
-WebSocket connections with hibernation APIs reduce compute costs during idle periods while maintaining open connections.
+ハイバネーションAPIを持つWebSocket接続により、オープンな接続を維持しながらアイドル期間のコンピューティングコストを削減します。
 
-**Synchronization Across Clients**
-Build a single state system that synchronizes across:
-- Chat interfaces
-- Slack bots
-- Chrome extensions
-- Web interfaces
-- VS Code instances
+**クライアント間の同期**
+以下を同期する単一の状態システムを構築：
+- チャットインターフェース
+- Slackボット
+- Chrome拡張機能
+- Webインターフェース
+- VS Codeインスタンス
 
-All changes sync to the session state, enabling seamless client switching.
+すべての変更がセッション状態に同期され、シームレスなクライアント切り替えが可能になります。
 
-### Multiplayer Support
+### マルチプレイヤーサポート
 
-**Why Multiplayer Matters**
-Multiplayer enables:
-- Teaching non-engineers to use AI effectively
-- Live QA sessions with multiple team members
-- Real-time PR review with immediate changes
-- Collaborative debugging sessions
+**マルチプレイヤーが重要な理由**
+マルチプレイヤーにより以下が可能：
+- 非エンジニアにAIを効果的に使う方法を教える
+- 複数のチームメンバーによるライブQAセッション
+- 即座の変更を伴うリアルタイムPRレビュー
+- コラボレーティブなデバッグセッション
 
-**Implementation Requirements**
-- Data model must not tie sessions to single authors
-- Pass authorship info to each prompt
-- Attribute code changes to the prompting user
-- Share session links for instant collaboration
+**実装要件**
+- データモデルはセッションを単一の著者に紐づけてはならない
+- 各プロンプトに著者情報を渡す
+- コード変更をプロンプトを送信したユーザーに帰属させる
+- 即座のコラボレーションのためにセッションリンクを共有
 
-With proper synchronization architecture, multiplayer support is nearly free to add.
+適切な同期アーキテクチャがあれば、マルチプレイヤーサポートの追加はほぼ無料です。
 
-### Authentication and Authorization
+### 認証と認可
 
-**User-Based Commits**
-Use GitHub authentication to:
-- Obtain user tokens for PR creation
-- Open PRs on behalf of the user (not the app)
-- Prevent users from approving their own changes
+**ユーザーベースのコミット**
+GitHub認証を使用して：
+- PR作成のためのユーザートークンを取得
+- アプリではなくユーザーの代わりにPRを開く
+- ユーザーが自身の変更を承認するのを防止
 
-**Sandbox-to-API Flow**
-1. Sandbox pushes changes (updating git user config)
-2. Sandbox sends event to API with branch name and session ID
-3. API uses user's GitHub token to create PR
-4. GitHub webhooks notify API of PR events
+**サンドボックスからAPIへのフロー**
+1. サンドボックスが変更をプッシュ（git user configを更新）
+2. サンドボックスがブランチ名とセッションIDを含むイベントをAPIに送信
+3. APIがユーザーのGitHubトークンを使用してPRを作成
+4. GitHubウェブフックがPRイベントをAPIに通知
 
-### Client Implementations
+### クライアント実装
 
-**Slack Integration**
-The most effective distribution channel for internal adoption:
-- Creates virality loop as team members see others using it
-- No syntax required, natural chat interface
-- Classify repository from message, thread context, and channel name
+**Slack統合**
+社内採用のための最も効果的な配信チャネル：
+- チームメンバーが他のメンバーの使用を見ることでバイラルループを作成
+- 構文不要、自然なチャットインターフェース
+- メッセージ、スレッドコンテキスト、チャネル名からリポジトリを分類
 
-Build a classifier to determine which repository to work in:
-- Fast model with descriptions of available repositories
-- Include hints for common repositories
-- Allow "unknown" option for ambiguous cases
+どのリポジトリで作業するかを決定する分類器を構築：
+- 利用可能なリポジトリの記述を持つ高速モデル
+- よく使用されるリポジトリのヒントを含める
+- 曖昧なケースのための「不明」オプションを許可
 
-**Web Interface**
-Core features:
-- Works on desktop and mobile
-- Real-time streaming of agent work
-- Hosted VS Code instance running inside sandbox
-- Streamed desktop view for visual verification
-- Before/after screenshots for PRs
+**Webインターフェース**
+コア機能：
+- デスクトップとモバイルで動作
+- エージェント作業のリアルタイムストリーミング
+- サンドボックス内で実行されるホスト型VS Codeインスタンス
+- 視覚的検証のためのストリームデスクトップビュー
+- PRの変更前後のスクリーンショット
 
-Statistics page showing:
-- Sessions resulting in merged PRs (primary metric)
-- Usage over time
-- Live "humans prompting" count (prompts in last 5 minutes)
+統計ページの表示内容：
+- マージされたPRにつながったセッション（主要メトリクス）
+- 時間経過による使用状況
+- ライブの「プロンプト中の人数」カウント（直近5分間のプロンプト数）
 
-**Chrome Extension**
-For non-engineering users:
-- Sidebar chat interface with screenshot tool
-- DOM and React internals extraction instead of raw images
-- Reduces token usage while maintaining precision
-- Distribute via managed device policy (bypasses Chrome Web Store)
+**Chrome拡張機能**
+非エンジニアユーザー向け：
+- スクリーンショットツール付きのサイドバーチャットインターフェース
+- 生画像の代わりにDOMとReact内部構造を抽出
+- 精度を維持しながらトークン使用量を削減
+- マネージドデバイスポリシーで配布（Chrome Web Storeをバイパス）
 
-## Practical Guidance
+## 実践的ガイダンス
 
-### Follow-Up Message Handling
+### フォローアップメッセージの処理
 
-Decide how to handle messages sent during execution:
-- **Queue approach**: Messages wait until current prompt completes
-- **Insert approach**: Messages are processed immediately
+実行中に送信されたメッセージの処理方法を決定：
+- **キューアプローチ**：現在のプロンプトが完了するまでメッセージを待機
+- **挿入アプローチ**：メッセージを即座に処理
 
-Queueing is simpler to manage and lets users send thoughts on next steps while agent works. Build mechanism to stop agent mid-execution when needed.
+キューイングは管理が簡単で、エージェントの作業中にユーザーが次のステップについての考えを送信できます。必要に応じてエージェントを実行中に停止するメカニズムを構築してください。
 
-### Metrics That Matter
+### 重要なメトリクス
 
-Track metrics that indicate real value:
-- Sessions resulting in merged PRs (primary success metric)
-- Time from session start to first model response
-- PR approval rate and revision count
-- Agent-written code percentage across repositories
+実際の価値を示すメトリクスを追跡：
+- マージされたPRにつながったセッション（主要な成功メトリクス）
+- セッション開始から最初のモデルレスポンスまでの時間
+- PR承認率とリビジョン回数
+- リポジトリ全体でのエージェントが書いたコードの割合
 
-### Adoption Strategy
+### 採用戦略
 
-Internal adoption patterns that work:
-- Work in public spaces (Slack channels) for visibility
-- Let the product create virality loops
-- Don't force usage over existing tools
-- Build to people's needs, not hypothetical requirements
+効果的な社内採用パターン：
+- 可視性のためにパブリックスペース（Slackチャネル）で作業
+- プロダクトにバイラルループを作らせる
+- 既存ツールに対して使用を強制しない
+- 仮想的な要件ではなく、人々のニーズに合わせて構築
 
-## Guidelines
+## ガイドライン
 
-1. Pre-build environment images on regular cadence (30 minutes is a good default)
-2. Start warming sandboxes when users begin typing, not when they submit
-3. Allow file reads before git sync completes; block only writes
-4. Structure agent framework as server-first with clients as thin wrappers
-5. Isolate state per session to prevent cross-session interference
-6. Attribute commits to the user who prompted, not the app
-7. Track merged PRs as primary success metric
-8. Build for multiplayer from the start; it is nearly free with proper sync architecture
+1. 定期的なケイデンス（30分がデフォルトとして適切）で環境イメージを事前にビルド
+2. ユーザーが送信した時ではなく、入力を始めた時にサンドボックスのウォーミングを開始
+3. git同期完了前にファイル読み取りを許可；書き込みのみをブロック
+4. エージェントフレームワークをサーバーファーストで構造化し、クライアントを薄いラッパーにする
+5. クロスセッション干渉を防ぐためにセッションごとに状態を分離
+6. コミットをアプリではなく、プロンプトを送信したユーザーに帰属させる
+7. マージされたPRを主要な成功メトリクスとして追跡
+8. 最初からマルチプレイヤーに対応して構築；適切な同期アーキテクチャがあればほぼ無料
 
-## Integration
+## 統合
 
-This skill builds on multi-agent-patterns for agent coordination and tool-design for agent-tool interfaces. It connects to:
+このスキルは、エージェント連携のためのmulti-agent-patternsと、エージェント-ツールインターフェースのためのtool-designを基盤としています。以下と関連します：
 
-- multi-agent-patterns - Self-spawning agents follow supervisor patterns
-- tool-design - Building tools for agent spawning and status checking
-- context-optimization - Managing context across distributed sessions
-- filesystem-context - Using filesystem for session state and artifacts
+- multi-agent-patterns - 自己スポーンエージェントはスーパーバイザーパターンに従う
+- tool-design - エージェントスポーンとステータス確認のためのツール構築
+- context-optimization - 分散セッション間でのコンテキスト管理
+- filesystem-context - セッション状態とアーティファクトのためのファイルシステム使用
 
-## References
+## 参考資料
 
-Internal reference:
-- [Infrastructure Patterns](./references/infrastructure-patterns.md) - Detailed implementation patterns
+内部参考資料：
+- [インフラストラクチャパターン](./references/infrastructure-patterns.md) - 詳細な実装パターン
 
-Related skills in this collection:
-- multi-agent-patterns - Coordination patterns for self-spawning agents
-- tool-design - Designing tools for hosted environments
-- context-optimization - Managing context in distributed systems
+このコレクション内の関連スキル：
+- multi-agent-patterns - 自己スポーンエージェントの連携パターン
+- tool-design - ホスト型環境向けのツール設計
+- context-optimization - 分散システムにおけるコンテキスト管理
 
-External resources:
-- [Ramp](https://builders.ramp.com/post/why-we-built-our-background-agent) - Why We Built Our Own Background Agent
-- [Modal Sandboxes](https://modal.com/docs/guide/sandbox) - Cloud sandbox infrastructure
-- [Cloudflare Durable Objects](https://developers.cloudflare.com/durable-objects/) - Per-session state management
-- [OpenCode](https://github.com/sst/opencode) - Server-first agent framework
+外部リソース：
+- [Ramp](https://builders.ramp.com/post/why-we-built-our-background-agent) - 自社バックグラウンドエージェントを構築した理由
+- [Modal Sandboxes](https://modal.com/docs/guide/sandbox) - クラウドサンドボックスインフラストラクチャ
+- [Cloudflare Durable Objects](https://developers.cloudflare.com/durable-objects/) - セッションごとの状態管理
+- [OpenCode](https://github.com/sst/opencode) - サーバーファーストエージェントフレームワーク
 
 ---
 
-## Skill Metadata
+## スキルメタデータ
 
-**Created**: 2026-01-12
-**Last Updated**: 2026-01-12
-**Author**: Agent Skills for Context Engineering Contributors
-**Version**: 1.0.0
+**作成日**: 2026-01-12
+**最終更新日**: 2026-01-12
+**著者**: Agent Skills for Context Engineering Contributors
+**バージョン**: 1.0.0
