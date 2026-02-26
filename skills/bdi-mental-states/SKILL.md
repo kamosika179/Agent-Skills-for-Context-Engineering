@@ -1,39 +1,39 @@
 ---
 name: bdi-mental-states
-description: This skill should be used when the user asks to "model agent mental states", "implement BDI architecture", "create belief-desire-intention models", "transform RDF to beliefs", "build cognitive agent", or mentions BDI ontology, mental state modeling, rational agency, or neuro-symbolic AI integration.
+description: このスキルは、ユーザーが「エージェントのメンタルステートをモデル化する」「BDIアーキテクチャを実装する」「Belief-Desire-Intentionモデルを作成する」「RDFをビリーフに変換する」「認知エージェントを構築する」と依頼した場合、またはBDIオントロジー、メンタルステートモデリング、合理的エージェンシー、ニューロシンボリックAI統合に言及した場合に使用してください。
 ---
 
-# BDI Mental State Modeling
+# BDIメンタルステートモデリング
 
-Transform external RDF context into agent mental states (beliefs, desires, intentions) using formal BDI ontology patterns. This skill enables agents to reason about context through cognitive architecture, supporting deliberative reasoning, explainability, and semantic interoperability within multi-agent systems.
+外部RDFコンテキストをエージェントのメンタルステート（ビリーフ、デザイア、インテンション）に変換するために、形式的なBDIオントロジーパターンを使用します。このスキルは、エージェントが認知アーキテクチャを通じてコンテキストについて推論することを可能にし、熟慮的推論、説明可能性、マルチエージェントシステムにおけるセマンティックな相互運用性を支援します。
 
-## When to Activate
+## アクティベーション条件
 
-Activate this skill when:
-- Processing external RDF context into agent beliefs about world states
-- Modeling rational agency with perception, deliberation, and action cycles
-- Enabling explainability through traceable reasoning chains
-- Implementing BDI frameworks (SEMAS, JADE, JADEX)
-- Augmenting LLMs with formal cognitive structures (Logic Augmented Generation)
-- Coordinating mental states across multi-agent platforms
-- Tracking temporal evolution of beliefs, desires, and intentions
-- Linking motivational states to action plans
+以下の場合にこのスキルをアクティベートしてください：
+- 外部RDFコンテキストを世界の状態に関するエージェントのビリーフに処理する場合
+- 知覚、熟慮、行動のサイクルで合理的エージェンシーをモデル化する場合
+- 追跡可能な推論チェーンによる説明可能性を実現する場合
+- BDIフレームワーク（SEMAS、JADE、JADEX）を実装する場合
+- 形式的な認知構造でLLMを拡張する場合（Logic Augmented Generation）
+- マルチエージェントプラットフォーム間でメンタルステートを調整する場合
+- ビリーフ、デザイア、インテンションの時間的進化を追跡する場合
+- 動機的状態をアクションプランにリンクする場合
 
-## Core Concepts
+## コアコンセプト
 
-### Mental Reality Architecture
+### メンタルリアリティアーキテクチャ
 
-**Mental States (Endurants)**: Persistent cognitive attributes
-- `Belief`: What the agent believes to be true about the world
-- `Desire`: What the agent wishes to bring about
-- `Intention`: What the agent commits to achieving
+**メンタルステート（Endurants）**：永続的な認知属性
+- `Belief`：エージェントが世界について真であると信じていること
+- `Desire`：エージェントが実現したいと望んでいること
+- `Intention`：エージェントが達成にコミットしていること
 
-**Mental Processes (Perdurants)**: Events that modify mental states
-- `BeliefProcess`: Forming/updating beliefs from perception
-- `DesireProcess`: Generating desires from beliefs
-- `IntentionProcess`: Committing to desires as actionable intentions
+**メンタルプロセス（Perdurants）**：メンタルステートを変更するイベント
+- `BeliefProcess`：知覚からビリーフを形成/更新する
+- `DesireProcess`：ビリーフからデザイアを生成する
+- `IntentionProcess`：デザイアを実行可能なインテンションとしてコミットする
 
-### Cognitive Chain Pattern
+### 認知チェーンパターン
 
 ```turtle
 :Belief_store_open a bdi:Belief ;
@@ -51,9 +51,9 @@ Activate this skill when:
     bdi:specifies :Plan_shopping .
 ```
 
-### World State Grounding
+### ワールドステートのグラウンディング
 
-Mental states reference structured configurations of the environment:
+メンタルステートは環境の構造化された設定を参照します：
 
 ```turtle
 :Agent_A a bdi:Agent ;
@@ -68,9 +68,9 @@ Mental states reference structured configurations of the environment:
     bdi:refersTo :WorldState_WS1 .
 ```
 
-### Goal-Directed Planning
+### 目標指向プランニング
 
-Intentions specify plans that address goals through task sequences:
+インテンションは、タスクシーケンスを通じてゴールに対処するプランを指定します：
 
 ```turtle
 :Intention_I1 bdi:specifies :Plan_P1 .
@@ -84,11 +84,11 @@ Intentions specify plans that address goals through task sequences:
 :Task_T2 bdi:precedes :Task_T3 .
 ```
 
-## T2B2T Paradigm
+## T2B2Tパラダイム
 
-Triples-to-Beliefs-to-Triples implements bidirectional flow between RDF knowledge graphs and internal mental states:
+Triples-to-Beliefs-to-Triplesは、RDFナレッジグラフと内部メンタルステート間の双方向フローを実装します：
 
-**Phase 1: Triples-to-Beliefs**
+**フェーズ1：Triples-to-Beliefs**
 ```turtle
 # External RDF context triggers belief formation
 :WorldState_notification a bdi:WorldState ;
@@ -99,7 +99,7 @@ Triples-to-Beliefs-to-Triples implements bidirectional flow between RDF knowledg
     bdi:generates :Belief_payment_request .
 ```
 
-**Phase 2: Beliefs-to-Triples**
+**フェーズ2：Beliefs-to-Triples**
 ```turtle
 # Mental deliberation produces new RDF output
 :Intention_pay a bdi:Intention ;
@@ -110,18 +110,18 @@ Triples-to-Beliefs-to-Triples implements bidirectional flow between RDF knowledg
     bdi:bringsAbout :WorldState_payment_complete .
 ```
 
-## Notation Selection by Level
+## レベル別の表記法選択
 
-| C4 Level | Notation | Mental State Representation |
-|----------|----------|----------------------------|
-| L1 Context | ArchiMate | Agent boundaries, external perception sources |
-| L2 Container | ArchiMate | BDI reasoning engine, belief store, plan executor |
-| L3 Component | UML | Mental state managers, process handlers |
-| L4 Code | UML/RDF | Belief/Desire/Intention classes, ontology instances |
+| C4レベル | 表記法 | メンタルステートの表現 |
+|----------|--------|---------------------|
+| L1 Context | ArchiMate | エージェント境界、外部知覚ソース |
+| L2 Container | ArchiMate | BDI推論エンジン、ビリーフストア、プランエグゼキュータ |
+| L3 Component | UML | メンタルステートマネージャー、プロセスハンドラー |
+| L4 Code | UML/RDF | Belief/Desire/Intentionクラス、オントロジーインスタンス |
 
-## Justification and Explainability
+## 正当化と説明可能性
 
-Mental entities link to supporting evidence for traceable reasoning:
+メンタルエンティティは追跡可能な推論のために裏付けるエビデンスにリンクします：
 
 ```turtle
 :Belief_B1 a bdi:Belief ;
@@ -137,9 +137,9 @@ Mental entities link to supporting evidence for traceable reasoning:
     rdfs:comment "Location precondition satisfied" .
 ```
 
-## Temporal Dimensions
+## 時間的次元
 
-Mental states persist over bounded time periods:
+メンタルステートは限定された時間期間にわたって存続します：
 
 ```turtle
 :Belief_B1 a bdi:Belief ;
@@ -150,7 +150,7 @@ Mental states persist over bounded time periods:
     bdi:hasEndTime :TimeInstant_11am .
 ```
 
-Query mental states active at specific moments:
+特定の時点でアクティブなメンタルステートをクエリ：
 
 ```sparql
 SELECT ?mentalState WHERE {
@@ -162,9 +162,9 @@ SELECT ?mentalState WHERE {
 }
 ```
 
-## Compositional Mental Entities
+## 構成的メンタルエンティティ
 
-Complex mental entities decompose into constituent parts for selective updates:
+複雑なメンタルエンティティは、選択的な更新のために構成部分に分解されます：
 
 ```turtle
 :Belief_meeting a bdi:Belief ;
@@ -176,11 +176,11 @@ Complex mental entities decompose into constituent parts for selective updates:
     bdi:modifies :Belief_meeting_location .
 ```
 
-## Integration Patterns
+## 統合パターン
 
-### Logic Augmented Generation (LAG)
+### Logic Augmented Generation（LAG）
 
-Augment LLM outputs with ontological constraints:
+オントロジー制約でLLM出力を拡張：
 
 ```python
 def augment_llm_with_bdi_ontology(prompt, ontology_graph):
@@ -194,9 +194,9 @@ def augment_llm_with_bdi_ontology(prompt, ontology_graph):
     return triples if is_consistent else retry_with_feedback()
 ```
 
-### SEMAS Rule Translation
+### SEMASルール変換
 
-Map BDI ontology to executable production rules:
+BDIオントロジーを実行可能なプロダクションルールにマッピング：
 
 ```prolog
 % Belief triggers desire formation
@@ -210,85 +210,85 @@ Map BDI ontology to executable production rules:
 [TAIL: commit_intention(agent_a, buy_groceries)].
 ```
 
-## Guidelines
+## ガイドライン
 
-1. Model world states as configurations independent of agent perspectives, providing referential substrate for mental states.
+1. ワールドステートをエージェントの視点から独立した設定としてモデル化し、メンタルステートの参照基盤を提供する。
 
-2. Distinguish endurants (persistent mental states) from perdurants (temporal mental processes), aligning with DOLCE ontology.
+2. Endurants（永続的なメンタルステート）とPerdurants（時間的なメンタルプロセス）を区別し、DOLCEオントロジーと整合させる。
 
-3. Treat goals as descriptions rather than mental states, maintaining separation between cognitive and planning layers.
+3. ゴールをメンタルステートではなく記述として扱い、認知層とプランニング層の分離を維持する。
 
-4. Use `hasPart` relations for meronymic structures enabling selective belief updates.
+4. 選択的なビリーフ更新を可能にするメロニミック構造のために`hasPart`関係を使用する。
 
-5. Associate every mental entity with temporal constructs via `atTime` or `hasValidity`.
+5. すべてのメンタルエンティティを`atTime`または`hasValidity`を介して時間的構造に関連付ける。
 
-6. Use bidirectional property pairs (`motivates`/`isMotivatedBy`, `generates`/`isGeneratedBy`) for flexible querying.
+6. 柔軟なクエリのために双方向プロパティペア（`motivates`/`isMotivatedBy`、`generates`/`isGeneratedBy`）を使用する。
 
-7. Link mental entities to `Justification` instances for explainability and trust.
+7. 説明可能性と信頼のためにメンタルエンティティを`Justification`インスタンスにリンクする。
 
-8. Implement T2B2T through: (1) translate RDF to beliefs, (2) execute BDI reasoning, (3) project mental states back to RDF.
+8. T2B2Tを以下の手順で実装する：(1) RDFをビリーフに変換、(2) BDI推論を実行、(3) メンタルステートをRDFに射影。
 
-9. Define existential restrictions on mental processes (e.g., `BeliefProcess ⊑ ∃generates.Belief`).
+9. メンタルプロセスに存在制限を定義する（例：`BeliefProcess ⊑ ∃generates.Belief`）。
 
-10. Reuse established ODPs (EventCore, Situation, TimeIndexedSituation, BasicPlan, Provenance) for interoperability.
+10. 相互運用性のために確立されたODP（EventCore、Situation、TimeIndexedSituation、BasicPlan、Provenance）を再利用する。
 
-## Competency Questions
+## コンピテンシークエスチョン
 
-Validate implementation against these SPARQL queries:
+以下のSPARQLクエリで実装を検証してください：
 
 ```sparql
-# CQ1: What beliefs motivated formation of a given desire?
+# CQ1: 特定のデザイアの形成を動機づけたビリーフは何か？
 SELECT ?belief WHERE {
     :Desire_D1 bdi:isMotivatedBy ?belief .
 }
 
-# CQ2: Which desire does a particular intention fulfill?
+# CQ2: 特定のインテンションはどのデザイアを満たすか？
 SELECT ?desire WHERE {
     :Intention_I1 bdi:fulfils ?desire .
 }
 
-# CQ3: Which mental process generated a belief?
+# CQ3: ビリーフを生成したメンタルプロセスは何か？
 SELECT ?process WHERE {
     ?process bdi:generates :Belief_B1 .
 }
 
-# CQ4: What is the ordered sequence of tasks in a plan?
+# CQ4: プラン内のタスクの順序付きシーケンスは何か？
 SELECT ?task ?nextTask WHERE {
     :Plan_P1 bdi:hasComponent ?task .
     OPTIONAL { ?task bdi:precedes ?nextTask }
 } ORDER BY ?task
 ```
 
-## Anti-Patterns
+## アンチパターン
 
-1. **Conflating mental states with world states**: Mental states reference world states, they are not world states themselves.
+1. **メンタルステートとワールドステートの混同**：メンタルステートはワールドステートを参照するものであり、ワールドステートそのものではありません。
 
-2. **Missing temporal bounds**: Every mental state should have validity intervals for diachronic reasoning.
+2. **時間的境界の欠如**：すべてのメンタルステートには通時的推論のための有効期間が必要です。
 
-3. **Flat belief structures**: Use compositional modeling with `hasPart` for complex beliefs.
+3. **フラットなビリーフ構造**：複雑なビリーフには`hasPart`を使用した構成的モデリングを使用してください。
 
-4. **Implicit justifications**: Always link mental entities to explicit justification instances.
+4. **暗黙的な正当化**：常にメンタルエンティティを明示的な正当化インスタンスにリンクしてください。
 
-5. **Direct intention-to-action mapping**: Intentions specify plans which contain tasks; actions execute tasks.
+5. **インテンションからアクションへの直接マッピング**：インテンションはタスクを含むプランを指定し、アクションはタスクを実行します。
 
-## Integration
+## 統合
 
-- **RDF Processing**: Apply after parsing external RDF context to construct cognitive representations
-- **Semantic Reasoning**: Combine with ontology reasoning to infer implicit mental state relationships
-- **Multi-Agent Communication**: Integrate with FIPA ACL for cross-platform belief sharing
-- **Temporal Context**: Coordinate with temporal reasoning for mental state evolution
-- **Explainable AI**: Feed into explanation systems tracing perception through deliberation to action
-- **Neuro-Symbolic AI**: Apply in LAG pipelines to constrain LLM outputs with cognitive structures
+- **RDF処理**：外部RDFコンテキストを解析した後に適用し、認知的表現を構築する
+- **セマンティック推論**：オントロジー推論と組み合わせて、暗黙的なメンタルステートの関係を推論する
+- **マルチエージェント通信**：FIPA ACLと統合し、プラットフォーム間のビリーフ共有を実現する
+- **時間的コンテキスト**：メンタルステートの進化のために時間的推論と調整する
+- **説明可能なAI**：知覚から熟慮を経て行動までの推論を追跡する説明システムに供給する
+- **ニューロシンボリックAI**：LAGパイプラインで適用し、認知構造でLLM出力を制約する
 
-## References
+## 参考資料
 
-See `references/` folder for detailed documentation:
-- `bdi-ontology-core.md` - Core ontology patterns and class definitions
-- `rdf-examples.md` - Complete RDF/Turtle examples
-- `sparql-competency.md` - Full competency question SPARQL queries
-- `framework-integration.md` - SEMAS, JADE, LAG integration patterns
+詳細なドキュメントについては`references/`フォルダを参照してください：
+- `bdi-ontology-core.md` - コアオントロジーパターンとクラス定義
+- `rdf-examples.md` - 完全なRDF/Turtleの例
+- `sparql-competency.md` - 完全なコンピテンシークエスチョンSPARQLクエリ
+- `framework-integration.md` - SEMAS、JADE、LAG統合パターン
 
-Primary sources:
+主要な出典：
 - Zuppiroli et al. "The Belief-Desire-Intention Ontology" (2025)
 - Rao & Georgeff "BDI agents: From theory to practice" (1995)
 - Bratman "Intention, plans, and practical reason" (1987)

@@ -1,145 +1,145 @@
 ---
 name: evaluation
-description: This skill should be used when the user asks to "evaluate agent performance", "build test framework", "measure agent quality", "create evaluation rubrics", or mentions LLM-as-judge, multi-dimensional evaluation, agent testing, or quality gates for agent pipelines.
+description: このスキルは、ユーザーが「エージェントのパフォーマンスを評価する」「テストフレームワークを構築する」「エージェントの品質を測定する」「評価ルーブリックを作成する」と依頼した場合、またはLLM-as-judge、多次元評価、エージェントテスト、エージェントパイプラインの品質ゲートに言及した場合に使用してください。
 ---
 
-# Evaluation Methods for Agent Systems
+# エージェントシステムの評価手法
 
-Evaluation of agent systems requires different approaches than traditional software or even standard language model applications. Agents make dynamic decisions, are non-deterministic between runs, and often lack single correct answers. Effective evaluation must account for these characteristics while providing actionable feedback. A robust evaluation framework enables continuous improvement, catches regressions, and validates that context engineering choices achieve intended effects.
+エージェントシステムの評価には、従来のソフトウェアや標準的な言語モデルアプリケーションとは異なるアプローチが必要です。エージェントは動的な意思決定を行い、実行ごとに非決定的であり、単一の正解がないことが多いです。効果的な評価は、これらの特性を考慮しながら、実用的なフィードバックを提供する必要があります。堅牢な評価フレームワークは、継続的な改善を可能にし、リグレッションを検出し、コンテキストエンジニアリングの選択が意図した効果を達成しているかを検証します。
 
-## When to Activate
+## アクティベーション条件
 
-Activate this skill when:
-- Testing agent performance systematically
-- Validating context engineering choices
-- Measuring improvements over time
-- Catching regressions before deployment
-- Building quality gates for agent pipelines
-- Comparing different agent configurations
-- Evaluating production systems continuously
+以下の場合にこのスキルをアクティベートしてください：
+- エージェントのパフォーマンスを体系的にテストする場合
+- コンテキストエンジニアリングの選択を検証する場合
+- 時間経過に伴う改善を測定する場合
+- デプロイ前にリグレッションを検出する場合
+- エージェントパイプラインの品質ゲートを構築する場合
+- 異なるエージェント設定を比較する場合
+- 本番システムを継続的に評価する場合
 
-## Core Concepts
+## コアコンセプト
 
-Agent evaluation requires outcome-focused approaches that account for non-determinism and multiple valid paths. Multi-dimensional rubrics capture various quality aspects: factual accuracy, completeness, citation accuracy, source quality, and tool efficiency. LLM-as-judge provides scalable evaluation while human evaluation catches edge cases.
+エージェント評価には、非決定性と複数の有効なパスを考慮した、成果に焦点を当てたアプローチが必要です。多次元ルーブリックは、事実の正確性、完全性、引用の正確性、ソースの品質、ツールの効率性など、さまざまな品質側面を捉えます。LLM-as-judgeはスケーラブルな評価を提供し、人間による評価はエッジケースを捕捉します。
 
-The key insight is that agents may find alternative paths to goals—the evaluation should judge whether they achieve right outcomes while following reasonable processes.
+重要な洞察は、エージェントは目標への代替パスを見つける可能性があるということです。評価は、合理的なプロセスに従いながら正しい成果を達成しているかどうかを判断すべきです。
 
-**Performance Drivers: The 95% Finding**
-Research on the BrowseComp evaluation (which tests browsing agents' ability to locate hard-to-find information) found that three factors explain 95% of performance variance:
+**パフォーマンスドライバー：95%の発見**
+BrowseComp評価（ブラウジングエージェントが見つけにくい情報を特定する能力をテストする評価）に関する研究では、3つの要因がパフォーマンスの分散の95%を説明することが判明しました：
 
-| Factor | Variance Explained | Implication |
-|--------|-------------------|-------------|
-| Token usage | 80% | More tokens = better performance |
-| Number of tool calls | ~10% | More exploration helps |
-| Model choice | ~5% | Better models multiply efficiency |
+| 要因 | 説明される分散 | 示唆 |
+|------|--------------|------|
+| トークン使用量 | 80% | より多くのトークン = より良いパフォーマンス |
+| ツール呼び出し回数 | 約10% | より多くの探索が有効 |
+| モデルの選択 | 約5% | より良いモデルが効率を倍増 |
 
-This finding has significant implications for evaluation design:
-- **Token budgets matter**: Evaluate agents with realistic token budgets, not unlimited resources
-- **Model upgrades beat token increases**: Upgrading to Claude Sonnet 4.5 or GPT-5.2 provides larger gains than doubling token budgets on previous versions
-- **Multi-agent validation**: The finding validates architectures that distribute work across agents with separate context windows
+この発見は評価設計に重要な示唆を持ちます：
+- **トークン予算が重要**：無制限のリソースではなく、現実的なトークン予算でエージェントを評価する
+- **モデルのアップグレードはトークン増加に勝る**：Claude Sonnet 4.5やGPT-5.2へのアップグレードは、以前のバージョンでトークン予算を倍増するよりも大きな効果をもたらす
+- **マルチエージェント検証**：この発見は、別々のコンテキストウィンドウを持つエージェント間で作業を分散するアーキテクチャを支持する
 
-## Detailed Topics
+## 詳細トピック
 
-### Evaluation Challenges
+### 評価の課題
 
-**Non-Determinism and Multiple Valid Paths**
-Agents may take completely different valid paths to reach goals. One agent might search three sources while another searches ten. They might use different tools to find the same answer. Traditional evaluations that check for specific steps fail in this context.
+**非決定性と複数の有効なパス**
+エージェントは、目標に到達するためにまったく異なる有効なパスをたどる可能性があります。あるエージェントは3つのソースを検索し、別のエージェントは10個を検索するかもしれません。同じ答えを見つけるために異なるツールを使用するかもしれません。特定のステップをチェックする従来の評価は、このコンテキストでは失敗します。
 
-The solution is outcome-focused evaluation that judges whether agents achieve right outcomes while following reasonable processes.
+解決策は、合理的なプロセスに従いながらエージェントが正しい成果を達成しているかどうかを判断する、成果に焦点を当てた評価です。
 
-**Context-Dependent Failures**
-Agent failures often depend on context in subtle ways. An agent might succeed on simple queries but fail on complex ones. It might work well with one tool set but fail with another. Failures may emerge only after extended interaction when context accumulates.
+**コンテキスト依存の失敗**
+エージェントの失敗は、しばしば微妙な方法でコンテキストに依存します。エージェントは単純なクエリでは成功するが、複雑なクエリでは失敗するかもしれません。あるツールセットではうまく機能するが、別のツールセットでは失敗するかもしれません。コンテキストが蓄積される長時間のインタラクション後にのみ失敗が現れることもあります。
 
-Evaluation must cover a range of complexity levels and test extended interactions, not just isolated queries.
+評価は、孤立したクエリだけでなく、さまざまな複雑さのレベルをカバーし、拡張されたインタラクションをテストする必要があります。
 
-**Composite Quality Dimensions**
-Agent quality is not a single dimension. It includes factual accuracy, completeness, coherence, tool efficiency, and process quality. An agent might score high on accuracy but low in efficiency, or vice versa.
+**複合品質次元**
+エージェントの品質は単一の次元ではありません。事実の正確性、完全性、一貫性、ツールの効率性、プロセスの品質が含まれます。エージェントは正確性では高いスコアを出しながら効率性では低いスコアになる場合があり、その逆もあり得ます。
 
-Evaluation rubrics must capture multiple dimensions with appropriate weighting for the use case.
+評価ルーブリックは、ユースケースに適した重み付けで複数の次元を捕捉する必要があります。
 
-### Evaluation Rubric Design
+### 評価ルーブリックの設計
 
-**Multi-Dimensional Rubric**
-Effective rubrics cover key dimensions with descriptive levels:
+**多次元ルーブリック**
+効果的なルーブリックは、説明的なレベルで主要な次元をカバーします：
 
-Factual accuracy: Claims match ground truth (excellent to failed)
+事実の正確性：主張がグラウンドトゥルースと一致する（優秀から失敗まで）
 
-Completeness: Output covers requested aspects (excellent to failed)
+完全性：出力が要求された側面をカバーする（優秀から失敗まで）
 
-Citation accuracy: Citations match claimed sources (excellent to failed)
+引用の正確性：引用が主張されたソースと一致する（優秀から失敗まで）
 
-Source quality: Uses appropriate primary sources (excellent to failed)
+ソースの品質：適切な一次ソースを使用する（優秀から失敗まで）
 
-Tool efficiency: Uses right tools reasonable number of times (excellent to failed)
+ツールの効率性：適切なツールを適切な回数使用する（優秀から失敗まで）
 
-**Rubric Scoring**
-Convert dimension assessments to numeric scores (0.0 to 1.0) with appropriate weighting. Calculate weighted overall scores. Determine passing threshold based on use case requirements.
+**ルーブリックのスコアリング**
+次元の評価を数値スコア（0.0〜1.0）に変換し、適切な重み付けを行います。加重全体スコアを計算します。ユースケースの要件に基づいて合格閾値を決定します。
 
-### Evaluation Methodologies
+### 評価手法
 
 **LLM-as-Judge**
-LLM-based evaluation scales to large test sets and provides consistent judgments. The key is designing effective evaluation prompts that capture the dimensions of interest.
+LLMベースの評価は、大規模なテストセットにスケールし、一貫した判断を提供します。重要なのは、関心のある次元を捉える効果的な評価プロンプトを設計することです。
 
-Provide clear task description, agent output, ground truth (if available), evaluation scale with level descriptions, and request structured judgment.
+明確なタスクの説明、エージェントの出力、グラウンドトゥルース（利用可能な場合）、レベルの説明付き評価スケール、構造化された判断の要求を提供します。
 
-**Human Evaluation**
-Human evaluation catches what automation misses. Humans notice hallucinated answers on unusual queries, system failures, and subtle biases that automated evaluation misses.
+**人間による評価**
+人間による評価は、自動化では見逃すものを捕捉します。人間は、珍しいクエリに対するハルシネーションされた回答、システム障害、自動評価では見逃す微妙なバイアスに気付きます。
 
-Effective human evaluation covers edge cases, samples systematically, tracks patterns, and provides contextual understanding.
+効果的な人間による評価は、エッジケースをカバーし、体系的にサンプリングし、パターンを追跡し、文脈的な理解を提供します。
 
-**End-State Evaluation**
-For agents that mutate persistent state, end-state evaluation focuses on whether the final state matches expectations rather than how the agent got there.
+**最終状態評価**
+永続的な状態を変更するエージェントについては、最終状態評価は、エージェントがどのようにそこに到達したかではなく、最終状態が期待と一致しているかどうかに焦点を当てます。
 
-### Test Set Design
+### テストセットの設計
 
-**Sample Selection**
-Start with small samples during development. Early in agent development, changes have dramatic impacts because there is abundant low-hanging fruit. Small test sets reveal large effects.
+**サンプル選択**
+開発中は小さなサンプルから始めます。エージェント開発の初期段階では、容易に改善できる点が豊富にあるため、変更が劇的な影響を与えます。小さなテストセットで大きな効果が明らかになります。
 
-Sample from real usage patterns. Add known edge cases. Ensure coverage across complexity levels.
+実際の使用パターンからサンプルを取ります。既知のエッジケースを追加します。複雑さのレベル全体でカバレッジを確保します。
 
-**Complexity Stratification**
-Test sets should span complexity levels: simple (single tool call), medium (multiple tool calls), complex (many tool calls, significant ambiguity), and very complex (extended interaction, deep reasoning).
+**複雑さの層別化**
+テストセットは、複雑さのレベルを網羅する必要があります：単純（単一ツール呼び出し）、中程度（複数ツール呼び出し）、複雑（多数のツール呼び出し、大きな曖昧さ）、非常に複雑（拡張されたインタラクション、深い推論）。
 
-### Context Engineering Evaluation
+### コンテキストエンジニアリングの評価
 
-**Testing Context Strategies**
-Context engineering choices should be validated through systematic evaluation. Run agents with different context strategies on the same test set. Compare quality scores, token usage, and efficiency metrics.
+**コンテキスト戦略のテスト**
+コンテキストエンジニアリングの選択は、体系的な評価を通じて検証すべきです。同じテストセットで異なるコンテキスト戦略を持つエージェントを実行します。品質スコア、トークン使用量、効率性メトリクスを比較します。
 
-**Degradation Testing**
-Test how context degradation affects performance by running agents at different context sizes. Identify performance cliffs where context becomes problematic. Establish safe operating limits.
+**劣化テスト**
+異なるコンテキストサイズでエージェントを実行することで、コンテキストの劣化がパフォーマンスにどのように影響するかをテストします。コンテキストが問題になるパフォーマンスの急落を特定します。安全な動作範囲を確立します。
 
-### Continuous Evaluation
+### 継続的評価
 
-**Evaluation Pipeline**
-Build evaluation pipelines that run automatically on agent changes. Track results over time. Compare versions to identify improvements or regressions.
+**評価パイプライン**
+エージェントの変更時に自動的に実行される評価パイプラインを構築します。結果を時系列で追跡します。バージョンを比較して改善やリグレッションを特定します。
 
-**Monitoring Production**
-Track evaluation metrics in production by sampling interactions and evaluating randomly. Set alerts for quality drops. Maintain dashboards for trend analysis.
+**本番監視**
+インタラクションをサンプリングしランダムに評価することで、本番環境で評価メトリクスを追跡します。品質低下のアラートを設定します。トレンド分析のためのダッシュボードを維持します。
 
-## Practical Guidance
+## 実践ガイダンス
 
-### Building Evaluation Frameworks
+### 評価フレームワークの構築
 
-1. Define quality dimensions relevant to your use case
-2. Create rubrics with clear, actionable level descriptions
-3. Build test sets from real usage patterns and edge cases
-4. Implement automated evaluation pipelines
-5. Establish baseline metrics before making changes
-6. Run evaluations on all significant changes
-7. Track metrics over time for trend analysis
-8. Supplement automated evaluation with human review
+1. ユースケースに関連する品質次元を定義する
+2. 明確で実用的なレベルの説明を持つルーブリックを作成する
+3. 実際の使用パターンとエッジケースからテストセットを構築する
+4. 自動評価パイプラインを実装する
+5. 変更を加える前にベースラインメトリクスを確立する
+6. すべての重要な変更に対して評価を実行する
+7. トレンド分析のために時系列でメトリクスを追跡する
+8. 自動評価を人間によるレビューで補完する
 
-### Avoiding Evaluation Pitfalls
+### 評価の落とし穴の回避
 
-Overfitting to specific paths: Evaluate outcomes, not specific steps.
-Ignoring edge cases: Include diverse test scenarios.
-Single-metric obsession: Use multi-dimensional rubrics.
-Neglecting context effects: Test with realistic context sizes.
-Skipping human evaluation: Automated evaluation misses subtle issues.
+特定のパスへの過剰適合：特定のステップではなく、成果を評価する。
+エッジケースの無視：多様なテストシナリオを含める。
+単一メトリクスへの執着：多次元ルーブリックを使用する。
+コンテキスト効果の軽視：現実的なコンテキストサイズでテストする。
+人間による評価の省略：自動評価は微妙な問題を見逃す。
 
-## Examples
+## 例
 
-**Example 1: Simple Evaluation**
+**例1：シンプルな評価**
 ```python
 def evaluate_agent_response(response, expected):
     rubric = load_rubric()
@@ -150,9 +150,9 @@ def evaluate_agent_response(response, expected):
     return {"passed": overall >= 0.7, "scores": scores}
 ```
 
-**Example 2: Test Set Structure**
+**例2：テストセットの構造**
 
-Test sets should span multiple complexity levels to ensure comprehensive evaluation:
+テストセットは、包括的な評価を確保するために複数の複雑さのレベルを網羅する必要があります：
 
 ```python
 test_set = [
@@ -184,48 +184,48 @@ test_set = [
 ]
 ```
 
-## Guidelines
+## ガイドライン
 
-1. Use multi-dimensional rubrics, not single metrics
-2. Evaluate outcomes, not specific execution paths
-3. Cover complexity levels from simple to complex
-4. Test with realistic context sizes and histories
-5. Run evaluations continuously, not just before release
-6. Supplement LLM evaluation with human review
-7. Track metrics over time for trend detection
-8. Set clear pass/fail thresholds based on use case
+1. 単一メトリクスではなく、多次元ルーブリックを使用する
+2. 特定の実行パスではなく、成果を評価する
+3. 単純から複雑までの複雑さのレベルをカバーする
+4. 現実的なコンテキストサイズと履歴でテストする
+5. リリース前だけでなく、継続的に評価を実行する
+6. LLM評価を人間によるレビューで補完する
+7. トレンド検出のために時系列でメトリクスを追跡する
+8. ユースケースに基づいて明確な合格/不合格の閾値を設定する
 
-## Integration
+## 統合
 
-This skill connects to all other skills as a cross-cutting concern:
+このスキルは、横断的な関心事としてすべての他のスキルと接続します：
 
-- context-fundamentals - Evaluating context usage
-- context-degradation - Detecting degradation
-- context-optimization - Measuring optimization effectiveness
-- multi-agent-patterns - Evaluating coordination
-- tool-design - Evaluating tool effectiveness
-- memory-systems - Evaluating memory quality
+- context-fundamentals - コンテキスト使用の評価
+- context-degradation - 劣化の検出
+- context-optimization - 最適化の有効性の測定
+- multi-agent-patterns - 連携の評価
+- tool-design - ツールの有効性の評価
+- memory-systems - メモリ品質の評価
 
-## References
+## 参考資料
 
-Internal reference:
-- [Metrics Reference](./references/metrics.md) - Detailed evaluation metrics and implementation
+内部参考資料：
+- [Metrics Reference](./references/metrics.md) - 詳細な評価メトリクスと実装
 
-## References
+## 参考資料
 
-Internal skills:
-- All other skills connect to evaluation for quality measurement
+内部スキル：
+- すべての他のスキルが品質測定のために評価と接続する
 
-External resources:
-- LLM evaluation benchmarks
-- Agent evaluation research papers
-- Production monitoring practices
+外部リソース：
+- LLM評価ベンチマーク
+- エージェント評価に関する研究論文
+- 本番監視のプラクティス
 
 ---
 
-## Skill Metadata
+## スキルメタデータ
 
-**Created**: 2025-12-20
-**Last Updated**: 2025-12-20
-**Author**: Agent Skills for Context Engineering Contributors
-**Version**: 1.0.0
+**作成日**: 2025-12-20
+**最終更新日**: 2025-12-20
+**著者**: Agent Skills for Context Engineering Contributors
+**バージョン**: 1.0.0
