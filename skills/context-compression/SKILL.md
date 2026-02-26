@@ -1,56 +1,56 @@
 ---
 name: context-compression
-description: This skill should be used when the user asks to "compress context", "summarize conversation history", "implement compaction", "reduce token usage", or mentions context compression, structured summarization, tokens-per-task optimization, or long-running agent sessions exceeding context limits.
+description: このスキルは、ユーザーが「コンテキストを圧縮する」「会話履歴を要約する」「コンパクションを実装する」「トークン使用を削減する」と求めた場合、またはコンテキスト圧縮、構造化サマリー、タスクあたりのトークン最適化、コンテキスト制限を超える長時間実行エージェントセッションについて言及する場合に使用します。
 ---
 
-# Context Compression Strategies
+# コンテキスト圧縮戦略
 
-When agent sessions generate millions of tokens of conversation history, compression becomes mandatory. The naive approach is aggressive compression to minimize tokens per request. The correct optimization target is tokens per task: total tokens consumed to complete a task, including re-fetching costs when compression loses critical information.
+エージェントセッションが数百万トークンの会話履歴を生成する場合、圧縮は必須となります。素朴なアプローチは、リクエストあたりのトークンを最小化する積極的な圧縮です。正しい最適化ターゲットは、タスクあたりのトークンです：タスクを完了するために消費される総トークン数であり、圧縮が重要な情報を失った場合の再取得コストを含みます。
 
-## When to Activate
+## 有効化のタイミング
 
-Activate this skill when:
-- Agent sessions exceed context window limits
-- Codebases exceed context windows (5M+ token systems)
-- Designing conversation summarization strategies
-- Debugging cases where agents "forget" what files they modified
-- Building evaluation frameworks for compression quality
+以下の場合にこのスキルを有効化してください：
+- エージェントセッションがコンテキストウィンドウの制限を超える場合
+- コードベースがコンテキストウィンドウを超える場合（5M以上のトークンのシステム）
+- 会話要約戦略を設計する時
+- エージェントが「変更したファイルを忘れる」ケースのデバッグ時
+- 圧縮品質の評価フレームワークを構築する時
 
-## Core Concepts
+## コアコンセプト
 
-Context compression trades token savings against information loss. Three production-ready approaches exist:
+コンテキスト圧縮は、トークンの節約と情報の損失をトレードオフします。3つのプロダクション対応アプローチが存在します：
 
-1. **Anchored Iterative Summarization**: Maintain structured, persistent summaries with explicit sections for session intent, file modifications, decisions, and next steps. When compression triggers, summarize only the newly-truncated span and merge with the existing summary. Structure forces preservation by dedicating sections to specific information types.
+1. **アンカードイテレーティブサマリゼーション**: セッションの意図、ファイル変更、決定、および次のステップの明示的なセクションを持つ構造化された永続的なサマリーを維持します。圧縮がトリガーされた時、新しく切り詰められたスパンのみを要約し、既存のサマリーとマージします。構造が、特定の情報タイプにセクションを割り当てることで保持を強制します。
 
-2. **Opaque Compression**: Produce compressed representations optimized for reconstruction fidelity. Achieves highest compression ratios (99%+) but sacrifices interpretability. Cannot verify what was preserved.
+2. **オペーク圧縮**: 再構築の忠実性に最適化された圧縮表現を生成します。最高の圧縮率（99%以上）を達成しますが、解釈可能性を犠牲にします。何が保持されたかを検証できません。
 
-3. **Regenerative Full Summary**: Generate detailed structured summaries on each compression. Produces readable output but may lose details across repeated compression cycles due to full regeneration rather than incremental merging.
+3. **リジェネレーティブフルサマリー**: 各圧縮時に詳細な構造化サマリーを生成します。読みやすい出力を生成しますが、インクリメンタルマージではなく完全な再生成のため、繰り返しの圧縮サイクルにわたって詳細を失う可能性があります。
 
-The critical insight: structure forces preservation. Dedicated sections act as checklists that the summarizer must populate, preventing silent information drift.
+重要な洞察：構造が保持を強制します。専用のセクションは、サマライザーが必ず埋めなければならないチェックリストとして機能し、サイレントな情報ドリフトを防ぎます。
 
-## Detailed Topics
+## 詳細トピック
 
-### Why Tokens-Per-Task Matters
+### タスクあたりのトークンが重要な理由
 
-Traditional compression metrics target tokens-per-request. This is the wrong optimization. When compression loses critical details like file paths or error messages, the agent must re-fetch information, re-explore approaches, and waste tokens recovering context.
+従来の圧縮メトリクスは、リクエストあたりのトークンをターゲットにしています。これは間違った最適化です。圧縮がファイルパスやエラーメッセージなどの重要な詳細を失うと、エージェントは情報を再取得し、アプローチを再探索し、コンテキストの回復にトークンを無駄にしなければなりません。
 
-The right metric is tokens-per-task: total tokens consumed from task start to completion. A compression strategy saving 0.5% more tokens but causing 20% more re-fetching costs more overall.
+正しいメトリクスはタスクあたりのトークンです：タスクの開始から完了までに消費される総トークン数です。0.5%多くのトークンを節約しても20%多くの再取得を引き起こす圧縮戦略は、全体的にはより多くのコストがかかります。
 
-### The Artifact Trail Problem
+### アーティファクトトレイルの問題
 
-Artifact trail integrity is the weakest dimension across all compression methods, scoring 2.2-2.5 out of 5.0 in evaluations. Even structured summarization with explicit file sections struggles to maintain complete file tracking across long sessions.
+アーティファクトトレイルの整合性は、すべての圧縮メソッドで最も弱い次元であり、評価で5.0中2.2〜2.5のスコアです。明示的なファイルセクションを持つ構造化サマリゼーションでさえ、長いセッションにわたる完全なファイル追跡の維持に苦労します。
 
-Coding agents need to know:
-- Which files were created
-- Which files were modified and what changed
-- Which files were read but not changed
-- Function names, variable names, error messages
+コーディングエージェントは以下を知る必要があります：
+- どのファイルが作成されたか
+- どのファイルが変更され、何が変わったか
+- どのファイルが読み取られたが変更されなかったか
+- 関数名、変数名、エラーメッセージ
 
-This problem likely requires specialized handling beyond general summarization: a separate artifact index or explicit file-state tracking in agent scaffolding.
+この問題は、一般的な要約を超えた専門的な処理を必要とする可能性が高いです：別のアーティファクトインデックスや、エージェントスキャフォールディングにおける明示的なファイル状態追跡です。
 
-### Structured Summary Sections
+### 構造化サマリーセクション
 
-Effective structured summaries include explicit sections:
+効果的な構造化サマリーには明示的なセクションが含まれます：
 
 ```markdown
 ## Session Intent
@@ -75,114 +75,114 @@ Effective structured summaries include explicit sections:
 3. Update documentation
 ```
 
-This structure prevents silent loss of file paths or decisions because each section must be explicitly addressed.
+この構造は、各セクションが明示的に対処されなければならないため、ファイルパスや決定のサイレントな損失を防ぎます。
 
-### Compression Trigger Strategies
+### 圧縮トリガー戦略
 
-When to trigger compression matters as much as how to compress:
+いつ圧縮をトリガーするかは、どのように圧縮するかと同じくらい重要です：
 
-| Strategy | Trigger Point | Trade-off |
+| 戦略 | トリガーポイント | トレードオフ |
 |----------|---------------|-----------|
-| Fixed threshold | 70-80% context utilization | Simple but may compress too early |
-| Sliding window | Keep last N turns + summary | Predictable context size |
-| Importance-based | Compress low-relevance sections first | Complex but preserves signal |
-| Task-boundary | Compress at logical task completions | Clean summaries but unpredictable timing |
+| 固定閾値 | コンテキスト利用率70〜80% | シンプルだが早すぎる圧縮の可能性 |
+| スライディングウィンドウ | 最後のNターン＋サマリーを保持 | 予測可能なコンテキストサイズ |
+| 重要度ベース | 低関連性セクションを先に圧縮 | 複雑だがシグナルを保持 |
+| タスク境界 | 論理的なタスク完了時に圧縮 | クリーンなサマリーだが予測不可能なタイミング |
 
-The sliding window approach with structured summaries provides the best balance of predictability and quality for most coding agent use cases.
+構造化サマリー付きのスライディングウィンドウアプローチは、ほとんどのコーディングエージェントのユースケースにおいて、予測可能性と品質の最良のバランスを提供します。
 
-### Probe-Based Evaluation
+### プローブベースの評価
 
-Traditional metrics like ROUGE or embedding similarity fail to capture functional compression quality. A summary may score high on lexical overlap while missing the one file path the agent needs.
+ROUGEやエンベディングの類似性などの従来のメトリクスは、機能的な圧縮品質を捕捉できません。サマリーは語彙の重複で高いスコアを獲得しながら、エージェントが必要とする1つのファイルパスを見逃す可能性があります。
 
-Probe-based evaluation directly measures functional quality by asking questions after compression:
+プローブベースの評価は、圧縮後に質問することで機能的な品質を直接測定します：
 
-| Probe Type | What It Tests | Example Question |
+| プローブタイプ | テスト対象 | 質問例 |
 |------------|---------------|------------------|
-| Recall | Factual retention | "What was the original error message?" |
-| Artifact | File tracking | "Which files have we modified?" |
-| Continuation | Task planning | "What should we do next?" |
-| Decision | Reasoning chain | "What did we decide about the Redis issue?" |
+| リコール | 事実の保持 | 「元のエラーメッセージは何でしたか？」 |
+| アーティファクト | ファイル追跡 | 「どのファイルを変更しましたか？」 |
+| 継続 | タスク計画 | 「次に何をすべきですか？」 |
+| 決定 | 推論チェーン | 「Redisの問題について何を決定しましたか？」 |
 
-If compression preserved the right information, the agent answers correctly. If not, it guesses or hallucinates.
+圧縮が正しい情報を保持していれば、エージェントは正しく回答します。そうでなければ、推測またはハルシネーションします。
 
-### Evaluation Dimensions
+### 評価次元
 
-Six dimensions capture compression quality for coding agents:
+6つの次元がコーディングエージェントの圧縮品質を捕捉します：
 
-1. **Accuracy**: Are technical details correct? File paths, function names, error codes.
-2. **Context Awareness**: Does the response reflect current conversation state?
-3. **Artifact Trail**: Does the agent know which files were read or modified?
-4. **Completeness**: Does the response address all parts of the question?
-5. **Continuity**: Can work continue without re-fetching information?
-6. **Instruction Following**: Does the response respect stated constraints?
+1. **正確性**: 技術的な詳細は正しいか？ファイルパス、関数名、エラーコード。
+2. **コンテキスト認識**: レスポンスは現在の会話状態を反映しているか？
+3. **アーティファクトトレイル**: エージェントはどのファイルが読み取られたか変更されたかを知っているか？
+4. **完全性**: レスポンスは質問のすべての部分に対処しているか？
+5. **継続性**: 情報の再取得なしに作業を継続できるか？
+6. **指示への準拠**: レスポンスは述べられた制約を尊重しているか？
 
-Accuracy shows the largest variation between compression methods (0.6 point gap). Artifact trail is universally weak (2.2-2.5 range).
+正確性は圧縮メソッド間で最大のバリエーションを示します（0.6ポイントの差）。アーティファクトトレイルは普遍的に弱いです（2.2〜2.5の範囲）。
 
-## Practical Guidance
+## 実践ガイダンス
 
-### Three-Phase Compression Workflow
+### 3フェーズ圧縮ワークフロー
 
-For large codebases or agent systems exceeding context windows, apply compression through three phases:
+コンテキストウィンドウを超える大規模なコードベースやエージェントシステムには、3つのフェーズを通じて圧縮を適用します：
 
-1. **Research Phase**: Produce a research document from architecture diagrams, documentation, and key interfaces. Compress exploration into a structured analysis of components and dependencies. Output: single research document.
+1. **調査フェーズ**: アーキテクチャ図、ドキュメント、および主要なインターフェースから調査ドキュメントを作成します。探索をコンポーネントと依存関係の構造化された分析に圧縮します。出力：単一の調査ドキュメント。
 
-2. **Planning Phase**: Convert research into implementation specification with function signatures, type definitions, and data flow. A 5M token codebase compresses to approximately 2,000 words of specification.
+2. **計画フェーズ**: 調査を関数シグネチャ、型定義、およびデータフローを含む実装仕様に変換します。5Mトークンのコードベースは約2,000語の仕様に圧縮されます。
 
-3. **Implementation Phase**: Execute against the specification. Context remains focused on the spec rather than raw codebase exploration.
+3. **実装フェーズ**: 仕様に対して実行します。コンテキストは生のコードベース探索ではなく、仕様に集中し続けます。
 
-### Using Example Artifacts as Seeds
+### シードとしてのアーティファクト例の使用
 
-When provided with a manual migration example or reference PR, use it as a template to understand the target pattern. The example reveals constraints that static analysis cannot surface: which invariants must hold, which services break on changes, and what a clean migration looks like.
+手動の移行例やリファレンスPRが提供された場合、ターゲットパターンを理解するためのテンプレートとして使用します。この例は、静的解析では表面化できない制約を明らかにします：どの不変条件が保持されなければならないか、どのサービスが変更で壊れるか、そしてクリーンな移行がどのように見えるかです。
 
-This is particularly important when the agent cannot distinguish essential complexity (business requirements) from accidental complexity (legacy workarounds). The example artifact encodes that distinction.
+これは、エージェントが本質的な複雑さ（ビジネス要件）と偶発的な複雑さ（レガシーの回避策）を区別できない場合に特に重要です。アーティファクト例はその区別をエンコードします。
 
-### Implementing Anchored Iterative Summarization
+### アンカードイテレーティブサマリゼーションの実装
 
-1. Define explicit summary sections matching your agent's needs
-2. On first compression trigger, summarize truncated history into sections
-3. On subsequent compressions, summarize only new truncated content
-4. Merge new summary into existing sections rather than regenerating
-5. Track which information came from which compression cycle for debugging
+1. エージェントのニーズに合わせた明示的なサマリーセクションを定義する
+2. 最初の圧縮トリガー時に、切り詰められた履歴をセクションに要約する
+3. 後続の圧縮時には、新しく切り詰められたコンテンツのみを要約する
+4. 再生成ではなく、既存のセクションに新しいサマリーをマージする
+5. デバッグのために、どの情報がどの圧縮サイクルからのものかを追跡する
 
-### When to Use Each Approach
+### 各アプローチの使用タイミング
 
-**Use anchored iterative summarization when:**
-- Sessions are long-running (100+ messages)
-- File tracking matters (coding, debugging)
-- You need to verify what was preserved
+**アンカードイテレーティブサマリゼーションを使用する場合：**
+- セッションが長時間実行される場合（100メッセージ以上）
+- ファイル追跡が重要な場合（コーディング、デバッグ）
+- 何が保持されたかを検証する必要がある場合
 
-**Use opaque compression when:**
-- Maximum token savings required
-- Sessions are relatively short
-- Re-fetching costs are low
+**オペーク圧縮を使用する場合：**
+- 最大のトークン節約が必要な場合
+- セッションが比較的短い場合
+- 再取得コストが低い場合
 
-**Use regenerative summaries when:**
-- Summary interpretability is critical
-- Sessions have clear phase boundaries
-- Full context review is acceptable on each compression
+**リジェネレーティブサマリーを使用する場合：**
+- サマリーの解釈可能性が重要な場合
+- セッションに明確なフェーズ境界がある場合
+- 各圧縮時の完全なコンテキストレビューが許容される場合
 
-### Compression Ratio Considerations
+### 圧縮率の考慮事項
 
-| Method | Compression Ratio | Quality Score | Trade-off |
+| メソッド | 圧縮率 | 品質スコア | トレードオフ |
 |--------|-------------------|---------------|-----------|
-| Anchored Iterative | 98.6% | 3.70 | Best quality, slightly less compression |
-| Regenerative | 98.7% | 3.44 | Good quality, moderate compression |
-| Opaque | 99.3% | 3.35 | Best compression, quality loss |
+| アンカードイテレーティブ | 98.6% | 3.70 | 最高品質、やや低い圧縮率 |
+| リジェネレーティブ | 98.7% | 3.44 | 良い品質、中程度の圧縮率 |
+| オペーク | 99.3% | 3.35 | 最高の圧縮率、品質の損失 |
 
-The 0.7% additional tokens retained by structured summarization buys 0.35 quality points. For any task where re-fetching costs matter, this trade-off favors structured approaches.
+構造化サマリゼーションによって保持される追加0.7%のトークンは、0.35の品質ポイントを獲得します。再取得コストが重要なタスクでは、このトレードオフは構造化アプローチに有利です。
 
-## Examples
+## 例
 
-**Example 1: Debugging Session Compression**
+**例1：デバッグセッションの圧縮**
 
-Original context (89,000 tokens, 178 messages):
-- 401 error on /api/auth/login endpoint
-- Traced through auth controller, middleware, session store
-- Found stale Redis connection
-- Fixed connection pooling, added retry logic
-- 14 tests passing, 2 failing
+元のコンテキスト（89,000トークン、178メッセージ）：
+- /api/auth/loginエンドポイントでの401エラー
+- authコントローラー、ミドルウェア、セッションストアを調査
+- 古くなったRedis接続を発見
+- 接続プーリングを修正、リトライロジックを追加
+- 14テスト合格、2テスト不合格
 
-Structured summary after compression:
+圧縮後の構造化サマリー：
 
 ```markdown
 ## Session Intent
@@ -207,59 +207,59 @@ Stale Redis connection in session store. JWT generated correctly but session cou
 3. Deploy to staging
 ```
 
-**Example 2: Probe Response Quality**
+**例2：プローブレスポンスの品質**
 
-After compression, asking "What was the original error?":
+圧縮後、「元のエラーは何でしたか？」と質問した場合：
 
-Good response (structured summarization):
-> "The original error was a 401 Unauthorized response from the /api/auth/login endpoint. Users received this error with valid credentials. Root cause was stale Redis connection in session store."
+良いレスポンス（構造化サマリゼーション）：
+> 「元のエラーは/api/auth/loginエンドポイントからの401 Unauthorizedレスポンスでした。有効な資格情報にもかかわらず、ユーザーはこのエラーを受け取りました。根本原因はセッションストアの古くなったRedis接続でした。」
 
-Poor response (aggressive compression):
-> "We were debugging an authentication issue. The login was failing. We fixed some configuration problems."
+悪いレスポンス（積極的な圧縮）：
+> 「認証の問題をデバッグしていました。ログインが失敗していました。いくつかの設定の問題を修正しました。」
 
-The structured response preserves endpoint, error code, and root cause. The aggressive response loses all technical detail.
+構造化レスポンスはエンドポイント、エラーコード、および根本原因を保持しています。積極的なレスポンスはすべての技術的な詳細を失っています。
 
-## Guidelines
+## ガイドライン
 
-1. Optimize for tokens-per-task, not tokens-per-request
-2. Use structured summaries with explicit sections for file tracking
-3. Trigger compression at 70-80% context utilization
-4. Implement incremental merging rather than full regeneration
-5. Test compression quality with probe-based evaluation
-6. Track artifact trail separately if file tracking is critical
-7. Accept slightly lower compression ratios for better quality retention
-8. Monitor re-fetching frequency as a compression quality signal
+1. リクエストあたりのトークンではなく、タスクあたりのトークンを最適化する
+2. ファイル追跡のための明示的なセクションを持つ構造化サマリーを使用する
+3. コンテキスト利用率70〜80%で圧縮をトリガーする
+4. 完全な再生成ではなくインクリメンタルマージを実装する
+5. プローブベースの評価で圧縮品質をテストする
+6. ファイル追跡が重要な場合はアーティファクトトレイルを別途追跡する
+7. より良い品質保持のためにやや低い圧縮率を受け入れる
+8. 圧縮品質のシグナルとして再取得の頻度を監視する
 
-## Integration
+## 統合
 
-This skill connects to several others in the collection:
+このスキルはコレクション内のいくつかの他のスキルに接続します：
 
-- context-degradation - Compression is a mitigation strategy for degradation
-- context-optimization - Compression is one optimization technique among many
-- evaluation - Probe-based evaluation applies to compression testing
-- memory-systems - Compression relates to scratchpad and summary memory patterns
+- context-degradation - 圧縮は劣化に対する緩和戦略である
+- context-optimization - 圧縮は多くの最適化技術の1つである
+- evaluation - プローブベースの評価は圧縮テストに適用される
+- memory-systems - 圧縮はスクラッチパッドとサマリーメモリパターンに関連する
 
-## References
+## 参考文献
 
-Internal reference:
-- [Evaluation Framework Reference](./references/evaluation-framework.md) - Detailed probe types and scoring rubrics
+内部参考：
+- [Evaluation Framework Reference](./references/evaluation-framework.md) - 詳細なプローブタイプとスコアリングルーブリック
 
-Related skills in this collection:
-- context-degradation - Understanding what compression prevents
-- context-optimization - Broader optimization strategies
-- evaluation - Building evaluation frameworks
+このコレクションの関連スキル：
+- context-degradation - 圧縮が防ぐものの理解
+- context-optimization - より広い最適化戦略
+- evaluation - 評価フレームワークの構築
 
-External resources:
+外部リソース：
 - Factory Research: Evaluating Context Compression for AI Agents (December 2025)
 - Research on LLM-as-judge evaluation methodology (Zheng et al., 2023)
 - Netflix Engineering: "The Infinite Software Crisis" - Three-phase workflow and context compression at scale (AI Summit 2025)
 
 ---
 
-## Skill Metadata
+## スキルメタデータ
 
-**Created**: 2025-12-22
-**Last Updated**: 2025-12-26
-**Author**: Agent Skills for Context Engineering Contributors
-**Version**: 1.1.0
+**作成日**: 2025-12-22
+**最終更新日**: 2025-12-26
+**著者**: Agent Skills for Context Engineering Contributors
+**バージョン**: 1.1.0
 

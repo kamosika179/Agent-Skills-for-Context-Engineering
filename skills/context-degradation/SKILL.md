@@ -1,164 +1,164 @@
 ---
 name: context-degradation
-description: This skill should be used when the user asks to "diagnose context problems", "fix lost-in-middle issues", "debug agent failures", "understand context poisoning", or mentions context degradation, attention patterns, context clash, context confusion, or agent performance degradation. Provides patterns for recognizing and mitigating context failures.
+description: このスキルは、ユーザーが「コンテキストの問題を診断する」「lost-in-middleの問題を修正する」「エージェントの障害をデバッグする」「コンテキストポイズニングを理解する」と求めた場合、またはコンテキストの劣化、アテンションパターン、コンテキストの衝突、コンテキストの混乱、エージェントのパフォーマンス低下について言及する場合に使用します。コンテキスト障害の認識と緩和のためのパターンを提供します。
 ---
 
-# Context Degradation Patterns
+# コンテキスト劣化パターン
 
-Language models exhibit predictable degradation patterns as context length increases. Understanding these patterns is essential for diagnosing failures and designing resilient systems. Context degradation is not a binary state but a continuum of performance degradation that manifests in several distinct ways.
+言語モデルは、コンテキストの長さが増加するにつれて予測可能な劣化パターンを示します。これらのパターンを理解することは、障害の診断とレジリエントなシステムの設計に不可欠です。コンテキストの劣化は二値的な状態ではなく、いくつかの異なる方法で現れるパフォーマンス劣化の連続体です。
 
-## When to Activate
+## 有効化のタイミング
 
-Activate this skill when:
-- Agent performance degrades unexpectedly during long conversations
-- Debugging cases where agents produce incorrect or irrelevant outputs
-- Designing systems that must handle large contexts reliably
-- Evaluating context engineering choices for production systems
-- Investigating "lost in middle" phenomena in agent outputs
-- Analyzing context-related failures in agent behavior
+以下の場合にこのスキルを有効化してください：
+- 長い会話中にエージェントのパフォーマンスが予期せず低下する場合
+- エージェントが不正確または無関係な出力を生成するケースのデバッグ時
+- 大規模なコンテキストを確実に処理する必要があるシステムの設計時
+- プロダクションシステムのコンテキストエンジニアリングの選択を評価する時
+- エージェント出力における「lost in middle」現象の調査時
+- エージェントの動作におけるコンテキスト関連の障害を分析する時
 
-## Core Concepts
+## コアコンセプト
 
-Context degradation manifests through several distinct patterns. The lost-in-middle phenomenon causes information in the center of context to receive less attention. Context poisoning occurs when errors compound through repeated reference. Context distraction happens when irrelevant information overwhelms relevant content. Context confusion arises when the model cannot determine which context applies. Context clash develops when accumulated information directly conflicts.
+コンテキストの劣化は、いくつかの異なるパターンを通じて現れます。lost-in-middle現象は、コンテキストの中央にある情報が受けるアテンションが少なくなる原因となります。コンテキストポイズニングは、エラーが繰り返し参照されることで複合化する時に発生します。コンテキストディストラクションは、無関係な情報が関連コンテンツを圧倒する時に起こります。コンテキストコンフュージョンは、モデルがどのコンテキストが適用されるかを判断できない時に発生します。コンテキストクラッシュは、蓄積された情報が直接矛盾する時に発展します。
 
-These patterns are predictable and can be mitigated through architectural patterns like compaction, masking, partitioning, and isolation.
+これらのパターンは予測可能であり、コンパクション、マスキング、パーティショニング、分離などのアーキテクチャパターンによって緩和できます。
 
-## Detailed Topics
+## 詳細トピック
 
-### The Lost-in-Middle Phenomenon
+### Lost-in-Middle現象
 
-The most well-documented degradation pattern is the "lost-in-middle" effect, where models demonstrate U-shaped attention curves. Information at the beginning and end of context receives reliable attention, while information buried in the middle suffers from dramatically reduced recall accuracy.
+最もよく文書化されている劣化パターンは「lost-in-middle」効果で、モデルがU字型のアテンション曲線を示します。コンテキストの先頭と末尾にある情報は確実にアテンションを受けますが、中間に埋もれた情報はリコール精度が劇的に低下します。
 
-**Empirical Evidence**
-Research demonstrates that relevant information placed in the middle of context experiences 10-40% lower recall accuracy compared to the same information at the beginning or end. This is not a failure of the model but a consequence of attention mechanics and training data distributions.
+**実証的エビデンス**
+研究によると、コンテキストの中間に配置された関連情報は、先頭または末尾にある同じ情報と比較して、リコール精度が10〜40%低下します。これはモデルの障害ではなく、アテンションメカニクスと学習データ分布の結果です。
 
-Models allocate massive attention to the first token (often the BOS token) to stabilize internal states. This creates an "attention sink" that soaks up attention budget. As context grows, the limited budget is stretched thinner, and middle tokens fail to garner sufficient attention weight for reliable retrieval.
+モデルは内部状態を安定させるために、最初のトークン（多くの場合BOSトークン）に大量のアテンションを割り当てます。これにより、アテンションバジェットを吸収する「アテンションシンク」が作成されます。コンテキストが成長するにつれて、限られたバジェットはさらに薄く引き伸ばされ、中間のトークンは信頼性の高い検索に十分なアテンション重みを獲得できなくなります。
 
-**Practical Implications**
-Design context placement with attention patterns in mind. Place critical information at the beginning or end of context. Consider whether information will be queried directly or needs to support reasoning—if the latter, placement matters less but overall signal quality matters more.
+**実践的な影響**
+アテンションパターンを念頭に置いてコンテキストの配置を設計します。重要な情報をコンテキストの先頭または末尾に配置します。情報が直接クエリされるのか、推論をサポートする必要があるのかを考慮してください—後者の場合、配置はそれほど重要ではありませんが、全体的なシグナル品質がより重要になります。
 
-For long documents or conversations, use summary structures that surface key information at attention-favored positions. Use explicit section headers and transitions to help models navigate structure.
+長いドキュメントや会話では、アテンションが優遇されるポジションに重要な情報を表面化させるサマリー構造を使用します。モデルが構造をナビゲートするのを助けるために、明示的なセクションヘッダーとトランジションを使用します。
 
-### Context Poisoning
+### コンテキストポイズニング
 
-Context poisoning occurs when hallucinations, errors, or incorrect information enters context and compounds through repeated reference. Once poisoned, context creates feedback loops that reinforce incorrect beliefs.
+コンテキストポイズニングは、ハルシネーション、エラー、または不正確な情報がコンテキストに入り、繰り返し参照されることで複合化する時に発生します。一度汚染されると、コンテキストは不正確な信念を強化するフィードバックループを作成します。
 
-**How Poisoning Occurs**
-Poisoning typically enters through three pathways. First, tool outputs may contain errors or unexpected formats that models accept as ground truth. Second, retrieved documents may contain incorrect or outdated information that models incorporate into reasoning. Third, model-generated summaries or intermediate outputs may introduce hallucinations that persist in context.
+**ポイズニングの発生方法**
+ポイズニングは通常、3つの経路を通じて入り込みます。第一に、ツール出力にエラーや予期しないフォーマットが含まれ、モデルがそれを正しい情報として受け入れる場合があります。第二に、検索されたドキュメントに不正確または古い情報が含まれ、モデルがそれを推論に組み込む場合があります。第三に、モデルが生成したサマリーや中間出力にハルシネーションが導入され、コンテキストに残り続ける場合があります。
 
-The compounding effect is severe. If an agent's goals section becomes poisoned, it develops strategies that take substantial effort to undo. Each subsequent decision references the poisoned content, reinforcing incorrect assumptions.
+複合効果は深刻です。エージェントの目標セクションが汚染されると、元に戻すのに多大な労力を要する戦略を展開します。後続の各判断が汚染されたコンテンツを参照し、不正確な仮定を強化します。
 
-**Detection and Recovery**
-Watch for symptoms including degraded output quality on tasks that previously succeeded, tool misalignment where agents call wrong tools or parameters, and hallucinations that persist despite correction attempts. When these symptoms appear, consider context poisoning.
+**検出と回復**
+以前成功していたタスクでの出力品質の低下、エージェントが間違ったツールやパラメータを呼び出すツールの不整合、修正の試みにもかかわらず持続するハルシネーションなどの症状に注意してください。これらの症状が現れた場合、コンテキストポイズニングを疑ってください。
 
-Recovery requires removing or replacing poisoned content. This may involve truncating context to before the poisoning point, explicitly noting the poisoning in context and asking for re-evaluation, or restarting with clean context and preserving only verified information.
+回復には、汚染されたコンテンツの除去または置換が必要です。ポイズニング発生前のポイントまでコンテキストを切り詰める、コンテキスト内でポイズニングを明示的に記載して再評価を求める、またはクリーンなコンテキストで再起動し検証済みの情報のみを保持することが含まれます。
 
-### Context Distraction
+### コンテキストディストラクション
 
-Context distraction emerges when context grows so long that models over-focus on provided information at the expense of their training knowledge. The model attends to everything in context regardless of relevance, and this creates pressure to use provided information even when internal knowledge is more accurate.
+コンテキストディストラクションは、コンテキストが長くなりすぎて、モデルが学習知識を犠牲にして提供された情報に過度に集中する時に発生します。モデルは関連性に関わらずコンテキスト内のすべてに注意を向け、これにより内部知識がより正確な場合でも提供された情報を使用するプレッシャーが生まれます。
 
-**The Distractor Effect**
-Research shows that even a single irrelevant document in context reduces performance on tasks involving relevant documents. Multiple distractors compound degradation. The effect is not about noise in absolute terms but about attention allocation—irrelevant information competes with relevant information for limited attention budget.
+**ディストラクター効果**
+研究によると、コンテキスト内のたった1つの無関係なドキュメントでも、関連ドキュメントを含むタスクのパフォーマンスが低下します。複数のディストラクターは劣化を複合化します。効果はノイズの絶対量ではなく、アテンション配分に関するものです—無関係な情報が限られたアテンションバジェットをめぐって関連情報と競合します。
 
-Models do not have a mechanism to "skip" irrelevant context. They must attend to everything provided, and this obligation creates distraction even when the irrelevant information is clearly not useful.
+モデルには、無関係なコンテキストを「スキップ」するメカニズムがありません。提供されたすべてに注意を向けなければならず、この義務は無関係な情報が明らかに有用でない場合でもディストラクションを引き起こします。
 
-**Mitigation Strategies**
-Mitigate distraction through careful curation of what enters context. Apply relevance filtering before loading retrieved documents. Use namespacing and organization to make irrelevant sections easy to ignore structurally. Consider whether information truly needs to be in context or can be accessed through tool calls instead.
+**緩和戦略**
+コンテキストに入るものの慎重なキュレーションによってディストラクションを緩和します。検索されたドキュメントをロードする前に関連性フィルタリングを適用します。名前空間と整理を使用して、無関係なセクションを構造的に無視しやすくします。情報が本当にコンテキスト内にある必要があるのか、代わりにツールコールを通じてアクセスできるのかを検討します。
 
-### Context Confusion
+### コンテキストコンフュージョン
 
-Context confusion arises when irrelevant information influences responses in ways that degrade quality. This is related to distraction but distinct—confusion concerns the influence of context on model behavior rather than attention allocation.
+コンテキストコンフュージョンは、無関係な情報が品質を低下させる形でレスポンスに影響を与える時に発生します。これはディストラクションに関連していますが異なります—コンフュージョンは、アテンション配分ではなく、コンテキストがモデルの動作に与える影響に関するものです。
 
-If you put something in context, the model has to pay attention to it. The model may incorporate irrelevant information, use inappropriate tool definitions, or apply constraints that came from different contexts. Confusion is especially problematic when context contains multiple task types or when switching between tasks within a single session.
+コンテキストに何かを入れると、モデルはそれに注意を払わなければなりません。モデルは無関係な情報を組み込んだり、不適切なツール定義を使用したり、異なるコンテキストからの制約を適用したりする可能性があります。コンフュージョンは、コンテキストに複数のタスクタイプが含まれている場合や、単一のセッション内でタスクを切り替える場合に特に問題になります。
 
-**Signs of Confusion**
-Watch for responses that address the wrong aspect of a query, tool calls that seem appropriate for a different task, or outputs that mix requirements from multiple sources. These indicate confusion about what context applies to the current situation.
+**コンフュージョンの兆候**
+クエリの間違った側面に対処するレスポンス、異なるタスクに適切と思われるツールコール、または複数のソースからの要件が混在する出力に注意してください。これらは、現在の状況にどのコンテキストが適用されるかについてのコンフュージョンを示しています。
 
-**Architectural Solutions**
-Architectural solutions include explicit task segmentation where different tasks get different context windows, clear transitions between task contexts, and state management that isolates context for different objectives.
+**アーキテクチャソリューション**
+アーキテクチャソリューションには、異なるタスクが異なるコンテキストウィンドウを取得する明示的なタスクセグメンテーション、タスクコンテキスト間の明確なトランジション、および異なる目標のためにコンテキストを分離する状態管理が含まれます。
 
-### Context Clash
+### コンテキストクラッシュ
 
-Context clash develops when accumulated information directly conflicts, creating contradictory guidance that derails reasoning. This differs from poisoning where one piece of information is incorrect—in clash, multiple correct pieces of information contradict each other.
+コンテキストクラッシュは、蓄積された情報が直接矛盾し、推論を脱線させる矛盾したガイダンスを作成する時に発展します。これは、1つの情報が不正確であるポイズニングとは異なります—クラッシュでは、複数の正しい情報が互いに矛盾します。
 
-**Sources of Clash**
-Clash commonly arises from multi-source retrieval where different sources have contradictory information, version conflicts where outdated and current information both appear in context, and perspective conflicts where different viewpoints are valid but incompatible.
+**クラッシュの原因**
+クラッシュは一般的に、異なるソースが矛盾する情報を持つマルチソース検索、古い情報と最新の情報の両方がコンテキストに表示されるバージョンの競合、および異なる視点が有効だが互換性がないパースペクティブの競合から発生します。
 
-**Resolution Approaches**
-Resolution approaches include explicit conflict marking that identifies contradictions and requests clarification, priority rules that establish which source takes precedence, and version filtering that excludes outdated information from context.
+**解決アプローチ**
+解決アプローチには、矛盾を特定して明確化を求める明示的な競合マーキング、どのソースが優先されるかを確立する優先ルール、およびコンテキストから古い情報を除外するバージョンフィルタリングが含まれます。
 
-### Empirical Benchmarks and Thresholds
+### 実証的ベンチマークと閾値
 
-Research provides concrete data on degradation patterns that inform design decisions.
+研究は、設計判断に情報を提供する劣化パターンに関する具体的なデータを提供します。
 
-**RULER Benchmark Findings**
-The RULER benchmark delivers sobering findings: only 50% of models claiming 32K+ context maintain satisfactory performance at 32K tokens. GPT-5.2 shows the least degradation among current models, while many still drop 30+ points at extended contexts. Near-perfect scores on simple needle-in-haystack tests do not translate to real long-context understanding.
+**RULERベンチマークの調査結果**
+RULERベンチマークは厳しい調査結果を提供します：32K以上のコンテキストを主張するモデルの50%のみが32Kトークンで満足のいくパフォーマンスを維持します。GPT-5.2は現在のモデルの中で最も劣化が少なく、多くのモデルは拡張コンテキストで30ポイント以上低下します。単純なneedle-in-haystackテストでのほぼ完璧なスコアは、実際の長いコンテキストの理解には反映されません。
 
-**Model-Specific Degradation Thresholds**
-| Model | Degradation Onset | Severe Degradation | Notes |
+**モデル別劣化閾値**
+| モデル | 劣化開始 | 重度の劣化 | 備考 |
 |-------|-------------------|-------------------|-------|
-| GPT-5.2 | ~64K tokens | ~200K tokens | Best overall degradation resistance with thinking mode |
-| Claude Opus 4.5 | ~100K tokens | ~180K tokens | 200K context window, strong attention management |
-| Claude Sonnet 4.5 | ~80K tokens | ~150K tokens | Optimized for agents and coding tasks |
-| Gemini 3 Pro | ~500K tokens | ~800K tokens | 1M context window, native multimodality |
-| Gemini 3 Flash | ~300K tokens | ~600K tokens | 3x speed of Gemini 2.5, 81.2% MMMU-Pro |
+| GPT-5.2 | 〜64Kトークン | 〜200Kトークン | thinkingモードで最高の全体的な劣化耐性 |
+| Claude Opus 4.5 | 〜100Kトークン | 〜180Kトークン | 200Kコンテキストウィンドウ、強力なアテンション管理 |
+| Claude Sonnet 4.5 | 〜80Kトークン | 〜150Kトークン | エージェントとコーディングタスクに最適化 |
+| Gemini 3 Pro | 〜500Kトークン | 〜800Kトークン | 1Mコンテキストウィンドウ、ネイティブマルチモダリティ |
+| Gemini 3 Flash | 〜300Kトークン | 〜600Kトークン | Gemini 2.5の3倍の速度、81.2% MMMU-Pro |
 
-**Model-Specific Behavior Patterns**
-Different models exhibit distinct failure modes under context pressure:
+**モデル別動作パターン**
+異なるモデルは、コンテキストのプレッシャー下で異なる障害モードを示します：
 
-- **Claude 4.5 series**: Lowest hallucination rates with calibrated uncertainty. Claude Opus 4.5 achieves 80.9% on SWE-bench Verified. Tends to refuse or ask clarification rather than fabricate.
-- **GPT-5.2**: Two modes available - instant (fast) and thinking (reasoning). Thinking mode reduces hallucination through step-by-step verification but increases latency.
-- **Gemini 3 Pro/Flash**: Native multimodality with 1M context window. Gemini 3 Flash offers 3x speed improvement over previous generation. Strong at multi-modal reasoning across text, code, images, audio, and video.
+- **Claude 4.5シリーズ**: 校正された不確実性で最低のハルシネーション率。Claude Opus 4.5はSWE-bench Verifiedで80.9%を達成。捏造するよりも拒否や明確化の要求を行う傾向。
+- **GPT-5.2**: 2つのモードが利用可能 - instant（高速）とthinking（推論）。thinkingモードはステップバイステップの検証によりハルシネーションを減少させますが、レイテンシが増加します。
+- **Gemini 3 Pro/Flash**: 1Mコンテキストウィンドウによるネイティブマルチモダリティ。Gemini 3 Flashは前世代の3倍の速度向上を提供。テキスト、コード、画像、音声、動画にわたるマルチモーダル推論に強い。
 
-These patterns inform model selection for different use cases. High-stakes tasks benefit from Claude 4.5's conservative approach or GPT-5.2's thinking mode; speed-critical tasks may use instant modes.
+これらのパターンは、異なるユースケースに対するモデル選択に情報を提供します。高リスクタスクにはClaude 4.5の保守的なアプローチやGPT-5.2のthinkingモードが有益であり、速度重視のタスクにはinstantモードが使用されます。
 
-### Counterintuitive Findings
+### 直感に反する調査結果
 
-Research reveals several counterintuitive patterns that challenge assumptions about context management.
+研究は、コンテキスト管理に関する仮定に挑戦するいくつかの直感に反するパターンを明らかにしています。
 
-**Shuffled Haystacks Outperform Coherent Ones**
-Studies found that shuffled (incoherent) haystacks produce better performance than logically coherent ones. This suggests that coherent context may create false associations that confuse retrieval, while incoherent context forces models to rely on exact matching.
+**シャッフルされたヘイスタックは一貫性のあるものを上回る**
+研究によると、シャッフルされた（非一貫性の）ヘイスタックは論理的に一貫性のあるものよりも良いパフォーマンスを生み出します。これは、一貫性のあるコンテキストが検索を混乱させる偽の関連を作成する可能性がある一方、非一貫性のコンテキストはモデルに正確なマッチングへの依存を強制することを示唆しています。
 
-**Single Distractors Have Outsized Impact**
-Even a single irrelevant document reduces performance significantly. The effect is not proportional to the amount of noise but follows a step function where the presence of any distractor triggers degradation.
+**単一のディストラクターが過大な影響を持つ**
+たった1つの無関係なドキュメントでもパフォーマンスを大幅に低下させます。効果はノイズの量に比例するのではなく、ディストラクターの存在が劣化を引き起こすステップ関数に従います。
 
-**Needle-Question Similarity Correlation**
-Lower similarity between needle and question pairs shows faster degradation with context length. Tasks requiring inference across dissimilar content are particularly vulnerable.
+**Needle-Questionの類似性相関**
+needleとquestionペアの類似性が低いほど、コンテキストの長さに伴う劣化が速くなります。異なるコンテンツ間の推論を必要とするタスクは特に脆弱です。
 
-### When Larger Contexts Hurt
+### より大きなコンテキストが害になる場合
 
-Larger context windows do not uniformly improve performance. In many cases, larger contexts create new problems that outweigh benefits.
+より大きなコンテキストウィンドウは一様にパフォーマンスを向上させるわけではありません。多くの場合、より大きなコンテキストは利点を上回る新しい問題を生み出します。
 
-**Performance Degradation Curves**
-Models exhibit non-linear degradation with context length. Performance remains stable up to a threshold, then degrades rapidly. The threshold varies by model and task complexity. For many models, meaningful degradation begins around 8,000-16,000 tokens even when context windows support much larger sizes.
+**パフォーマンス劣化曲線**
+モデルはコンテキストの長さに対して非線形な劣化を示します。パフォーマンスは閾値まで安定を保ち、その後急速に劣化します。閾値はモデルとタスクの複雑さによって異なります。多くのモデルでは、コンテキストウィンドウがはるかに大きなサイズをサポートしていても、8,000〜16,000トークン前後で意味のある劣化が始まります。
 
-**Cost Implications**
-Processing cost grows disproportionately with context length. The cost to process a 400K token context is not double the cost of 200K—it increases exponentially in both time and computing resources. For many applications, this makes large-context processing economically impractical.
+**コストへの影響**
+処理コストはコンテキストの長さに対して不均衡に増大します。400Kトークンのコンテキストを処理するコストは200Kの2倍ではなく—時間と計算リソースの両方で指数関数的に増加します。多くのアプリケーションにとって、これにより大規模コンテキスト処理は経済的に非現実的になります。
 
-**Cognitive Load Metaphor**
-Even with an infinite context, asking a single model to maintain consistent quality across dozens of independent tasks creates a cognitive bottleneck. The model must constantly switch context between items, maintain a comparative framework, and ensure stylistic consistency. This is not a problem that more context solves.
+**認知負荷のメタファー**
+無限のコンテキストがあっても、単一のモデルに数十の独立したタスクにわたって一貫した品質を維持するよう求めることは、認知的なボトルネックを作成します。モデルは常にアイテム間でコンテキストを切り替え、比較フレームワークを維持し、スタイルの一貫性を確保する必要があります。これはより多くのコンテキストが解決する問題ではありません。
 
-## Practical Guidance
+## 実践ガイダンス
 
-### The Four-Bucket Approach
+### 4バケットアプローチ
 
-Four strategies address different aspects of context degradation:
+4つの戦略がコンテキスト劣化の異なる側面に対処します：
 
-**Write**: Save context outside the window using scratchpads, file systems, or external storage. This keeps active context lean while preserving information access.
+**書き出す（Write）**: スクラッチパッド、ファイルシステム、または外部ストレージを使用してコンテキストをウィンドウの外に保存します。これにより、情報アクセスを維持しながらアクティブなコンテキストをスリムに保ちます。
 
-**Select**: Pull relevant context into the window through retrieval, filtering, and prioritization. This addresses distraction by excluding irrelevant information.
+**選択する（Select）**: 検索、フィルタリング、および優先順位付けを通じて、関連するコンテキストをウィンドウに取り込みます。これにより、無関係な情報を除外してディストラクションに対処します。
 
-**Compress**: Reduce tokens while preserving information through summarization, abstraction, and observation masking. This extends effective context capacity.
+**圧縮する（Compress）**: 要約、抽象化、および観察マスキングを通じて、情報を保持しながらトークンを削減します。これにより、効果的なコンテキスト容量が拡張されます。
 
-**Isolate**: Split context across sub-agents or sessions to prevent any single context from growing large enough to degrade. This is the most aggressive strategy but often the most effective.
+**分離する（Isolate）**: コンテキストをサブエージェントまたはセッションに分割して、単一のコンテキストが劣化するほど大きくなるのを防ぎます。これは最も積極的な戦略ですが、多くの場合最も効果的です。
 
-### Architectural Patterns
+### アーキテクチャパターン
 
-Implement these strategies through specific architectural patterns. Use just-in-time context loading to retrieve information only when needed. Use observation masking to replace verbose tool outputs with compact references. Use sub-agent architectures to isolate context for different tasks. Use compaction to summarize growing context before it exceeds limits.
+特定のアーキテクチャパターンを通じてこれらの戦略を実装します。ジャストインタイムコンテキストロードを使用して、必要な時にのみ情報を取得します。観察マスキングを使用して、冗長なツール出力をコンパクトな参照に置き換えます。サブエージェントアーキテクチャを使用して、異なるタスクのコンテキストを分離します。コンパクションを使用して、成長するコンテキストが制限を超える前に要約します。
 
-## Examples
+## 例
 
-**Example 1: Detecting Degradation**
+**例1：劣化の検出**
 ```yaml
 # Context grows during long conversation
 turn_1: 1000 tokens
@@ -168,7 +168,7 @@ turn_20: 60000 tokens (degradation begins)
 turn_30: 90000 tokens (significant degradation)
 ```
 
-**Example 2: Mitigating Lost-in-Middle**
+**例2：Lost-in-Middleの緩和**
 ```markdown
 # Organize context with critical info at edges
 
@@ -187,45 +187,45 @@ turn_30: 90000 tokens (significant degradation)
 - Growth in Region A
 ```
 
-## Guidelines
+## ガイドライン
 
-1. Monitor context length and performance correlation during development
-2. Place critical information at beginning or end of context
-3. Implement compaction triggers before degradation becomes severe
-4. Validate retrieved documents for accuracy before adding to context
-5. Use versioning to prevent outdated information from causing clash
-6. Segment tasks to prevent context confusion across different objectives
-7. Design for graceful degradation rather than assuming perfect conditions
-8. Test with progressively larger contexts to find degradation thresholds
+1. 開発中にコンテキストの長さとパフォーマンスの相関を監視する
+2. 重要な情報をコンテキストの先頭または末尾に配置する
+3. 劣化が深刻になる前にコンパクショントリガーを実装する
+4. コンテキストに追加する前に検索されたドキュメントの正確性を検証する
+5. バージョニングを使用して古い情報がクラッシュを引き起こすのを防ぐ
+6. 異なる目標間のコンテキストコンフュージョンを防ぐためにタスクをセグメント化する
+7. 完璧な条件を仮定するのではなく、グレースフルデグラデーションを設計する
+8. 劣化の閾値を見つけるために、段階的に大きなコンテキストでテストする
 
-## Integration
+## 統合
 
-This skill builds on context-fundamentals and should be studied after understanding basic context concepts. It connects to:
+このスキルはcontext-fundamentalsの上に構築されており、基本的なコンテキストの概念を理解した後に学習すべきです。以下に接続します：
 
-- context-optimization - Techniques for mitigating degradation
-- multi-agent-patterns - Using isolation to prevent degradation
-- evaluation - Measuring and detecting degradation in production
+- context-optimization - 劣化を緩和する技術
+- multi-agent-patterns - 分離を使用して劣化を防止する
+- evaluation - プロダクションでの劣化の測定と検出
 
-## References
+## 参考文献
 
-Internal reference:
-- [Degradation Patterns Reference](./references/patterns.md) - Detailed technical reference
+内部参考：
+- [Degradation Patterns Reference](./references/patterns.md) - 詳細な技術リファレンス
 
-Related skills in this collection:
-- context-fundamentals - Context basics
-- context-optimization - Mitigation techniques
-- evaluation - Detection and measurement
+このコレクションの関連スキル：
+- context-fundamentals - コンテキストの基礎
+- context-optimization - 緩和技術
+- evaluation - 検出と測定
 
-External resources:
-- Research on attention mechanisms and context window limitations
-- Studies on the "lost-in-middle" phenomenon
-- Production engineering guides from AI labs
+外部リソース：
+- アテンションメカニズムとコンテキストウィンドウの制限に関する研究
+- 「lost-in-middle」現象に関する研究
+- AIラボからのプロダクションエンジニアリングガイド
 
 ---
 
-## Skill Metadata
+## スキルメタデータ
 
-**Created**: 2025-12-20
-**Last Updated**: 2025-12-20
-**Author**: Agent Skills for Context Engineering Contributors
-**Version**: 1.0.0
+**作成日**: 2025-12-20
+**最終更新日**: 2025-12-20
+**著者**: Agent Skills for Context Engineering Contributors
+**バージョン**: 1.0.0
