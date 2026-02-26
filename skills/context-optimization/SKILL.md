@@ -1,133 +1,133 @@
 ---
 name: context-optimization
-description: This skill should be used when the user asks to "optimize context", "reduce token costs", "improve context efficiency", "implement KV-cache optimization", "partition context", or mentions context limits, observation masking, context budgeting, or extending effective context capacity.
+description: このスキルは、ユーザーが「コンテキストを最適化」「トークンコストを削減」「コンテキスト効率を改善」「KVキャッシュ最適化を実装」「コンテキストを分割」と依頼した場合、またはコンテキスト制限、オブザベーションマスキング、コンテキストバジェット管理、実効コンテキスト容量の拡張に言及した場合に使用してください。
 ---
 
-# Context Optimization Techniques
+# コンテキスト最適化テクニック
 
-Context optimization extends the effective capacity of limited context windows through strategic compression, masking, caching, and partitioning. The goal is not to magically increase context windows but to make better use of available capacity. Effective optimization can double or triple effective context capacity without requiring larger models or longer contexts.
+コンテキスト最適化は、戦略的な圧縮、マスキング、キャッシング、パーティショニングを通じて、限られたコンテキストウィンドウの実効容量を拡張します。目的はコンテキストウィンドウを魔法のように増やすことではなく、利用可能な容量をより有効に活用することです。効果的な最適化により、より大きなモデルやより長いコンテキストを必要とせずに、実効コンテキスト容量を2倍から3倍に拡張できます。
 
-## When to Activate
+## いつアクティブにするか
 
-Activate this skill when:
-- Context limits constrain task complexity
-- Optimizing for cost reduction (fewer tokens = lower costs)
-- Reducing latency for long conversations
-- Implementing long-running agent systems
-- Needing to handle larger documents or conversations
-- Building production systems at scale
+以下の場合にこのスキルをアクティブにしてください：
+- コンテキスト制限がタスクの複雑さを制約している場合
+- コスト削減のための最適化（トークンが少ない＝コストが低い）
+- 長い会話のレイテンシ削減
+- 長時間実行されるエージェントシステムの実装
+- より大きなドキュメントや会話を処理する必要がある場合
+- 本番環境でスケーラブルなシステムを構築する場合
 
-## Core Concepts
+## 主要コンセプト
 
-Context optimization extends effective capacity through four primary strategies: compaction (summarizing context near limits), observation masking (replacing verbose outputs with references), KV-cache optimization (reusing cached computations), and context partitioning (splitting work across isolated contexts).
+コンテキスト最適化は、4つの主要戦略を通じて実効容量を拡張します：コンパクション（制限に近づいた際のコンテキスト要約）、オブザベーションマスキング（冗長な出力を参照に置換）、KVキャッシュ最適化（キャッシュされた計算の再利用）、コンテキストパーティショニング（分離されたコンテキスト間での作業分割）。
 
-The key insight is that context quality matters more than quantity. Optimization preserves signal while reducing noise. The art lies in selecting what to keep versus what to discard, and when to apply each technique.
+重要な洞察は、コンテキストの質が量よりも重要であるということです。最適化はノイズを削減しながらシグナルを保持します。何を保持し何を破棄するか、そしていつ各テクニックを適用するかの判断が鍵となります。
 
-## Detailed Topics
+## 詳細トピック
 
-### Compaction Strategies
+### コンパクション戦略
 
-**What is Compaction**
-Compaction is the practice of summarizing context contents when approaching limits, then reinitializing a new context window with the summary. This distills the contents of a context window in a high-fidelity manner, enabling the agent to continue with minimal performance degradation.
+**コンパクションとは**
+コンパクションとは、制限に近づいた際にコンテキストの内容を要約し、その要約で新しいコンテキストウィンドウを再初期化する手法です。コンテキストウィンドウの内容を高忠実度で凝縮し、エージェントが最小限のパフォーマンス低下で継続できるようにします。
 
-Compaction typically serves as the first lever in context optimization. The art lies in selecting what to keep versus what to discard.
+コンパクションは通常、コンテキスト最適化における最初の手段です。何を保持し何を破棄するかの判断が鍵となります。
 
-**Compaction Implementation**
-Compaction works by identifying sections that can be compressed, generating summaries that capture essential points, and replacing full content with summaries. Priority for compression goes to tool outputs (replace with summaries), old turns (summarize early conversation), retrieved docs (summarize if recent versions exist), and never compress system prompt.
+**コンパクションの実装**
+コンパクションは、圧縮可能なセクションを特定し、要点を捉えた要約を生成し、全文を要約に置き換えることで機能します。圧縮の優先順位は、ツール出力（要約で置換）、古いターン（初期の会話を要約）、取得したドキュメント（最新バージョンがあれば要約）の順で、システムプロンプトは決して圧縮しません。
 
-**Summary Generation**
-Effective summaries preserve different elements depending on message type:
+**要約の生成**
+効果的な要約は、メッセージタイプに応じて異なる要素を保持します：
 
-Tool outputs: Preserve key findings, metrics, and conclusions. Remove verbose raw output.
+ツール出力：主要な発見、メトリクス、結論を保持。冗長な生データを削除。
 
-Conversational turns: Preserve key decisions, commitments, and context shifts. Remove filler and back-and-forth.
+会話ターン：主要な決定、コミットメント、コンテキストの転換を保持。つなぎややり取りを削除。
 
-Retrieved documents: Preserve key facts and claims. Remove supporting evidence and elaboration.
+取得したドキュメント：主要な事実と主張を保持。裏付け証拠や詳細説明を削除。
 
-### Observation Masking
+### オブザベーションマスキング
 
-**The Observation Problem**
-Tool outputs can comprise 80%+ of token usage in agent trajectories. Much of this is verbose output that has already served its purpose. Once an agent has used a tool output to make a decision, keeping the full output provides diminishing value while consuming significant context.
+**オブザベーション問題**
+ツール出力はエージェントの軌跡におけるトークン使用量の80%以上を占めることがあります。その多くは、既に役目を果たした冗長な出力です。エージェントがツール出力を使って意思決定を行った後、全出力を保持し続けることは、大量のコンテキストを消費しながら価値は逓減していきます。
 
-Observation masking replaces verbose tool outputs with compact references. The information remains accessible if needed but does not consume context continuously.
+オブザベーションマスキングは、冗長なツール出力をコンパクトな参照に置き換えます。情報は必要に応じてアクセス可能ですが、コンテキストを継続的に消費しません。
 
-**Masking Strategy Selection**
-Not all observations should be masked equally:
+**マスキング戦略の選択**
+すべてのオブザベーションを同等にマスクすべきではありません：
 
-Never mask: Observations critical to current task, observations from the most recent turn, observations used in active reasoning.
+マスクしない：現在のタスクに重要なオブザベーション、直近のターンからのオブザベーション、アクティブな推論で使用中のオブザベーション。
 
-Consider masking: Observations from 3+ turns ago, verbose outputs with key points extractable, observations whose purpose has been served.
+マスクを検討：3ターン以上前のオブザベーション、要点を抽出可能な冗長な出力、役目を果たしたオブザベーション。
 
-Always mask: Repeated outputs, boilerplate headers/footers, outputs already summarized in conversation.
+常にマスク：繰り返しの出力、定型のヘッダー/フッター、会話中に既に要約されている出力。
 
-### KV-Cache Optimization
+### KVキャッシュ最適化
 
-**Understanding KV-Cache**
-The KV-cache stores Key and Value tensors computed during inference, growing linearly with sequence length. Caching the KV-cache across requests sharing identical prefixes avoids recomputation.
+**KVキャッシュの理解**
+KVキャッシュは推論中に計算されたKeyおよびValueテンソルを保存し、シーケンス長に比例して線形に増加します。同一のプレフィックスを共有するリクエスト間でKVキャッシュをキャッシングすることで、再計算を回避します。
 
-Prefix caching reuses KV blocks across requests with identical prefixes using hash-based block matching. This dramatically reduces cost and latency for requests with common prefixes like system prompts.
+プレフィックスキャッシングは、ハッシュベースのブロックマッチングを使用して、同一のプレフィックスを持つリクエスト間でKVブロックを再利用します。これにより、システムプロンプトのような共通プレフィックスを持つリクエストのコストとレイテンシが劇的に削減されます。
 
-**Cache Optimization Patterns**
-Optimize for caching by reordering context elements to maximize cache hits. Place stable elements first (system prompt, tool definitions), then frequently reused elements, then unique elements last.
+**キャッシュ最適化パターン**
+キャッシュヒットを最大化するためにコンテキスト要素を並び替えて最適化します。安定した要素を最初に配置し（システムプロンプト、ツール定義）、次に頻繁に再利用される要素、最後にユニークな要素を配置します。
 
-Design prompts to maximize cache stability: avoid dynamic content like timestamps, use consistent formatting, keep structure stable across sessions.
+キャッシュの安定性を最大化するようにプロンプトを設計します：タイムスタンプなどの動的コンテンツを避け、一貫したフォーマットを使用し、セッション間で構造を安定させます。
 
-### Context Partitioning
+### コンテキストパーティショニング
 
-**Sub-Agent Partitioning**
-The most aggressive form of context optimization is partitioning work across sub-agents with isolated contexts. Each sub-agent operates in a clean context focused on its subtask without carrying accumulated context from other subtasks.
+**サブエージェントパーティショニング**
+コンテキスト最適化の最も積極的な形態は、分離されたコンテキストを持つサブエージェント間で作業を分割することです。各サブエージェントは、他のサブタスクからの蓄積されたコンテキストを持たない、サブタスクに特化したクリーンなコンテキストで動作します。
 
-This approach achieves separation of concerns—the detailed search context remains isolated within sub-agents while the coordinator focuses on synthesis and analysis.
+このアプローチは関心の分離を実現します—詳細な検索コンテキストはサブエージェント内に隔離され、コーディネーターは統合と分析に集中します。
 
-**Result Aggregation**
-Aggregate results from partitioned subtasks by validating all partitions completed, merging compatible results, and summarizing if still too large.
+**結果の集約**
+パーティションされたサブタスクの結果を集約するには、すべてのパーティションが完了したことを検証し、互換性のある結果をマージし、まだ大きすぎる場合は要約します。
 
-### Budget Management
+### バジェット管理
 
-**Context Budget Allocation**
-Design explicit context budgets. Allocate tokens to categories: system prompt, tool definitions, retrieved docs, message history, and reserved buffer. Monitor usage against budget and trigger optimization when approaching limits.
+**コンテキストバジェットの割り当て**
+明示的なコンテキストバジェットを設計します。トークンをカテゴリに割り当てます：システムプロンプト、ツール定義、取得したドキュメント、メッセージ履歴、予約バッファ。バジェットに対する使用量を監視し、制限に近づいた際に最適化をトリガーします。
 
-**Trigger-Based Optimization**
-Monitor signals for optimization triggers: token utilization above 80%, degradation indicators, and performance drops. Apply appropriate optimization techniques based on context composition.
+**トリガーベースの最適化**
+最適化トリガーのシグナルを監視します：トークン使用率が80%超、劣化の指標、パフォーマンスの低下。コンテキスト構成に基づいて適切な最適化テクニックを適用します。
 
-## Practical Guidance
+## 実践的なガイダンス
 
-### Optimization Decision Framework
+### 最適化の意思決定フレームワーク
 
-When to optimize:
-- Context utilization exceeds 70%
-- Response quality degrades as conversations extend
-- Costs increase due to long contexts
-- Latency increases with conversation length
+最適化するタイミング：
+- コンテキスト使用率が70%を超えた場合
+- 会話が長くなるにつれてレスポンス品質が低下する場合
+- 長いコンテキストによりコストが増加する場合
+- 会話長に伴いレイテンシが増加する場合
 
-What to apply:
-- Tool outputs dominate: observation masking
-- Retrieved documents dominate: summarization or partitioning
-- Message history dominates: compaction with summarization
-- Multiple components: combine strategies
+適用すべきもの：
+- ツール出力が支配的：オブザベーションマスキング
+- 取得したドキュメントが支配的：要約またはパーティショニング
+- メッセージ履歴が支配的：要約を伴うコンパクション
+- 複数のコンポーネント：戦略を組み合わせる
 
-### Performance Considerations
+### パフォーマンスに関する考慮事項
 
-Compaction should achieve 50-70% token reduction with less than 5% quality degradation. Masking should achieve 60-80% reduction in masked observations. Cache optimization should achieve 70%+ hit rate for stable workloads.
+コンパクションは、品質低下5%未満で50〜70%のトークン削減を達成すべきです。マスキングは、マスクされたオブザベーションで60〜80%の削減を達成すべきです。キャッシュ最適化は、安定したワークロードで70%以上のヒット率を達成すべきです。
 
-Monitor and iterate on optimization strategies based on measured effectiveness.
+測定された効果に基づいて最適化戦略を監視し、反復的に改善してください。
 
-## Examples
+## 例
 
-**Example 1: Compaction Trigger**
+**例1: コンパクショントリガー**
 ```python
 if context_tokens / context_limit > 0.8:
     context = compact_context(context)
 ```
 
-**Example 2: Observation Masking**
+**例2: オブザベーションマスキング**
 ```python
 if len(observation) > max_length:
     ref_id = store_observation(observation)
     return f"[Obs:{ref_id} elided. Key: {extract_key(observation)}]"
 ```
 
-**Example 3: Cache-Friendly Ordering**
+**例3: キャッシュフレンドリーな順序付け**
 ```python
 # Stable content first
 context = [system_prompt, tool_definitions]  # Cacheable
@@ -135,45 +135,45 @@ context += [reused_templates]  # Reusable
 context += [unique_content]  # Unique
 ```
 
-## Guidelines
+## ガイドライン
 
-1. Measure before optimizing—know your current state
-2. Apply compaction before masking when possible
-3. Design for cache stability with consistent prompts
-4. Partition before context becomes problematic
-5. Monitor optimization effectiveness over time
-6. Balance token savings against quality preservation
-7. Test optimization at production scale
-8. Implement graceful degradation for edge cases
+1. 最適化の前に測定する—現在の状態を把握する
+2. 可能な場合はマスキングの前にコンパクションを適用する
+3. 一貫したプロンプトでキャッシュの安定性を設計する
+4. コンテキストが問題になる前にパーティショニングする
+5. 最適化の効果を経時的に監視する
+6. トークン節約と品質保持のバランスを取る
+7. 本番スケールで最適化をテストする
+8. エッジケースに対してグレースフルデグラデーションを実装する
 
-## Integration
+## 統合
 
-This skill builds on context-fundamentals and context-degradation. It connects to:
+このスキルは context-fundamentals と context-degradation の上に構築されています。以下と連携します：
 
-- multi-agent-patterns - Partitioning as isolation
-- evaluation - Measuring optimization effectiveness
-- memory-systems - Offloading context to memory
+- multi-agent-patterns - 隔離としてのパーティショニング
+- evaluation - 最適化効果の測定
+- memory-systems - メモリへのコンテキストオフロード
 
-## References
+## 参考資料
 
-Internal reference:
-- [Optimization Techniques Reference](./references/optimization_techniques.md) - Detailed technical reference
+内部参考：
+- [Optimization Techniques Reference](./references/optimization_techniques.md) - 詳細な技術リファレンス
 
-Related skills in this collection:
-- context-fundamentals - Context basics
-- context-degradation - Understanding when to optimize
-- evaluation - Measuring optimization
+このコレクション内の関連スキル：
+- context-fundamentals - コンテキストの基礎
+- context-degradation - 最適化のタイミングの理解
+- evaluation - 最適化の測定
 
-External resources:
-- Research on context window limitations
-- KV-cache optimization techniques
-- Production engineering guides
+外部リソース：
+- コンテキストウィンドウの制限に関する研究
+- KVキャッシュ最適化テクニック
+- 本番エンジニアリングガイド
 
 ---
 
-## Skill Metadata
+## スキルメタデータ
 
-**Created**: 2025-12-20
-**Last Updated**: 2025-12-20
-**Author**: Agent Skills for Context Engineering Contributors
-**Version**: 1.0.0
+**作成日**: 2025-12-20
+**最終更新日**: 2025-12-20
+**著者**: Agent Skills for Context Engineering Contributors
+**バージョン**: 1.0.0
